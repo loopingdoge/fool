@@ -30,7 +30,7 @@ public class NewNode implements Node {
         for (Node exp:explist)
             exp.typeCheck();
 
-        if (entry.getType() instanceof ArrowType) { //TODO mettere IstanceType
+        if (entry.getType() instanceof InstanceType) {
             System.out.println("Wrong usage of function identifier");
             System.exit(0);
         }
