@@ -1,0 +1,51 @@
+class Serpente (bool staStrisciando) {
+	bool striscia()
+		staStrisciando
+	;
+};
+let
+	Serpente s = new Serpente(true);
+in
+	s.striscia();
+
+
+let
+    int x = 5;
+    int f ()
+        x;
+in
+    f(x);
+
+------------------------------------------------------
+
+let
+    int y = 5 + 2 ;
+    bool f (int n, int m)
+    let
+        int x = m;
+    in
+        x==y;
+in
+    print(if f(y, 8) then {false} else {10});
+
+
+------------------------------------------------------
+
+let
+    int gee(int n)
+        n + 1;
+    int foo(int n)
+        if (n == 0) then { 1 } else { n * gee(n-1) };
+in
+    print(foo(3));
+
+------------------------------------------------------
+
+let
+    int foo(int n)
+        let
+            int gee(int n) n+1;
+        in
+            if (n==0) then { 1 } else { n * gee(n-1) };
+in
+    print(gee(3));

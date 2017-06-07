@@ -68,7 +68,7 @@ public class TestDebug {
 
     public static void main(String[] args) throws Exception {
 
-        String filename = "prova.fool";
+        String filename = "input.fool";
 
         CharStream input = CharStreams.fromFileName(filename);
         FOOLLexer lexer = new FOOLLexer(input);

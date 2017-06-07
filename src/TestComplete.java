@@ -19,19 +19,20 @@ import ast.Node;
 public class TestComplete {
     public static void main(String[] args) throws Exception {
       
-        String filename = "prova.fool";
+        String filename = "input.fool";
 
 		CharStream input = CharStreams.fromFileName(filename);
         FOOLLexer lexer = new FOOLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        
+        FOOLParser parser = new FOOLParser(tokens);
+        FoolVisitorImpl visitor = new FoolVisitorImpl();
+        Node ast = visitor.visit(parser.prog()); //generazione AST
+
         //SIMPLISTIC BUT WRONG CHECK OF THE LEXER ERRORS
         if (lexer.lexicalErrors > 0){
         	System.out.println("The program was not in the right format. Exiting the compilation process now");
         } else {
-	        FOOLParser parser = new FOOLParser(tokens);
-	        FoolVisitorImpl visitor = new FoolVisitorImpl();
-	        Node ast = visitor.visit(parser.prog()); //generazione AST
+
 	        Environment env = new Environment();
 	        ArrayList<SemanticError> err = ast.checkSemantics(env);
 	        
@@ -43,11 +44,12 @@ public class TestComplete {
 	        } else {
 		        System.out.println("Visualizing AST...");
 		        System.out.println(ast.toPrint(""));
-		
+
+
 		        Node type = ast.typeCheck(); //type-checking bottom-up 
 		        System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
 
-		        // CODE GENERATION  prova.fool.asm
+		        // CODE GENERATION  input.fool.asm
 		        String code=ast.codeGeneration(); 
 		        BufferedWriter out = new BufferedWriter(new FileWriter(filename + ".asm"));
 		        out.write(code);
@@ -75,6 +77,6 @@ public class TestComplete {
 		        vm.cpu();
 	        }
         }
-        
+
     }
 }

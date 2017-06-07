@@ -1,4 +1,4 @@
-// Generated from C:/Users/Alberto/workspace/fool/src/parser\FOOL.g4 by ANTLR 4.7
+// Generated from /Users/alberto/workspace/fool/src/parser/FOOL.g4 by ANTLR 4.7
 package parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -833,15 +833,16 @@ public class FOOLParser extends Parser {
 
 	public static class ExpContext extends ParserRuleContext {
 		public TermContext left;
+		public Token operator;
 		public ExpContext right;
 		public TermContext term() {
 			return getRuleContext(TermContext.class,0);
 		}
-		public TerminalNode PLUS() { return getToken(FOOLParser.PLUS, 0); }
-		public TerminalNode MINUS() { return getToken(FOOLParser.MINUS, 0); }
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
 		}
+		public TerminalNode PLUS() { return getToken(FOOLParser.PLUS, 0); }
+		public TerminalNode MINUS() { return getToken(FOOLParser.MINUS, 0); }
 		public ExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -886,9 +887,10 @@ public class FOOLParser extends Parser {
 			if (_la==PLUS || _la==MINUS) {
 				{
 				setState(122);
+				((ExpContext)_localctx).operator = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !(_la==PLUS || _la==MINUS) ) {
-				_errHandler.recoverInline(this);
+					((ExpContext)_localctx).operator = (Token)_errHandler.recoverInline(this);
 				}
 				else {
 					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -915,15 +917,16 @@ public class FOOLParser extends Parser {
 
 	public static class TermContext extends ParserRuleContext {
 		public FactorContext left;
+		public Token operator;
 		public TermContext right;
 		public FactorContext factor() {
 			return getRuleContext(FactorContext.class,0);
 		}
-		public TerminalNode TIMES() { return getToken(FOOLParser.TIMES, 0); }
-		public TerminalNode DIV() { return getToken(FOOLParser.DIV, 0); }
 		public TermContext term() {
 			return getRuleContext(TermContext.class,0);
 		}
+		public TerminalNode TIMES() { return getToken(FOOLParser.TIMES, 0); }
+		public TerminalNode DIV() { return getToken(FOOLParser.DIV, 0); }
 		public TermContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -958,9 +961,10 @@ public class FOOLParser extends Parser {
 			if (_la==TIMES || _la==DIV) {
 				{
 				setState(127);
+				((TermContext)_localctx).operator = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !(_la==TIMES || _la==DIV) ) {
-				_errHandler.recoverInline(this);
+					((TermContext)_localctx).operator = (Token)_errHandler.recoverInline(this);
 				}
 				else {
 					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;

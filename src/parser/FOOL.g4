@@ -50,11 +50,11 @@ type
     ;
 
 exp
-    :  ('-')? left=term ((PLUS | MINUS) right=exp)?
+    :  ('-')? left=term (operator=(PLUS | MINUS) right=exp)?
     ;
 
 term
-    : left=factor ((TIMES | DIV) right=term)?
+    : left=factor (operator=(TIMES | DIV) right=term)?
     ;
 
 factor

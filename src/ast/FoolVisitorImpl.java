@@ -125,16 +125,19 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	@Override
 	public Node visitExp(ExpContext ctx) {
 		//this could be enhanced
-		
+
 		//check whether this is a simple or binary expression
 		//notice here the necessity of having named elements in the grammar
 		if(ctx.right == null){
 			//it is a simple expression
 			return visit( ctx.left );
 		}else{
-		    // TODO: recognize minus exp
-			//it is a binary expression, you should visit left and right
-			return new PlusNode(visit(ctx.left), visit(ctx.right));
+            //it is a binary expression, you should visit left and right
+            if (ctx.operator.getText().equals(ctx.PLUS().getText())) {
+                return new PlusNode(visit(ctx.left), visit(ctx.right));
+            } else {
+                return new MinusNode(visit(ctx.left), visit(ctx.right));
+            }
 		}
 		
 	}
@@ -148,6 +151,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 			return visit( ctx.left );
 		}else{
 			//it is a binary expression, you should visit left and right
+
 			return new MultNode(visit(ctx.left), visit(ctx.right));
 		}
 	}

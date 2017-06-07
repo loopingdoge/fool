@@ -6,6 +6,15 @@ import util.SemanticError;
 import java.util.ArrayList;
 
 public class MinusNode implements Node {
+
+    private Node left;
+    private Node right;
+
+    public MinusNode (Node l, Node r) {
+        left=l;
+        right=r;
+    }
+
     @Override
     public String toPrint(String indent) {
         // TODO: implement

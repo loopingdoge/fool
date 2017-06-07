@@ -6,6 +6,7 @@ import util.SemanticError;
 import java.util.ArrayList;
 
 public class NewNode implements Node {
+
     @Override
     public String toPrint(String indent) {
         // TODO: implement
