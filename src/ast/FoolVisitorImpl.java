@@ -171,7 +171,13 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 			return visit( ctx.left );
 		}else{
 			//it is a binary expression, you should visit left and right
-			return new EqualNode(visit(ctx.left), visit(ctx.right));
+            if(ctx.operator.getType() == FOOLLexer.EQ) {
+                return new EqualNode(visit(ctx.left), visit(ctx.right));
+            }else if(ctx.operator.getType() == FOOLLexer.LEQ) {
+                return new LessEqualNode(visit(ctx.left), visit(ctx.right));
+            }else{
+                return new GreaterEqualNode(visit(ctx.left), visit(ctx.right));
+            }
 		}
 	}
 	

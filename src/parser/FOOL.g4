@@ -58,7 +58,7 @@ term
     ;
 
 factor
-    : left=value (EQ right=value)?
+    : left=value (operator=(GEQ | EQ | LEQ) right=value)?
     ;
 
 value
@@ -81,6 +81,8 @@ SEMIC  : ';' ;
 COLON  : ':' ;
 COMMA  : ',' ;
 EQ     : '==' ;
+LEQ    : ('<=' | '=<') ;
+GEQ    : ('>=' | '=>') ;
 ASM    : '=' ;
 PLUS   : '+' ;
 MINUS  : '-' ;
