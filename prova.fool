@@ -3,7 +3,7 @@ let
     int f ()
         x;
 in
-    true;
+    f(x);
 
 /* Altri esempi
 
