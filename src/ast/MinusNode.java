@@ -1,5 +1,6 @@
 package ast;
 
+import lib.FOOLlib;
 import util.Environment;
 import util.SemanticError;
 
@@ -17,14 +18,18 @@ public class MinusNode implements Node {
 
     @Override
     public String toPrint(String indent) {
-        // TODO: implement
-        return null;
+        return indent+"Minus\n" + left.toPrint(indent+"  ")
+                + right.toPrint(indent+"  ") ;
     }
 
     @Override
     public Node typeCheck() {
-        // TODO: implement
-        return null;
+        if (! ( FOOLlib.isSubtype(left.typeCheck(),new IntTypeNode()) &&
+                FOOLlib.isSubtype(right.typeCheck(),new IntTypeNode()) ) ) {
+            System.out.println("Non integers in diff");
+            System.exit(0);
+        }
+        return new IntTypeNode();
     }
 
     @Override
