@@ -41,6 +41,12 @@ public class GreaterEqualNode implements Node {
             System.out.println("Incompatible types in greaterequal");
             System.exit(0);
         }
+        //Ho messo qua il controllo che non sia un operazione invalida, non so se va qua però
+        if(l.getClass() == ast.BoolTypeNode.class){
+            System.out.println("Operator '>=' cannot be applied to 'boolean', 'boolean'");
+            System.exit(0);
+
+        }
         return new BoolTypeNode();
     }
   

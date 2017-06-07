@@ -1,6 +1,7 @@
 package ast;
 
 import lib.FOOLlib;
+import parser.FOOLLexer;
 import util.Environment;
 import util.SemanticError;
 
@@ -40,6 +41,12 @@ public class LessEqualNode implements Node {
         if (! ( FOOLlib.isSubtype(l,r) || FOOLlib.isSubtype(r,l) ) ) {
             System.out.println("Incompatible types in lessequal");
             System.exit(0);
+        }
+        //Ho messo qua il controllo che non sia un operazione invalida, non so se va qua però
+        if(l.getClass() == ast.BoolTypeNode.class){
+            System.out.println("Operator '<=' cannot be applied to 'boolean', 'boolean'");
+            System.exit(0);
+
         }
         return new BoolTypeNode();
     }
