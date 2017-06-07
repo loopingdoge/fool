@@ -1,4 +1,4 @@
-// Generated from /Users/alberto/workspace/fool/src/parser/FOOL.g4 by ANTLR 4.7
+// Generated from C:/Users/Pietro/Desktop/Compilatori & Interpreti/fool/src/parser\FOOL.g4 by ANTLR 4.7
 package parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
