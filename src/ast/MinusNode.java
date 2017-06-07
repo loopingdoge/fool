@@ -35,7 +35,13 @@ public class MinusNode implements Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        // TODO: implement
-        return null;
+        //create the result
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        //check semantics in the left and in the right exp
+        res.addAll(left.checkSemantics(env));
+        res.addAll(right.checkSemantics(env));
+
+        return res;
     }
 }
