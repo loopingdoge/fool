@@ -1,9 +1,5 @@
 let
-    int y = 5 + 2 ;
-    bool f (int n, int m)
-    let
-        int x = m;
-    in
-        x==y;
+    int y = 5 ;
+    int x = new y( 4,5,true) ;
 in
-    print(if f(y, 8) then {false} else {10});
+    print( y );

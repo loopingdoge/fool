@@ -46,7 +46,7 @@ locazione successiva alla prossima locazione libera per lo stack (se la memoria 
 indirizzi da 0 a MEMSIZE-1, lo stack pointer inizialmente punta a MEMSIZE). 
 In questo modo, quando lo stack non e` vuoto, lo stack pointer punta al top dello stack. 
 
-Il programma e` collocato in una memoria separata puntata dall� instruction pointer 
+Il programma e` collocato in una memoria separata puntata dall' instruction pointer 
 (che punta alla prossima istruzione da eseguire). Gli altri registri della macchina 
 virtuale sono: HP (heap pointer), RA (return address), RV (return value) e FP 
 (frame pointer). 

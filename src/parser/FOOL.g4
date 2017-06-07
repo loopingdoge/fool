@@ -122,9 +122,6 @@ WS              : (' '|'\t'|'\n'|'\r')-> skip ;
 LINECOMENTS     : '//' (~('\n'|'\r'))* -> skip ;
 BLOCKCOMENTS    : '/*'( ~('/'|'*')|'/'~'*'|'*'~'/'|BLOCKCOMENTS)* '*/' -> skip ;
 
-
-
-
 //VERY SIMPLISTIC ERROR CHECK FOR THE LEXING PROCESS, THE OUTPUT GOES DIRECTLY TO THE TERMINAL
 //THIS IS WRONG!!!!
 ERR     : . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN) ;

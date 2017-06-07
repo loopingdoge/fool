@@ -1,4 +1,4 @@
-// Generated from C:/Users/Pietro/Desktop/Compilatori & Interpreti/fool/src/parser\FOOL.g4 by ANTLR 4.7
+// Generated from /Users/devid/Workspace/CEI/fool/src/parser/FOOL.g4 by ANTLR 4.7
 package parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -14,17 +14,14 @@ public class FOOLLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
-
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
-
 	public static final int
 		SEMIC=1, COLON=2, COMMA=3, EQ=4, ASM=5, PLUS=6, MINUS=7, TIMES=8, DIV=9, 
 		TRUE=10, FALSE=11, LPAR=12, RPAR=13, CLPAR=14, CRPAR=15, IF=16, THEN=17, 
 		ELSE=18, LET=19, IN=20, VAR=21, FUN=22, INT=23, BOOL=24, CLASS=25, IMPLEMENTS=26, 
 		THIS=27, NEW=28, DOT=29, INTEGER=30, ID=31, WS=32, LINECOMENTS=33, BLOCKCOMENTS=34, 
 		ERR=35;
-
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -47,7 +44,6 @@ public class FOOLLexer extends Lexer {
 		"'let'", "'in'", "'var'", "'fun'", "'int'", "'bool'", "'class'", "'implements'", 
 		"'this'", "'new'", "'.'"
 	};
-
 	private static final String[] _SYMBOLIC_NAMES = {
 		null, "SEMIC", "COLON", "COMMA", "EQ", "ASM", "PLUS", "MINUS", "TIMES", 
 		"DIV", "TRUE", "FALSE", "LPAR", "RPAR", "CLPAR", "CRPAR", "IF", "THEN", 
@@ -55,7 +51,6 @@ public class FOOLLexer extends Lexer {
 		"THIS", "NEW", "DOT", "INTEGER", "ID", "WS", "LINECOMENTS", "BLOCKCOMENTS", 
 		"ERR"
 	};
-
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -84,14 +79,16 @@ public class FOOLLexer extends Lexer {
 	}
 
 	@Override
+
 	public Vocabulary getVocabulary() {
 		return VOCABULARY;
 	}
 
-    //there is a much better way to do this, check the ANTLR guide
-    //I will leave it like this for now just becasue it is quick
-    //but it doesn't work well
-    public int lexicalErrors=0;
+
+	   //there is a much better way to do this, check the ANTLR guide
+	   //I will leave it like this for now just becasue it is quick
+	   //but it doesn't work well
+	   public int lexicalErrors=0;
 
 
 	public FOOLLexer(CharStream input) {
@@ -206,7 +203,6 @@ public class FOOLLexer extends Lexer {
 		"\2\2\u00e6J\3\2\2\2\u00e7\u00e8\13\2\2\2\u00e8\u00e9\b&\3\2\u00e9\u00ea"+
 		"\3\2\2\2\u00ea\u00eb\b&\4\2\u00ebL\3\2\2\2\t\2\u00b9\u00c0\u00c2\u00cf"+
 		"\u00dd\u00df\5\b\2\2\3&\2\2\3\2";
-
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

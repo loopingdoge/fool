@@ -33,6 +33,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	@Override
 	public Node visitLetInExp(LetInExpContext ctx) {
 		//resulting node of the right type
+
 		ProgLetInNode res;
 		
 		//list of declarations in @res
@@ -256,6 +257,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
             //instantiate the invocation
             res = new CallNode(ctx.ID().getText(), args);
         }
+
 		return res;
 	}
 
@@ -268,8 +270,19 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 
     @Override
     public Node visitNewExp(FOOLParser.NewExpContext ctx) {
-        // TODO: implement
-        NewNode res = null;
+
+        NewNode res;
+        String id;
+        ArrayList<Node> declarations = new ArrayList<Node>();
+
+        id = ctx.ID().getText(); // prendo l'id
+
+        for(ExpContext exp : ctx.exp()){
+            declarations.add( visit(exp) ); // prendo tutti i parametri
+        }
+
+        res = new NewNode( id, declarations );
+
         return res;
     }
 	

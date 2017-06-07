@@ -1,22 +1,43 @@
 package ast;
 
+import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NewNode implements Node {
 
+    private String id;
+    private ArrayList<Node> explist;
+    STentry entry;
+    int nestinglevel;
+
+    public NewNode (String i, ArrayList<Node> e) {
+        id = i;
+        explist = e;
+    }
+
     @Override
     public String toPrint(String indent) {
-        // TODO: implement
-        return null;
+        String explstr="";
+        for (Node exp:explist)
+            explstr += exp.toPrint(indent + "  " );
+        return indent+"New:" + id + "\n" + explstr ;
     }
 
     @Override
     public Node typeCheck() {
-        // TODO: implement
-        return null;
+        for (Node exp:explist)
+            exp.typeCheck();
+
+        if (entry.getType() instanceof ArrowTypeNode) { //TODO mettere IstanceType
+            System.out.println("Wrong usage of function identifier");
+            System.exit(0);
+        }
+
+        return entry.getType();
     }
 
     @Override
@@ -27,7 +48,26 @@ public class NewNode implements Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        // TODO: implement
-        return null;
+        //create the result
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        if (explist.size() > 0) {
+            //if there are children then check semantics for every child and save the results
+            for(Node n : explist)
+                res.addAll(n.checkSemantics(env));
+        }
+
+        int j = env.nestingLevel;
+        STentry tmp = null;
+        while ( j >= 0 && tmp == null)
+            tmp=(env.symTable.get(j--)).get(id);
+        if (tmp==null)
+            res.add(new SemanticError("Id "+id+" not declared"));
+        else {
+            entry = tmp;
+            nestinglevel = env.nestingLevel;
+        }
+
+        return res;
     }
 }
