@@ -35,20 +35,20 @@ public class LessEqualNode implements Node {
 	    return res;
 	}
   
-    public Node typeCheck() {
-        Node l = left.typeCheck();
-        Node r = right.typeCheck();
+    public Type typeCheck() {
+        Type l = left.typeCheck();
+        Type r = right.typeCheck();
         if (! ( FOOLlib.isSubtype(l,r) || FOOLlib.isSubtype(r,l) ) ) {
             System.out.println("Incompatible types in lessequal");
             System.exit(0);
         }
         //Ho messo qua il controllo che non sia un operazione invalida, non so se va qua però
-        if(l.getClass() == ast.BoolTypeNode.class){
+        if(l.getClass() == ast.BoolType.class){
             System.out.println("Operator '<=' cannot be applied to 'boolean', 'boolean'");
             System.exit(0);
 
         }
-        return new BoolTypeNode();
+        return new BoolType();
     }
   
     public String codeGeneration() {
