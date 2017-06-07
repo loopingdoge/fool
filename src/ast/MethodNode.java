@@ -13,7 +13,7 @@ public class MethodNode implements Node {
     }
 
     @Override
-    public Node typeCheck() {
+    public Type typeCheck() {
         // TODO: implement
         return null;
     }

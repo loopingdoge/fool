@@ -10,10 +10,10 @@ import lib.FOOLlib;
 public class VarNode implements Node {
 
     private String id;
-    private Node type;
+    private Type type;
     private Node exp;
 
-    public VarNode (String i, Node t, Node v) {
+    public VarNode (String i, Type t, Node v) {
         id=i;
         type=t;
         exp=v;
@@ -43,8 +43,8 @@ public class VarNode implements Node {
     }
   
     //valore di ritorno non utilizzato
-    public Node typeCheck () {
-        if (! (FOOLlib.isSubtype(exp.typeCheck(),type)) ){
+    public Type typeCheck () {
+        if (! (FOOLlib.isSubtype(exp.typeCheck(), type)) ){
             System.out.println("incompatible value for variable "+id);
             System.exit(0);
         }

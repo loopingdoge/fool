@@ -69,7 +69,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 		VarNode result;
 		
 		//visit the type
-		Node typeNode = visit(ctx.vardec().type());
+		Type typeNode = visit(ctx.vardec().type()).typeCheck();
 		
 		//visit the exp
 		Node expNode = visit(ctx.exp());
@@ -82,13 +82,13 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	public Node visitFun(FunContext ctx) {
 		
 		//initialize @res with the visits to the type and its ID
-		FunNode res = new FunNode(ctx.ID().getText(), visit(ctx.type()));
+		FunNode res = new FunNode(ctx.ID().getText(), visit(ctx.type()).typeCheck());
 		
 		//add argument declarations
 		//we are getting a shortcut here by constructing directly the ParNode
 		//this could be done differently by visiting instead the VardecContext
 		for(VardecContext vc : ctx.vardec())
-			res.addPar( new ParNode(vc.ID().getText(), visit( vc.type() )) );
+			res.addPar( new ParNode(vc.ID().getText(), visit( vc.type() ).typeCheck()) );
 		
 		//add body
 		//create a list for the nested declarations
@@ -114,13 +114,12 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	@Override
 	public Node visitType(TypeContext ctx) {
 		if(ctx.getText().equals("int"))
-			return new IntTypeNode();
+			return new IntNode(0);	// TODO: cambiato da IntType a IntNode, non so se va bene
 		else if(ctx.getText().equals("bool"))
-			return new BoolTypeNode();
+			return new BoolNode(true);	// TODO: cambiato da IntType a IntNode, non so se va bene
 		
 		//this will never happen thanks to the parser
 		return null;
-
 	}
 	
 	@Override

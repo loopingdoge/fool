@@ -23,13 +23,13 @@ public class MinusNode implements Node {
     }
 
     @Override
-    public Node typeCheck() {
-        if (! ( FOOLlib.isSubtype(left.typeCheck(),new IntTypeNode()) &&
-                FOOLlib.isSubtype(right.typeCheck(),new IntTypeNode()) ) ) {
+    public Type typeCheck() {
+        if (! ( FOOLlib.isSubtype(left.typeCheck(),new IntType()) &&
+                FOOLlib.isSubtype(right.typeCheck(),new IntType()) ) ) {
             System.out.println("Non integers in diff");
             System.exit(0);
         }
-        return new IntTypeNode();
+        return new IntType();
     }
 
     @Override

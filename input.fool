@@ -1,4 +1,0 @@
-let
-    int y = 5 + 2 ;
-in
-    print(y);

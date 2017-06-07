@@ -13,7 +13,7 @@ public class ProgClassDecNode implements Node {
     }
 
     @Override
-    public Node typeCheck() {
+    public Type typeCheck() {
         // TODO: implement
         return null;
     }

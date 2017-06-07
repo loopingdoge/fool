@@ -18,8 +18,8 @@ public class BoolNode implements Node {
     else return s+"Bool:false\n";  
   }
   
-  public Node typeCheck() {
-    return new BoolTypeNode();
+  public Type typeCheck() {
+    return new BoolType();
   }    
   
   @Override

@@ -9,12 +9,12 @@ import util.SemanticError;
 public class FunNode implements Node {
 
 	private String id;
-	private Node type;
+	private Type type;
 	private ArrayList<Node> parlist = new ArrayList<Node>();
 	private ArrayList<Node> declist;
 	private Node body;
 
-	public FunNode (String i, Node t) {
+	public FunNode (String i, Type t) {
         id=i;
         type=t;
     }
@@ -41,7 +41,7 @@ public class FunNode implements Node {
             HashMap<String,STentry> hmn = new HashMap<String,STentry> ();
             env.symTable.add(hmn);
 
-            ArrayList<Node> parTypes = new ArrayList<Node>();
+            ArrayList<Type> parTypes = new ArrayList<Type>();
             int paroffset=1;
 
             //check args
@@ -53,7 +53,7 @@ public class FunNode implements Node {
             }
 
             //set func type
-            entry.addType( new ArrowTypeNode(parTypes, type) );
+            entry.addType( new ArrowType(parTypes, type) );
 	      
 	        //check semantics in the dec list
 	        if(declist.size() > 0){
@@ -92,7 +92,7 @@ public class FunNode implements Node {
     }
   
     //valore di ritorno non utilizzato
-    public Node typeCheck () {
+    public Type typeCheck () {
 	    if (declist!=null)
 	        for (Node dec:declist)
 		        dec.typeCheck();

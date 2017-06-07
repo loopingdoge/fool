@@ -40,8 +40,8 @@ public class IdNode implements Node {
 	    return res;
 	}
   
-    public Node typeCheck () {
-	    if (entry.getType() instanceof ArrowTypeNode) { //
+    public Type typeCheck () {
+	    if (entry.getType() instanceof ArrowType) { //
 	        System.out.println("Wrong usage of function identifier");
             System.exit(0);
         }
