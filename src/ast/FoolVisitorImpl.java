@@ -153,8 +153,11 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 			return visit( ctx.left );
 		}else{
 			//it is a binary expression, you should visit left and right
-
-			return new MultNode(visit(ctx.left), visit(ctx.right));
+			if(ctx.operator.getType() == FOOLLexer.TIMES) {
+				return new MultNode(visit(ctx.left), visit(ctx.right));
+			}else{
+                return new DivNode(visit(ctx.left), visit(ctx.right));
+            }
 		}
 	}
 	
