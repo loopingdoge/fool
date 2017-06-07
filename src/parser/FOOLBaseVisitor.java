@@ -1,4 +1,4 @@
-// Generated from /Users/devid/Workspace/CEI/fool/src/parser/FOOL.g4 by ANTLR 4.7
+// Generated from /Users/civo/IdeaProjects/fool/src/parser/FOOL.g4 by ANTLR 4.7
 package parser;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
