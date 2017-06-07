@@ -29,8 +29,9 @@ public class MinusNode implements Node {
 
     @Override
     public String codeGeneration() {
-        // TODO: implement
-        return null;
+        return left.codeGeneration()
+                + right.codeGeneration()
+                + "sub\n";
     }
 
     @Override
