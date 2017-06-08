@@ -41,7 +41,7 @@ public class EqualNode implements Node {
             System.out.println("Incompatible types in equal");
             System.exit(0);
         }
-        return new BoolTypeNode();
+        return new BoolType();
     }
   
     public String codeGeneration() {
