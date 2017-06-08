@@ -10,10 +10,10 @@ public class CallNode implements Node {
 
     private String id;
     private ArrayList<Node> params = new ArrayList<Node>();
-    private STentry entry;
+    private SymbolTableEntry entry;
     private int nestingLevel;
 
-    public CallNode(String id, ArrayList<Node> params, STentry entry, int nestingLevel) {
+    public CallNode(String id, ArrayList<Node> params, SymbolTableEntry entry, int nestingLevel) {
         this.id = id;
         this.params = params;
         this.entry = entry;
@@ -41,7 +41,7 @@ public class CallNode implements Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         int j = env.nestingLevel;
-        STentry tmp = null;
+        SymbolTableEntry tmp = null;
         while (j >= 0 && tmp == null)
             tmp = (env.symTable.get(j--)).get(id);
         if (tmp == null)
@@ -57,16 +57,16 @@ public class CallNode implements Node {
         return res;
     }
 
-    public Node typeCheck() {  //
-        ArrowTypeNode t = null;
-        if (entry.getType() instanceof ArrowTypeNode) {
-            t = (ArrowTypeNode) entry.getType();
+    public Type typeCheck() {  //
+        ArrowType t = null;
+        if (entry.getType() instanceof ArrowType) {
+            t = (ArrowType) entry.getType();
         } else {
             System.out.println("Invocation of a non-function " + id);
             System.exit(0);
         }
 
-        ArrayList<Node> p = t.getParList();
+        ArrayList<Type> p = t.getParList();
         if (!(p.size() == params.size())) {
             System.out.println("Wrong number of parameters in the invocation of " + id);
             System.exit(0);

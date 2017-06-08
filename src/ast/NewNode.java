@@ -9,7 +9,7 @@ public class NewNode implements Node {
 
     private String id;
     private ArrayList<Node> explist;
-    STentry entry;
+    SymbolTableEntry entry;
     int nestinglevel;
 
     public NewNode (String i, ArrayList<Node> e) {
@@ -56,7 +56,7 @@ public class NewNode implements Node {
         }
 
         int j = env.nestingLevel;
-        STentry tmp = null;
+        SymbolTableEntry tmp = null;
         while ( j >= 0 && tmp == null)
             tmp=(env.symTable.get(j--)).get(id);
         if (tmp==null)

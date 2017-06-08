@@ -1,27 +1,27 @@
 package ast;
 
-public class STentry {
+public class SymbolTableEntry {
 
     private int nl;
-    private Node type;
+    private Type type;
     private int offset;
 
-    public STentry(int n, int os) {
+    public SymbolTableEntry(int n, int os) {
         nl = n;
         offset = os;
     }
 
-    public STentry(int n, Node t, int os) {
+    public SymbolTableEntry(int n, Type t, int os) {
         nl = n;
         type = t;
         offset = os;
     }
 
-    public void addType(Node t) {
+    public void addType(Type t) {
         type = t;
     }
 
-    public Node getType() {
+    public Type getType() {
         return type;
     }
 
@@ -34,9 +34,9 @@ public class STentry {
     }
 
     public String toPrint(String s) { //
-        return s + "STentry: nestlev " + Integer.toString(nl) + "\n" +
-                s + "STentry: type\n" +
+        return s + "SymbolTableEntry: nestlev " + Integer.toString(nl) + "\n" +
+                s + "SymbolTableEntry: type\n" +
                 type.toPrint(s + "  ") +
-                s + "STentry: offset " + Integer.toString(offset) + "\n";
+                s + "SymbolTableEntry: offset " + Integer.toString(offset) + "\n";
     }
 }

@@ -30,15 +30,15 @@ public class FunNode implements Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         //env.offset = -2;
-        HashMap<String,STentry> hm = env.symTable.get(env.nestingLevel);
-        STentry entry = new STentry(env.nestingLevel,env.offset--); //separo introducendo "entry"
+        HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
+        SymbolTableEntry entry = new SymbolTableEntry(env.nestingLevel,env.offset--); //separo introducendo "entry"
 
         if ( hm.put(id,entry) != null )
             res.add(new SemanticError("Fun id "+id+" already declared"));
         else{
             //creare una nuova hashmap per la symTable
             env.nestingLevel++;
-            HashMap<String,STentry> hmn = new HashMap<String,STentry> ();
+            HashMap<String, SymbolTableEntry> hmn = new HashMap<String, SymbolTableEntry> ();
             env.symTable.add(hmn);
 
             ArrayList<Type> parTypes = new ArrayList<Type>();
@@ -48,7 +48,7 @@ public class FunNode implements Node {
             for(Node a : parlist){
                 ParNode arg = (ParNode) a;
                 parTypes.add(arg.getType());
-                if ( hmn.put(arg.getId(),new STentry(env.nestingLevel,arg.getType(),paroffset++)) != null  )
+                if ( hmn.put(arg.getId(),new SymbolTableEntry(env.nestingLevel,arg.getType(),paroffset++)) != null  )
                     System.out.println("Parameter id "+arg.getId()+" already declared");
             }
 

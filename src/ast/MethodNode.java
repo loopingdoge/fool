@@ -9,10 +9,10 @@ public class MethodNode implements Node {
 
     private String id;
     private ArrayList<Node> params = new ArrayList<Node>();
-    private STentry entry;
+    private SymbolTableEntry entry;
     private int nestingLevel;
 
-    public MethodNode(String id, ArrayList<Node> params, STentry entry, int nestingLevel) {
+    public MethodNode(String id, ArrayList<Node> params, SymbolTableEntry entry, int nestingLevel) {
         this.id = id;
         this.params = params;
         this.entry = entry;
@@ -41,19 +41,13 @@ public class MethodNode implements Node {
     }
 
     @Override
-    public String codeGeneration() {
-        // TODO: implement
-        return null;
-    }
-
-    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         return new CallNode(id, params, entry, nestingLevel).checkSemantics(env);
     }
 
     @Override
     public String codeGeneration() {
-        return "";
+        return "Method node to be implemented yet";
     }
 
 }
