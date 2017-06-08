@@ -50,7 +50,7 @@ public class ProgLetInNode implements Node {
         return res;
 	}
   
-    public Node typeCheck () {
+    public Type typeCheck () {
         for (Node dec:declist)
             dec.typeCheck();
         return exp.typeCheck();

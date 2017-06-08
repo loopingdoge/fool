@@ -15,10 +15,11 @@ import util.Environment;
 import util.SemanticError;
 import ast.FoolVisitorImpl;
 import ast.Node;
+import ast.Type;
 
 public class TestComplete {
     public static void main(String[] args) throws Exception {
-
+      
         String filename = "input.fool";
 
         CharStream input = CharStreams.fromFileName(filename);
@@ -46,8 +47,8 @@ public class TestComplete {
                 System.out.println(ast.toPrint(""));
 
 
-                Node type = ast.typeCheck(); //type-checking bottom-up
-                System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
+		        Type type = ast.typeCheck(); //type-checking bottom-up
+		        System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
 
                 // CODE GENERATION  input.fool.asm
                 String code = ast.codeGeneration();

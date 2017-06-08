@@ -36,8 +36,14 @@ public class MethodNode implements Node {
     }
 
     @Override
-    public Node typeCheck() {
+    public Type typeCheck() {
         return new CallNode(id, params, entry, nestingLevel).typeCheck();
+    }
+
+    @Override
+    public String codeGeneration() {
+        // TODO: implement
+        return null;
     }
 
     @Override

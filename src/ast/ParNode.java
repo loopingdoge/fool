@@ -8,9 +8,9 @@ import util.SemanticError;
 public class ParNode implements Node {
 
   private String id;
-  private Node type;
+  private Type type;
   
-  public ParNode (String i, Node t) {
+  public ParNode (String i, Type t) {
    id=i;
    type=t;
   }
@@ -19,7 +19,7 @@ public class ParNode implements Node {
 	  return id;
   }
   
-  public Node getType(){
+  public Type getType(){
 	  return type;
   }
   
@@ -35,7 +35,7 @@ public class ParNode implements Node {
   }
   
   //non utilizzato
-  public Node typeCheck () {
+  public Type typeCheck () {
      return null;
   }
   

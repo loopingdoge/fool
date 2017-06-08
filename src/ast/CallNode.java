@@ -29,7 +29,7 @@ public class CallNode implements Node {
         String paramsToString = params.stream()
                 .map(param -> param.toPrint(indent + "  "))
                 .reduce("", String::concat);
-        return indent + "Call method: " + id
+        return indent + "Call: " + id
                 + " at nesting level " + nestingLevel + "\n"
                 + entry.toPrint(indent + "  ")
                 + paramsToString;

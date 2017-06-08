@@ -1,11 +1,9 @@
 package ast;
 
-import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class NewNode implements Node {
 
@@ -28,11 +26,11 @@ public class NewNode implements Node {
     }
 
     @Override
-    public Node typeCheck() {
+    public Type typeCheck() {
         for (Node exp:explist)
             exp.typeCheck();
 
-        if (entry.getType() instanceof ArrowTypeNode) { //TODO mettere IstanceType
+        if (entry.getType() instanceof InstanceType) {
             System.out.println("Wrong usage of function identifier");
             System.exit(0);
         }

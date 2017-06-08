@@ -17,7 +17,7 @@ public class PrintNode implements Node {
     return s+"Print\n" + val.toPrint(s+"  ") ;
   }
   
-  public Node typeCheck() {
+  public Type typeCheck() {
     return val.typeCheck();
   }  
   

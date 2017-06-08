@@ -1,23 +1,23 @@
 package ast;
 
-import java.util.ArrayList;
-
+import lib.FOOLlib;
 import util.Environment;
 import util.SemanticError;
-import lib.FOOLlib;
 
-public class EqualNode implements Node {
+import java.util.ArrayList;
+
+public class GreaterEqualNode implements Node {
 
     private Node left;
     private Node right;
-  
-    public EqualNode (Node l, Node r) {
+
+    public GreaterEqualNode(Node l, Node r) {
         left=l;
         right=r;
     }
   
     public String toPrint(String s) {
-        return s+"Equal\n" + left.toPrint(s+"  ")
+        return s+"GreaterEqual\n" + left.toPrint(s+"  ")
                 + right.toPrint(s+"  ") ;
     }
   
@@ -38,8 +38,14 @@ public class EqualNode implements Node {
         Type l = left.typeCheck();
         Type r = right.typeCheck();
         if (! ( FOOLlib.isSubtype(l,r) || FOOLlib.isSubtype(r,l) ) ) {
-            System.out.println("Incompatible types in equal");
+            System.out.println("Incompatible types in greaterequal");
             System.exit(0);
+        }
+        //Ho messo qua il controllo che non sia un operazione invalida, non so se va qua però
+        if(l.getClass() == ast.BoolType.class){
+            System.out.println("Operator '>=' cannot be applied to 'boolean', 'boolean'");
+            System.exit(0);
+
         }
         return new BoolType();
     }
@@ -47,9 +53,10 @@ public class EqualNode implements Node {
     public String codeGeneration() {
         String l1 = FOOLlib.freshLabel();
 	    String l2 = FOOLlib.freshLabel();
-	    return left.codeGeneration()+
-                right.codeGeneration()+
-                "beq "+ l1 +"\n"+
+	    //Dal Less Equal basta invertire l'ordine dei due valori nello stack iniziale su cui andrà a valutare il 'bleq'
+	    return right.codeGeneration()+
+                left.codeGeneration()+
+                "bleq "+ l1 +"\n"+
 			   "push 0\n"+
 			   "b " + l2 + "\n" +
 			   l1 + ":\n"+

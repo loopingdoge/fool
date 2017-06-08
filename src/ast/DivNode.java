@@ -1,17 +1,17 @@
 package ast;
 
-import java.util.ArrayList;
-
+import lib.FOOLlib;
 import util.Environment;
 import util.SemanticError;
-import lib.FOOLlib;
 
-public class MultNode implements Node {
+import java.util.ArrayList;
+
+public class DivNode implements Node {
 
     private Node left;
     private Node right;
 
-    public MultNode (Node l, Node r) {
+    public DivNode(Node l, Node r) {
         left=l;
         right=r;
     }
@@ -30,14 +30,14 @@ public class MultNode implements Node {
     }
 
     public String toPrint(String s) {
-        return s+"Mult\n" + left.toPrint(s+"  ")
+        return s+"Div\n" + left.toPrint(s+"  ")
                 + right.toPrint(s+"  ") ;
     }
 
     public Type typeCheck() {
         if (! ( FOOLlib.isSubtype(left.typeCheck(),new IntType()) &&
                 FOOLlib.isSubtype(right.typeCheck(),new IntType()) ) ) {
-            System.out.println("Non integers in multiplication");
+            System.out.println("Non integers in division");
             System.exit(0);
         }
         return new IntType();
@@ -46,7 +46,7 @@ public class MultNode implements Node {
     public String codeGeneration() {
         return left.codeGeneration()+
                 right.codeGeneration()+
-                "mult\n";
+                "div\n";
     }
 
 }  
