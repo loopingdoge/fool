@@ -66,7 +66,7 @@ public class CallNode implements Node {
             System.exit(0);
         }
 
-        ArrayList<Type> p = t.getParList();
+        ArrayList<Type> p = t.getParams();
         if (!(p.size() == params.size())) {
             System.out.println("Wrong number of parameters in the invocation of " + id);
             System.exit(0);
@@ -76,7 +76,7 @@ public class CallNode implements Node {
                 System.out.println("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + id);
                 System.exit(0);
             }
-        return t.getRet();
+        return t.getReturnType();
     }
 
     public String codeGeneration() {

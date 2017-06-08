@@ -7,15 +7,24 @@ import util.SemanticError;
 
 public class IntType implements Type {
 
-    public IntType() {}
-
-    public String toPrint(String s) {
-	return s+"IntType\n";  
-  }
+    @Override
+    public TypeID getID() {
+        return TypeID.INT;
+    }
 
     @Override
-    public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return new ArrayList<SemanticError>();
+    public boolean isSubTypeOf(Type t) {
+        return this.getID() == t.getID();
     }
-  
-}  
+
+    @Override
+    public boolean isSuperTypeOf(Type t) {
+        return this.getID() == t.getID();
+    }
+
+    @Override
+    public String toString() {
+        return "int";
+    }
+
+}

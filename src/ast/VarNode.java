@@ -13,46 +13,46 @@ public class VarNode implements Node {
     private Type type;
     private Node exp;
 
-    public VarNode (String i, Type t, Node v) {
-        id=i;
-        type=t;
-        exp=v;
+    public VarNode(String i, Type t, Node v) {
+        id = i;
+        type = t;
+        exp = v;
     }
-  
-  	@Override
-	public ArrayList<SemanticError> checkSemantics(Environment env) {
-  	    //create result list
-  	    ArrayList<SemanticError> res = new ArrayList<SemanticError>();
-  	  
+
+    @Override
+    public ArrayList<SemanticError> checkSemantics(Environment env) {
+        //create result list
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
         //env.offset = -2;
-  	    HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
-        SymbolTableEntry entry = new SymbolTableEntry(env.nestingLevel,type, env.offset--); //separo introducendo "entry"
-        
-        if ( hm.put(id,entry) != null )
-            res.add(new SemanticError("Var id "+id+" already declared"));
-        
+        HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
+        SymbolTableEntry entry = new SymbolTableEntry(env.nestingLevel, type, env.offset--); //separo introducendo "entry"
+
+        if (hm.put(id, entry) != null)
+            res.add(new SemanticError("Var id " + id + " already declared"));
+
         res.addAll(exp.checkSemantics(env));
-        
+
         return res;
-	}
-  
-    public String toPrint(String s) {
-	    return s+"Var:" + id +"\n"
-                +type.toPrint(s+"  ")
-                +exp.toPrint(s+"  ");
     }
-  
+
+    public String toPrint(String s) {
+        return s + "Var:" + id + "\n"
+                + s + " " + type + "\n"
+                + exp.toPrint(s + "  ");
+    }
+
     //valore di ritorno non utilizzato
-    public Type typeCheck () {
-        if (! (FOOLlib.isSubtype(exp.typeCheck(), type)) ){
-            System.out.println("incompatible value for variable "+id);
+    public Type typeCheck() {
+        if (!(FOOLlib.isSubtype(exp.typeCheck(), type))) {
+            System.out.println("incompatible value for variable " + id);
             System.exit(0);
         }
         return null;
     }
-  
+
     public String codeGeneration() {
-		return exp.codeGeneration();
+        return exp.codeGeneration();
     }
-    
+
 }  

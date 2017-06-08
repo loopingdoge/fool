@@ -1,38 +1,47 @@
 package ast;
-import java.util.ArrayList;
 
-import util.Environment;
-import util.SemanticError;
+import java.util.ArrayList;
 
 public class ArrowType implements Type {
 
-    private ArrayList<Type> parlist;
-    private Type ret;
-  
+    private ArrayList<Type> params;
+    private Type returnType;
+
     public ArrowType(ArrayList<Type> p, Type r) {
-        parlist=p;
-        ret=r;
+        params = p;
+        returnType = r;
     }
-    
-    public String toPrint(String s) {
-	    String parlstr="";
-        for (Type par:parlist)
-            parlstr+=par.toPrint(s+"  ");
-        return s+"ArrowType\n" + parlstr + ret.toPrint(s+"  ->") ;
+
+    public Type getReturnType() {
+        return returnType;
     }
-  
-    public Type getRet () {
-        return ret;
-    }
-  
-    public ArrayList<Type> getParList () { //
-        return parlist;
+
+    public ArrayList<Type> getParams() {
+        return params;
     }
 
     @Override
-	public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return new ArrayList<SemanticError>();
-	}
+    public TypeID getID() {
+        return TypeID.ARROW;
+    }
 
+    @Override
+    public boolean isSubTypeOf(Type t) {
+        return false;
+    }
 
-}  
+    @Override
+    public boolean isSuperTypeOf(Type t) {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        String paramsString = params.stream()
+                .map(Object::toString)
+                .reduce("", (p1, p2) -> p1.length() != 0 ? p1 + ", " : p1 + p2);
+        paramsString = "(" + paramsString + ")";
+        return "ArrowType " + paramsString + " -> " + returnType.toString();
+    }
+
+}

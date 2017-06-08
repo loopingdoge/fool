@@ -48,7 +48,7 @@ public class TestComplete {
 
 
 		        Type type = ast.typeCheck(); //type-checking bottom-up
-		        System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
+		        System.out.println("Type checking ok! Type of the program is: " + type);
 
                 // CODE GENERATION  input.fool.asm
                 String code = ast.codeGeneration();

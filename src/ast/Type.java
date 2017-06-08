@@ -1,14 +1,18 @@
 package ast;
 
-import util.Environment;
-import util.SemanticError;
-
-import java.util.ArrayList;
+enum TypeID {
+    INT,
+    BOOL,
+    ARROW,
+    INSTANCE
+}
 
 public interface Type {
 
-    String toPrint(String indent);
+    TypeID getID();
 
-    ArrayList<SemanticError> checkSemantics(Environment env);
+    boolean isSubTypeOf(Type t);
+
+    boolean isSuperTypeOf(Type t);
 
 }

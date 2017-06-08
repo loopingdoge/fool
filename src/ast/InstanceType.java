@@ -1,23 +1,29 @@
 package ast;
-import java.util.ArrayList;
-
-import util.Environment;
-import util.SemanticError;
 
 public class InstanceType implements Type {
 
     private Type ret;
 
-    public InstanceType() {}
-
-    public String toPrint(String s) {
-        return "";
+    @Override
+    public TypeID getID() {
+        return TypeID.INSTANCE;
     }
 
     @Override
-    public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return new ArrayList<SemanticError>();
+    public boolean isSubTypeOf(Type t) {
+        // TODO: implement
+        return false;
     }
 
+    @Override
+    public boolean isSuperTypeOf(Type t) {
+        // TODO: implement
+        return false;
+    }
 
+    @Override
+    public String toString() {
+        // TODO: describe the instance type
+        return "Instance";
+    }
 }

@@ -8,18 +8,13 @@ public class FOOLlib {
   
   private static int funLabCount=0; 
 
-  private static String funCode=""; 
+  private static String funCode="";
 
   //valuta se il tipo "a" � <: al tipo "b", dove "a" e "b" sono tipi di base: int o bool
   public static boolean isSubtype (Type a, Type b) {
-    return a.getClass().equals(b.getClass());
+    return a.isSubTypeOf(b);
   }
 
-  public static boolean isSubtype (ArrowType a, ArrowType b) {
-      // TODO: function subtyping
-      return false;
-  }
-  
   public static String freshLabel() { 
 	return "label"+(labCount++);
   } 
