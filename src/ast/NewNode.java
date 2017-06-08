@@ -8,40 +8,42 @@ import java.util.ArrayList;
 public class NewNode implements Node {
 
     private String id;
-    private ArrayList<Node> explist;
+    private ArrayList<Node> params;
     SymbolTableEntry entry;
     int nestinglevel;
 
-    public NewNode (String i, ArrayList<Node> e) {
-        id = i;
-        explist = e;
+    public NewNode (String id, ArrayList<Node> params) {
+        this.id = id;
+        this.params = params;
     }
 
     @Override
     public String toPrint(String indent) {
-        String explstr="";
-        for (Node exp:explist)
-            explstr += exp.toPrint(indent + "  " );
-        return indent+"New:" + id + "\n" + explstr ;
+        String paramsToString = params.stream()
+                .map(param -> param.toPrint(indent + "  "))
+                .reduce("", String::concat);
+        return indent + "New: " + id  + "\n"
+                + entry.toPrint(indent + "  ")
+                + paramsToString;
     }
 
     @Override
     public Type typeCheck() {
-        for (Node exp:explist)
+
+        for (Node exp:params)
             exp.typeCheck();
 
         if (entry.getType() instanceof InstanceType) {
-            System.out.println("Wrong usage of function identifier");
+            System.out.println("Wrong usage of new operator");
             System.exit(0);
         }
 
-        return entry.getType();
+        return new InstanceType();//entry.getType();
     }
 
     @Override
     public String codeGeneration() {
-        // TODO: implement
-        return null;
+        return "New node to be implemented yet";
     }
 
     @Override
@@ -49,9 +51,9 @@ public class NewNode implements Node {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        if (explist.size() > 0) {
+        if (params.size() > 0) {
             //if there are children then check semantics for every child and save the results
-            for(Node n : explist)
+            for(Node n : params)
                 res.addAll(n.checkSemantics(env));
         }
 

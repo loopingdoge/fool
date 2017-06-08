@@ -1,10 +1,16 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.yaml.snakeyaml.Yaml;
 
 import parser.ExecuteVM;
 import parser.FOOLLexer;
@@ -18,11 +24,8 @@ import ast.Node;
 import ast.Type;
 
 public class TestComplete {
-    public static void main(String[] args) throws Exception {
-      
-        String filename = "input.fool";
 
-        CharStream input = CharStreams.fromFileName(filename);
+    private static void test(  String testID, CharStream input, String result ) throws IOException {
         FOOLLexer lexer = new FOOLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         FOOLParser parser = new FOOLParser(tokens);
@@ -47,17 +50,17 @@ public class TestComplete {
                 System.out.println(ast.toPrint(""));
 
 
-		        Type type = ast.typeCheck(); //type-checking bottom-up
-		        System.out.println("Type checking ok! Type of the program is: " + type);
+                Type type = ast.typeCheck(); //type-checking bottom-up
+                System.out.println("Type checking ok! Type of the program is: " + type);
 
                 // CODE GENERATION  input.fool.asm
                 String code = ast.codeGeneration();
-                BufferedWriter out = new BufferedWriter(new FileWriter(filename + ".asm"));
+                BufferedWriter out = new BufferedWriter(new FileWriter(testID + ".asm"));
                 out.write(code);
                 out.close();
                 System.out.println("Code generated! Assembling and running generated code.");
 
-                CharStream inputASM = CharStreams.fromFileName(filename + ".asm");
+                CharStream inputASM = CharStreams.fromFileName(testID + ".asm");
                 SVMLexer lexerASM = new SVMLexer(inputASM);
                 CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
                 SVMParser parserASM = new SVMParser(tokensASM);
@@ -79,5 +82,34 @@ public class TestComplete {
             }
         }
 
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        String filename = "input.fool";
+        CharStream input = CharStreams.fromFileName(filename);
+        test("", input, "");
+
+//        final String fileName = "test.yml";
+//        Yaml yaml = new Yaml();
+//
+//        try {
+//            InputStream is = new FileInputStream(new File(fileName));
+//            Map< String, ArrayList<String>> tests = (Map< String, ArrayList<String>>) yaml.load(is);
+//
+//            for (String testID : tests.keySet()) {
+//
+//                ArrayList<String> test = tests.get(testID);
+//                String code = test.get(0);
+//                String result = test.get(1);
+//
+//                System.out.println( "Executing: " + testID );
+//                CharStream input = CharStreams.fromString(code);
+//                test(testID, input, result);
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

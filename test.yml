@@ -1,0 +1,20 @@
+# Sintassi
+
+# nometest:
+# - codice
+# - risultato (stringa)
+
+test1:
+-   let
+      int y = 5 ;
+    in
+      print( y );
+
+-   "5"
+
+test2:
+-   let
+      int y = 5 + 2;
+    in
+      print( y );
+-   "7"1
