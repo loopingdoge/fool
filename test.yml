@@ -17,4 +17,46 @@ test2:
       int y = 5 + 2;
     in
       print( y );
--   "7"1
+-   "7"
+
+test3:
+-   let
+        int x = 5;
+        int f ()
+            x;
+    in
+        print(f());
+-   "5"
+
+test4:
+-   let
+        int y = 5 + 2 ;
+        bool f (int n, int m)
+        let
+            int x = m;
+        in
+            x == y;
+    in
+        print(if f(y, 8) then {false} else {10});
+-   "Semantic error"
+
+test5:
+-   let
+        int gee(int n)
+            n + 1;
+        int foo(int n)
+            if (n == 0) then { 1 } else { n * gee(n-1) };
+    in
+        print(foo(3));
+-   "1"
+
+test6:
+-   let
+        int foo(int n)
+            let
+                int gee(int n) n+1;
+            in
+                if (n==0) then { 1 } else { n * gee(n-1) };
+    in
+        print(gee(3));
+-   "Id gee not declared"
