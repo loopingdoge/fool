@@ -38,9 +38,10 @@ public class AndNode implements Node {
         Type l = left.typeCheck();
         Type r = right.typeCheck();
         if (! ( FOOLlib.isSubtype(l,r) || FOOLlib.isSubtype(r,l) )) {
-            System.out.println("Incompatible types in equal");
+            System.out.println("Incompatible types in AND");
             System.exit(0);
         }
+        //Non serve perchè in teoria se dà errore lo da sopra nel controllo dei SubType
         if(l.getClass() != ast.BoolType.class){
             System.out.println("Operator '&&' cannot be applied to 'int', 'int'");
             System.exit(0);

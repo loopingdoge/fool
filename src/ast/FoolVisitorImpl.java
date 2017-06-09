@@ -197,10 +197,16 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	public Node visitBoolVal(BoolValContext ctx) {
         System.out.println("BBB --> " + ctx.getText());
         //there is no need to perform a check here, the lexer ensures this text is a boolean
-        if(ctx.NOT() == null) {
-            return new BoolNode(Boolean.parseBoolean(ctx.getText().replace("!","")), false);
+		//[ADDED] With NOT operator Boolean.parseBoolean accept i.e. '!4' with a 'false' value, the correct solution is to check the input.
+        String text = ctx.getText().replace("!","");
+        if(text.equals("false") || text.equals("true")) {
+            if (ctx.NOT() == null) {
+                return new BoolNode(Boolean.parseBoolean(text), false);
+            } else {
+                return new BoolNode(Boolean.parseBoolean(text), true);
+            }
         }else{
-            return new BoolNode(Boolean.parseBoolean(ctx.getText().replace("!","")), true);
+            return new IntNode(Integer.parseInt(text));
         }
 	}
 	
