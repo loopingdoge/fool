@@ -3,6 +3,7 @@
 Setup
 -
 1) Aggiungere il file `antlr-4.7-complete.jar` come libreria
+2) Aggiungere il file `snakeyaml-1.18.jar` come libreria
  
 Descrizione:
 -
