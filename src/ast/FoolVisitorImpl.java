@@ -116,7 +116,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 		if(ctx.getText().equals("int"))
 			return new IntNode(0);	// TODO: cambiato da IntType a IntNode, non so se va bene
 		else if(ctx.getText().equals("bool"))
-			return new BoolNode(true);	// TODO: cambiato da IntType a IntNode, non so se va bene
+			return new BoolNode(true, false);	// TODO: cambiato da IntType a IntNode, non so se va bene
 		
 		//this will never happen thanks to the parser
 		return null;
@@ -170,12 +170,17 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 			return visit( ctx.left );
 		}else{
 			//it is a binary expression, you should visit left and right
-            if(ctx.operator.getType() == FOOLLexer.EQ) {
-                return new EqualNode(visit(ctx.left), visit(ctx.right));
-            }else if(ctx.operator.getType() == FOOLLexer.LEQ) {
-                return new LessEqualNode(visit(ctx.left), visit(ctx.right));
-            }else{
-                return new GreaterEqualNode(visit(ctx.left), visit(ctx.right));
+            switch(ctx.operator.getType()){
+                case FOOLLexer.EQ:
+                    return new EqualNode(visit(ctx.left), visit(ctx.right));
+                case FOOLLexer.LEQ:
+                    return new LessEqualNode(visit(ctx.left), visit(ctx.right));
+                case FOOLLexer.GEQ:
+                    return new GreaterEqualNode(visit(ctx.left), visit(ctx.right));
+                case FOOLLexer.AND:
+                    return new AndNode(visit(ctx.left), visit(ctx.right));
+                default:
+                    return new OrNode(visit(ctx.left), visit(ctx.right));
             }
 		}
 	}
@@ -190,9 +195,13 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 	
 	@Override
 	public Node visitBoolVal(BoolValContext ctx) {
-		
-		//there is no need to perform a check here, the lexer ensures this text is a boolean
-		return new BoolNode(Boolean.parseBoolean(ctx.getText())); 
+        System.out.println("BBB --> " + ctx.getText());
+        //there is no need to perform a check here, the lexer ensures this text is a boolean
+        if(ctx.NOT() == null) {
+            return new BoolNode(Boolean.parseBoolean(ctx.getText().replace("!","")), false);
+        }else{
+            return new BoolNode(Boolean.parseBoolean(ctx.getText().replace("!","")), true);
+        }
 	}
 	
 	@Override

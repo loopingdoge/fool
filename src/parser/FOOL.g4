@@ -58,12 +58,12 @@ term
     ;
 
 factor
-    : left=value (operator=(GEQ | EQ | LEQ) right=value)?
+    : left=value (operator=(AND | OR | GEQ | EQ | LEQ) right=value)?
     ;
 
 value
     : INTEGER                        		                                        #intVal
-    | ( TRUE | FALSE )                  		                                    #boolVal
+    | (NOT)? ( TRUE | FALSE )                  		                                #boolVal
     | LPAR exp RPAR                      			                                #baseExp
     | IF cond=exp THEN CLPAR thenBranch=exp CRPAR ELSE CLPAR elseBranch=exp CRPAR   #ifExp
     | ID                                                                            #varExp
@@ -83,6 +83,9 @@ COMMA  : ',' ;
 EQ     : '==' ;
 LEQ    : ('<=' | '=<') ;
 GEQ    : ('>=' | '=>') ;
+AND    : '&&' ;
+OR     : '||' ;
+NOT    : '!' ;
 ASM    : '=' ;
 PLUS   : '+' ;
 MINUS  : '-' ;

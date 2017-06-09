@@ -7,29 +7,35 @@ import util.SemanticError;
 
 public class BoolNode implements Node {
 
-  private boolean val;
-  
-  public BoolNode (boolean n) {
-    val=n;
-  }
-  
-  public String toPrint(String s) {
-    if (val) return s+"Bool:true\n";
-    else return s+"Bool:false\n";  
-  }
-  
-  public Type typeCheck() {
-    return new BoolType();
-  }    
-  
-  @Override
- 	public ArrayList<SemanticError> checkSemantics(Environment env) {
+    private boolean val;
+    private boolean not;
 
- 	  return new ArrayList<SemanticError>();
- 	}
-  
-  public String codeGeneration() {
-		return "push "+(val?1:0)+"\n";
-	  }
-         
+    public BoolNode(boolean n, boolean no) {
+        val=n;
+        not = no;
+    }
+
+    public String toPrint(String s) {
+        if (not) return s + "Bool: not " + val + "\n";
+        else return s + "Bool:" + val + "\n";
+    }
+
+    public Type typeCheck() {
+        return new BoolType();
+    }
+
+    @Override
+    public ArrayList<SemanticError> checkSemantics(Environment env) {
+
+        return new ArrayList<SemanticError>();
+    }
+
+    public String codeGeneration() {
+        if(not){
+            return "push " + (!val ? 1 : 0 ) + "\n";
+        }else {
+            return "push " + (val ? 1 : 0) + "\n";
+        }
+    }
+
 }  
