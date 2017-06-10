@@ -49,4 +49,19 @@ public class MultNode implements Node {
                 "mult\n";
     }
 
+    @Override
+    public String toString(){
+        return "Mult";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(left);
+        childs.add(right);
+
+        return childs;
+    }
+
 }  

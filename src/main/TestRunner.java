@@ -37,7 +37,7 @@ public class TestRunner {
         }
 
         if (visualizeAST) {
-            System.out.println("Visualizing AST...");
+            System.out.println("\nVisualizing AST... VECCHIO");
             System.out.println(ast.toPrint(""));
         }
 
@@ -92,6 +92,10 @@ public class TestRunner {
                 System.out.println("Semantic analysis...");
             }
 
+            //Nuovo metodo di stampa dell'AST
+            stampAST(ast);
+
+
             Type type = semanticAnalysis(ast, enableLogging);
 
             if (enableLogging) {
@@ -129,4 +133,23 @@ public class TestRunner {
         return output.toString();
     }
 
+    public static void stampAST(Node ast){
+        System.out.println("\nAbstract Syntax Tree NUOVO: ");
+        if(ast.getChilds() != null) {
+            recursiveStamp(ast, "");
+        }else{
+            System.out.println("\nEmpty AST");
+        }
+    }
+
+    //TODO: Mancano all'appello le classi: ProgClassDecNode(che non è finita), MethodNode(incompleta), ThisNode(incompleta)
+
+    public static void recursiveStamp(Node father, String indent){
+        System.out.println(indent + father);
+        if(father.getChilds() != null){
+            for (Node child : father.getChilds()) {
+                recursiveStamp(child, indent + "   ");
+            }
+        }
+    }
 }

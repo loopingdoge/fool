@@ -31,4 +31,18 @@ public class ProgNode implements Node {
         return exp.codeGeneration()+"halt\n";
     }
 
+    @Override
+    public String toString(){
+        return "Prog";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(exp);
+
+        return childs;
+    }
+
 }  

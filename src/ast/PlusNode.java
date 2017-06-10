@@ -48,4 +48,19 @@ public class PlusNode implements Node {
 			   right.codeGeneration()+
 			   "add\n";
     }
+
+    @Override
+    public String toString(){
+        return "Plus";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(left);
+        childs.add(right);
+
+        return childs;
+    }
 }  

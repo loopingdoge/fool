@@ -50,4 +50,9 @@ public class MethodNode implements Node {
         return "Method node to be implemented yet";
     }
 
+    @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
 }

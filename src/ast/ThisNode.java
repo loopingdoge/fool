@@ -25,6 +25,11 @@ public class ThisNode implements Node {
     }
 
     @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
+    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         // TODO: implement
         return null;

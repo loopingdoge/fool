@@ -43,4 +43,14 @@ public class ParNode implements Node {
         return "";
     }
 
+    @Override
+    public String toString(){
+        return "Par -> " + id + ": " + type;
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
 }  

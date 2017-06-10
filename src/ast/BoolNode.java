@@ -38,4 +38,14 @@ public class BoolNode implements Node {
         }
     }
 
+    @Override
+    public String toString(){
+        return "Bool -> " + (not ? "not ": "") + val;
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
 }  

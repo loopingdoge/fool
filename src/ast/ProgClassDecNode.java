@@ -63,6 +63,11 @@ public class ProgClassDecNode implements Node {
     }
 
     @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
+    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();

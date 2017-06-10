@@ -136,4 +136,30 @@ public class FunNode implements Node {
 
         return "push " + funl + "\n";
     }
+
+    @Override
+    public String toString(){
+        return "Fun -> " + id + ": " + type;
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        if(parlist != null && parlist.size()>0) {
+            for (Node child : parlist) {
+                childs.add(child);
+            }
+        }
+
+        if(declist != null && declist.size()>0) {
+            for (Node child : declist) {
+                childs.add(child);
+            }
+        }
+
+        childs.add(body);
+
+        return childs;
+    }
 }  

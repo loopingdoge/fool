@@ -63,5 +63,20 @@ public class LessEqualNode implements Node {
 			   "push 1\n" +
 			   l2 + ":\n";
     }
-  
+
+    @Override
+    public String toString(){
+        return "LessEqual";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(left);
+        childs.add(right);
+
+        return childs;
+    }
+
 }  

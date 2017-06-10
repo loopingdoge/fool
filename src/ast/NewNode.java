@@ -47,6 +47,11 @@ public class NewNode implements Node {
     }
 
     @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
+    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();

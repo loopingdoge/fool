@@ -69,4 +69,20 @@ public class IfNode implements Node {
 	            l2 + ":\n";
     }
 
+    @Override
+    public String toString(){
+        return "If";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(cond);
+        childs.add(th);
+        childs.add(el);
+
+        return childs;
+    }
+
 }  

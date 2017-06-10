@@ -40,6 +40,21 @@ public class MinusNode implements Node {
     }
 
     @Override
+    public String toString(){
+        return "Minus";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(left);
+        childs.add(right);
+
+        return childs;
+    }
+
+    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();

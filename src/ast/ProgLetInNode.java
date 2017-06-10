@@ -11,11 +11,6 @@ public class ProgLetInNode implements Node {
     private ArrayList<Node> declist;
     private Node exp;
   
-    public ProgLetInNode (ArrayList<Node> d, Node e) {
-        declist=d;
-        exp=e;
-    }
-  
     public String toPrint(String s) {
 	    String declstr="";
         for (Node dec:declist)
@@ -65,5 +60,25 @@ public class ProgLetInNode implements Node {
                 exp.codeGeneration()+"halt\n"+
                 FOOLlib.getCode();
     }
-    
+
+    public ArrayList<Node> getChilds(){
+        ArrayList<Node> childs = new ArrayList<>();
+
+        for(Node son: declist){
+            childs.add(son);
+        }
+        childs.add(exp);
+
+        return childs;
+    }
+
+    @Override
+    public String toString(){
+        return "ProgLetIn";
+    }
+
+    public ProgLetInNode (ArrayList<Node> d, Node e) {
+        declist=d;
+        exp=e;
+    }
 }  

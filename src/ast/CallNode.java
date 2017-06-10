@@ -99,5 +99,22 @@ public class CallNode implements Node {
                 "js\n";
     }
 
+    @Override
+    public String toString(){
+        return "Call -> " + id;
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        if(params != null && params.size()>0)
+        for(Node child: params){
+            childs.add(child);
+        }
+
+        return childs;
+    }
+
 
 }  

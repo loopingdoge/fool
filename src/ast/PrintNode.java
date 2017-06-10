@@ -12,7 +12,12 @@ public class PrintNode implements Node {
   public PrintNode (Node v) {
     val=v;
   }
-  
+
+  @Override
+  public String toString(){
+      return "Print";
+  }
+
   public String toPrint(String s) {
     return s+"Print\n" + val.toPrint(s+"  ") ;
   }
@@ -30,5 +35,14 @@ public class PrintNode implements Node {
   public String codeGeneration() {
 		return val.codeGeneration()+"print\n";
   }
-    
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(val);
+
+        return childs;
+    }
+
 }  

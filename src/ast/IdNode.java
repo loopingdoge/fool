@@ -59,4 +59,14 @@ public class IdNode implements Node {
 
     }
 
+    @Override
+    public String toString(){
+        return "Id -> " + id;
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        return null;
+    }
+
 }  

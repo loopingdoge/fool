@@ -1,4 +1,0 @@
-let
-    int e = !false;
-in
-    print(3);

@@ -49,4 +49,19 @@ public class DivNode implements Node {
                 "div\n";
     }
 
+    @Override
+    public String toString(){
+        return "Div";
+    }
+
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(left);
+        childs.add(right);
+
+        return childs;
+    }
+
 }  

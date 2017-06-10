@@ -55,4 +55,18 @@ public class VarNode implements Node {
         return exp.codeGeneration();
     }
 
+    @Override
+    public ArrayList<Node> getChilds() {
+        ArrayList<Node> childs = new ArrayList<>();
+
+        childs.add(exp);
+
+        return childs;
+    }
+
+    @Override
+    public String toString(){
+        return "VarDec -> " + id + ": " + type;
+    }
+
 }  

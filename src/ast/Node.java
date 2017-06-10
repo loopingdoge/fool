@@ -18,4 +18,6 @@ public interface Node {
 
     String codeGeneration();
 
+    ArrayList<Node> getChilds();
+
 }
