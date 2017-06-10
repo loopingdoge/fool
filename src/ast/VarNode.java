@@ -64,6 +64,10 @@ public class VarNode implements Node {
         return childs;
     }
 
+    public Type getType() { return this.type; }
+
+    public String getId() { return this.id; }
+
     @Override
     public String toString(){
         return "VarDec -> " + id + ": " + type;

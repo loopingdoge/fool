@@ -34,9 +34,8 @@ public class SymbolTableEntry {
     }
 
     public String toPrint(String s) { //
-        return s + "SymbolTableEntry: nestlev " + Integer.toString(nl) + "\n"
-                + s + "SymbolTableEntry: type\n"
-                + s + "  " + type + "\n"
+        return    s + "SymbolTableEntry: nestlev " + Integer.toString(nl) + "\n"
+                + s + "SymbolTableEntry: type " + type + "\n"
                 + s + "SymbolTableEntry: offset " + Integer.toString(offset) + "\n";
     }
 }

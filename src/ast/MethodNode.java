@@ -9,6 +9,7 @@ public class MethodNode implements Node {
 
     private String id;
     private ArrayList<Node> params = new ArrayList<Node>();
+    private Type type;
     private SymbolTableEntry entry;
     private int nestingLevel;
 
@@ -22,6 +23,15 @@ public class MethodNode implements Node {
     public MethodNode(String id, ArrayList<Node> params) {
         this.id = id;
         this.params = params;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    // TODO: implement method signature as its Type
+    public Type getType() {
+        return type;
     }
 
     @Override

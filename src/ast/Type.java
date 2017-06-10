@@ -4,6 +4,7 @@ enum TypeID {
     INT,
     BOOL,
     ARROW,
+    CLASSDEC,
     INSTANCE
 }
 

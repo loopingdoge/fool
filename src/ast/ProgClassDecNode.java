@@ -8,52 +8,36 @@ import java.util.HashMap;
 
 public class ProgClassDecNode implements Node {
 
-    private Type type;
-    private String classID;
-    private String superClassID;
-    private ArrayList<Node> vardeclist;
-    private ArrayList<Node> fundeclist;
-    SymbolTableEntry stEntry;
-    int nestinglevel = 0;
+    ArrayList<Node> classDeclarations;
+    ArrayList<Node> letDeclarations;
+    Node exp;
 
-    public ProgClassDecNode(Type type, String classID, String superClassID, ArrayList<Node> vardeclist, ArrayList<Node> fundeclist) {
-        this.type = type;
-        this.classID = classID;
-        this.superClassID = superClassID;
-        this.vardeclist = vardeclist;
-        this.fundeclist = fundeclist;
+    public ProgClassDecNode(ArrayList<Node> classDeclarations, ArrayList<Node> letDeclarations, Node exp) {
+        this.classDeclarations = classDeclarations;
+        this.letDeclarations = letDeclarations;
+        this.exp = exp;
     }
 
     @Override
     public String toPrint(String indent) {
 
-        String vardecToString = vardeclist.stream()
-                .map(vardeclist -> vardeclist.toPrint(indent + "  "))
-                .reduce("", String::concat);
+        StringBuilder strBuilder = new StringBuilder(indent + "ProgClassDecNode");
 
-        String fundecToString = fundeclist.stream()
-                .map(fundeclist -> fundeclist.toPrint(indent + "  "))
-                .reduce("", String::concat);
+        for (Node classDec: classDeclarations)
+            strBuilder.append(indent + classDec);
 
-        return indent + "Class declarated " + classID + "\n"
-                + indent + "extends: " + superClassID + "\n"
-                + indent + stEntry.toPrint(indent + "  ")
-                + indent + "fields: " + vardecToString
-                + indent + "methods: " + fundecToString;
+        for (Node letDec: letDeclarations)
+            strBuilder.append(indent + letDec);
+
+        strBuilder.append(indent + exp);
+
+        return strBuilder.toString();
     }
 
     @Override
     public Type typeCheck() {
 
-        // TODO: check for duplicate variables (superclass)
-        for (Node dec : vardeclist)
-            dec.typeCheck();
-
-        // TODO: correct method overriding check
-        for (Node dec : fundeclist)
-            dec.typeCheck();
-
-        return type;
+        return null; // not used?
     }
 
     @Override
@@ -64,46 +48,14 @@ public class ProgClassDecNode implements Node {
 
     @Override
     public ArrayList<Node> getChilds() {
+        // TODO: implement
         return null;
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
-
-        if (vardeclist.size() > 0) {
-            for(Node n : vardeclist)
-                res.addAll(n.checkSemantics(env));
-        }
-
-        if (fundeclist.size() > 0) {
-            for(Node n : fundeclist)
-                res.addAll(n.checkSemantics(env));
-        }
-
-        // check if super class id exists
-        if (superClassID != null && !superClassID.isEmpty()) {
-
-            int j = env.nestingLevel;
-            SymbolTableEntry tmp = null;
-            while ( j >= 0 && tmp == null)
-                tmp = (env.symTable.get(j--)).get(superClassID);
-            if (tmp == null)
-                res.add(new SemanticError("Id of the super class: " + superClassID + " not declared"));
-            else {  // non necessario?
-                stEntry = tmp;
-                nestinglevel = env.nestingLevel;
-            }
-        }
-
-        HashMap<String, SymbolTableEntry> hm = env.symTable.get(0);
-        SymbolTableEntry entry = new SymbolTableEntry(0, type, env.offset);
-
-        // inserisco la nuova classe nella symbol table
-        if (hm.put(classID, entry) != null)
-            res.add(new SemanticError("Class with id:" + classID + " already declared!"));
-
+        // TODO: implement
         return res;
     }
 }

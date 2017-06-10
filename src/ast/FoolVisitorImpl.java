@@ -57,9 +57,24 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<Node> {
 
     @Override
     public Node visitClassExp(FOOLParser.ClassExpContext ctx) {
-        // TODO: implement
-        ProgClassDecNode res = null;
-        System.err.println("Implement visitClassExp in FoolVisitorImpl.java");
+        ProgClassDecNode res;
+
+		ArrayList<Node> classDeclarations = new ArrayList<Node>();
+		for(FOOLParser.ClassdecContext dc : ctx.classdec()){
+			classDeclarations.add( visit(dc) );  // visit each class declaration
+		}
+
+		ArrayList<Node> letDeclarations = new ArrayList<Node>();
+		for(DecContext dc : ctx.let().dec()){
+			letDeclarations.add( visit(dc) );
+		}
+
+        System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
+
+		Node exp = visit( ctx.exp() );
+
+		res = new ProgClassDecNode(classDeclarations, letDeclarations, exp);
+
         return res;
     }
 
