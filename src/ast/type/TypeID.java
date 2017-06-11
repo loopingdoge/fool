@@ -5,5 +5,6 @@ public enum TypeID {
     BOOL,
     ARROW,
     INSTANCE,
-    CLASSDEC
+    CLASSDEC,
+    VOID
 }

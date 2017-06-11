@@ -1,4 +1,6 @@
-package parser;
+package lib;
+
+import parser.SVMParser;
 
 import java.util.ArrayList;
 

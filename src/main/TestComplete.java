@@ -25,8 +25,8 @@ public class TestComplete {
             for (String testID : tests.keySet()) {
 
                 ArrayList<String> test = tests.get(testID);
-                String code = test.get(0);
-                String result = test.get(1);
+                String code = String.valueOf(test.get(0));
+                String result = String.valueOf(test.get(1));
 
                 System.out.println("Executing: " + testID);
                 CharStream input = CharStreams.fromString(code);

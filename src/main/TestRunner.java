@@ -4,10 +4,14 @@ import ast.node.FoolVisitorImpl;
 import ast.node.INode;
 import ast.type.Type;
 import ast.type.TypeException;
+import lib.ExecuteVM;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import parser.*;
+import parser.FOOLLexer;
+import parser.FOOLParser;
+import parser.SVMLexer;
+import parser.SVMParser;
 import util.Environment;
 import util.SemanticError;
 
@@ -62,9 +66,11 @@ public class TestRunner {
         parserASM.assembly();
 
         if (lexerASM.lexicalErrors > 0) {
+            System.err.println("Error: SVM lexer error");
             // TODO: throw new lexer exception
         }
         if (parserASM.getNumberOfSyntaxErrors() > 0) {
+            System.err.println("Error: SVM parser error");
             // TODO: throw new parser exception
         }
 
@@ -150,10 +156,8 @@ public class TestRunner {
     //TODO: Mancano all'appello le classi: ProgClassDecNode(che non è finita), MethodNode(incompleta), ThisNode(incompleta)
     private static void recursiveStamp(INode father, String indent) {
         System.out.println(indent + father);
-        if(father.getChilds() != null) {
-            for (INode child : father.getChilds()) {
-                recursiveStamp(child, indent + "   ");
-            }
+        for (INode child : father.getChilds()) {
+            recursiveStamp(child, indent + "   ");
         }
     }
 }

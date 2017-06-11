@@ -42,7 +42,7 @@ public class MethodNode extends Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class MethodNode extends Node {
 
     @Override
     public ArrayList<INode> getChilds() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

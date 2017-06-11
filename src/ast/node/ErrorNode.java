@@ -27,12 +27,12 @@ public class ErrorNode implements INode {
 
     @Override
     public String codeGeneration() {
-        return null;
+        return "";
     }
 
     @Override
     public ArrayList<INode> getChilds() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

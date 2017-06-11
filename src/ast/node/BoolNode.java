@@ -46,7 +46,7 @@ public class BoolNode extends Node {
 
     @Override
     public ArrayList<INode> getChilds() {
-        return null;
+        return new ArrayList<>();
     }
 
 }  

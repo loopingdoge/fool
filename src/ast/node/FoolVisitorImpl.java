@@ -13,7 +13,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitSingleExp(SingleExpContext ctx) {
-        return visit(ctx.exp());    //simply return the result of the visit to the inner exp
+        return new ProgSingleExpNode(ctx, visit(ctx.exp()));
     }
 
     @Override

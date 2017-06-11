@@ -1,11 +1,12 @@
 grammar SVM;
 
 @header {
-import java.util.HashMap;
+    import java.util.HashMap;
+    import lib.ExecuteVM;
 }
 
 @lexer::members {
-public int lexicalErrors=0;
+    public int lexicalErrors=0;
 }
 
 @parser::members {

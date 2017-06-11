@@ -60,3 +60,7 @@ test6:
     in
         print(gee(3));
 -   "Id gee not declared"
+
+test7:
+-   print(1);
+-   "1"

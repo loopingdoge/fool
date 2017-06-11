@@ -42,7 +42,7 @@ public class NewNode extends Node {
 
     @Override
     public ArrayList<INode> getChilds() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

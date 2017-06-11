@@ -2,6 +2,7 @@ package ast.node;
 
 import ast.type.Type;
 import ast.type.TypeException;
+import ast.type.VoidType;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
@@ -23,13 +24,13 @@ public class ProgClassDecNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        return null; // not used?
+        return new VoidType();
     }
 
     @Override
     public String codeGeneration() {
         // TODO: implement
-        return null;
+        return "";
     }
 
     @Override
