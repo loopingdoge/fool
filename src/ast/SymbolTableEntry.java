@@ -1,5 +1,7 @@
 package ast;
 
+import ast.type.Type;
+
 public class SymbolTableEntry {
 
     private int nl;

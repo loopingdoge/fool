@@ -1,6 +1,6 @@
 package lib;
 
-import ast.*;
+import ast.type.Type;
 
 public class FOOLlib {
   
