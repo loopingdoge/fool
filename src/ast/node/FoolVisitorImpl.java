@@ -45,9 +45,18 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     public INode visitClassExp(FOOLParser.ClassExpContext ctx) {
         ProgClassDecNode res;
 
-        ArrayList<INode> classDeclarations = new ArrayList<INode>();
+        ArrayList<ClassNode> classDeclarations = new ArrayList<ClassNode>();
         for (FOOLParser.ClassdecContext dc : ctx.classdec()) {
-            classDeclarations.add(visit(dc));  // visit each class declaration
+            ArrayList<VarNode> vars = new ArrayList<VarNode>();
+            for (VardecContext varctx: dc.vardec()) {
+               vars.add((VarNode) visit(varctx));
+            }
+            ArrayList<MethodNode> funs = new ArrayList<MethodNode>();
+            for (VardecContext functx: dc.vardec()) {
+                funs.add((MethodNode) visit(functx));
+            }
+            ClassNode classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID(1).getText(), vars, funs);
+            classDeclarations.add(classNode);
         }
 
         ArrayList<INode> letDeclarations = new ArrayList<INode>();

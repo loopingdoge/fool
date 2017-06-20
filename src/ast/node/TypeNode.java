@@ -1,9 +1,6 @@
 package ast.node;
 
-import ast.type.BoolType;
-import ast.type.IntType;
-import ast.type.Type;
-import ast.type.TypeException;
+import ast.type.*;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;

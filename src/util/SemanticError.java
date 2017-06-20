@@ -10,7 +10,6 @@ public class SemanticError {
 	
 	@Override
 	public String toString() {
-		
 		return msg;
 	}
 }

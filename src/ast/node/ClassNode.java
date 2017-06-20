@@ -1,33 +1,75 @@
 package ast.node;
 
 import ast.SymbolTableEntry;
+import ast.type.ClassType;
 import ast.type.Type;
 import ast.type.TypeException;
+import ast.type.TypeID;
+import org.antlr.v4.runtime.ParserRuleContext;
 import parser.FOOLParser;
 import util.Environment;
+import util.RedeclaredVarException;
 import util.SemanticError;
+import util.UndeclaredVarException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClassNode extends Node {
 
-    private Type type;
+
     private String classID;
     private String superClassID;
-    private ArrayList<Node> vardeclist;
-    private ArrayList<Node> fundeclist;
+    private ArrayList<VarNode> vardeclist;
+    private ArrayList<MethodNode> fundeclist;
+
+    private HashMap<String, Type> fields = new HashMap<>();
+    private HashMap<String, Type> methods = new HashMap<>();
+
     private SymbolTableEntry stEntry;
     private int nestinglevel = 0;
 
-    public ClassNode(FOOLParser.ClassdecContext ctx) {
+    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<VarNode> vardeclist, ArrayList<MethodNode> fundeclist) {
         super(ctx);
+        this.classID = classID;
+        this.superClassID = superClassID;
+        this.vardeclist = vardeclist;
+        this.fundeclist = fundeclist;
     }
+
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        for (VarNode var : vardeclist) {
+            fields.put(var.getId(), var.getType());
+        }
+        for (MethodNode fun : fundeclist) {
+            methods.put(fun.getId(), fun.getType());
+        }
+
+        try {
+            env.addEntry(classID, new SymbolTableEntry(env.getNestingLevel() + 1, new ClassType(classID, superClassID, fields, methods), 0));
+        } catch (RedeclaredVarException ex) {
+            res.add(new SemanticError(ex.getMessage()));
+        }
+
+
+        for (VarNode var : vardeclist) {
+            res.addAll(var.checkSemantics(env));
+        }
+        for (MethodNode fun : fundeclist) {
+            res.addAll(fun.checkSemantics(env));
+        }
+
+        try {
+            if (!(env.getTypeOf(superClassID) instanceof ClassType))
+                res.add(new SemanticError("ID of super class " + superClassID + " is not related to a class type"));
+        } catch (UndeclaredVarException exp) {
+            res.add(new SemanticError("Super class " + superClassID + "not defined"));
+        }
 
         System.out.println("[DEBUG] ClassNode.checkSemantics()  env.nestingLevel = " + env.nestingLevel);
         HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
@@ -47,7 +89,7 @@ public class ClassNode extends Node {
         int fieldsOffset = 1;
 
         //check (fields) var declarations
-        for (Node a : vardeclist) {
+        for (INode a : vardeclist) {
             VarNode var = (VarNode) a;
             fieldsTypes.add(var.getType());
             if (hmn.put(var.getId(), new SymbolTableEntry(env.nestingLevel, var.getType(), fieldsOffset++)) != null)
@@ -58,7 +100,7 @@ public class ClassNode extends Node {
         int methodsOffset = 1;
 
         //check (fields) var declarations
-        for (Node a : fundeclist) {
+        for (INode a : fundeclist) {
             MethodNode method = (MethodNode) a;
             methodsTypes.add(method.getType());
             if (hmn.put(method.getId(), new SymbolTableEntry(env.nestingLevel, method.getType(), fieldsOffset++)) != null)
@@ -90,12 +132,12 @@ public class ClassNode extends Node {
         }
 
         if (vardeclist.size() > 0) {
-            for(Node n : vardeclist)
+            for(INode n : vardeclist)
                 res.addAll(n.checkSemantics(env));
         }
 
         if (fundeclist.size() > 0) {
-            for(Node n : fundeclist)
+            for(INode n : fundeclist)
                 res.addAll(n.checkSemantics(env));
         }
 
@@ -106,11 +148,11 @@ public class ClassNode extends Node {
     public Type type() throws TypeException {
 
         // TODO: check for duplicate variables (superclass)
-        for (Node dec : vardeclist)
+        for (INode dec : vardeclist)
             dec.type();
 
         // TODO: correct method overriding check
-        for (Node dec : fundeclist)
+        for (INode dec : fundeclist)
             dec.type();
 
         return type;

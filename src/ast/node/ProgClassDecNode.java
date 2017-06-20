@@ -3,6 +3,7 @@ package ast.node;
 import ast.type.Type;
 import ast.type.TypeException;
 import ast.type.VoidType;
+import org.antlr.v4.runtime.ParserRuleContext;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
@@ -11,11 +12,11 @@ import java.util.ArrayList;
 
 public class ProgClassDecNode extends Node {
 
-    private ArrayList<INode> classDeclarations;
+    private ArrayList<ClassNode> classDeclarations;
     private ArrayList<INode> letDeclarations;
     private INode exp;
 
-    public ProgClassDecNode(FOOLParser.ClassExpContext ctx, ArrayList<INode> classDeclarations, ArrayList<INode> letDeclarations, INode exp) {
+    public ProgClassDecNode(ParserRuleContext ctx, ArrayList<ClassNode> classDeclarations, ArrayList<INode> letDeclarations, INode exp) {
         super(ctx);
         this.classDeclarations = classDeclarations;
         this.letDeclarations = letDeclarations;
@@ -46,6 +47,12 @@ public class ProgClassDecNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
         // TODO: implement
+
+        for (ClassNode classNode : classDeclarations) {
+            res.addAll(classNode.checkSemantics(env));
+        }
+
+
         return res;
     }
 
