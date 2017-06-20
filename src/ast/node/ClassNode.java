@@ -1,7 +1,6 @@
 package ast.node;
 
 import ast.SymbolTableEntry;
-import ast.type.ClassType;
 import ast.type.Type;
 import ast.type.TypeException;
 import parser.FOOLParser;
@@ -67,8 +66,8 @@ public class ClassNode extends Node {
         }
 
         //set class type in st entry
-        entry.addType(new ClassType(classID, superClassID, fieldsTypes, methodsTypes));
-
+        // TODO: [Albi] ho commentato perche' dava errore, passare i parametri giusti
+        // entry.addType(new ClassType(classID, superClassID, fieldsTypes, methodsTypes));
 
         // check if super class id exists
         if (superClassID != null && !superClassID.isEmpty()) {

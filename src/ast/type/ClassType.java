@@ -1,29 +1,28 @@
 package ast.type;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ClassType implements Type {
 
-    private String classID;
-    private String superclassID;
-    private ArrayList<Type> fieldsTypes;
-    private ArrayList<Type> methodsTypes;
+    private String classID = "";
+    private String superclassID = "";
+    private HashMap<String, Type> fields = new HashMap<>();
+    private HashMap<String, Type> methods = new HashMap<>();
 
-    public ClassType(String classID, String superclassID, ArrayList<Type> fieldsTypes, ArrayList<Type> methodsTypes) {
+    public ClassType(String classID, String superclassID, HashMap<String, Type> fields, HashMap<String, Type> methods) {
         this.classID = classID;
         this.superclassID = superclassID;
-        this.fieldsTypes = fieldsTypes;
-        this.methodsTypes = methodsTypes;
+        this.fields = fields;
+        this.methods = methods;
     }
 
-    public ClassType(String classID, String superclassID, ArrayList<Type> fieldsTypes) {
+    public ClassType(String classID, String superclassID, HashMap<String, Type> fields) {
         this.classID = classID;
         this.superclassID = superclassID;
-        this.fieldsTypes = fieldsTypes;
+        this.fields = fields;
     }
 
     public ClassType(String classID, String superclassID) {
-
         this.classID = classID;
         this.superclassID = superclassID;
     }
@@ -32,21 +31,26 @@ public class ClassType implements Type {
         this.classID = classID;
     }
 
-    public ArrayList<Type> getFunctionTypes() {
-        return methodsTypes;
-    }
-
-    public ArrayList<Type> getFieldsTypes() {
-
-        return fieldsTypes;
-    }
-
     public String getClassID() {
         return classID;
     }
 
     public String getSuperclassID() {
         return superclassID;
+    }
+
+    public boolean containsID(String id) {
+        return this.fields.containsKey(id) || this.methods.containsKey(id);
+    }
+
+    public Type getTypeOf(String id) {
+        if (this.fields.containsKey(id)) {
+            return this.fields.get(id);
+        } else if (this.methods.containsKey(id)) {
+            return this.methods.get(id);
+        } else {
+            return new VoidType();
+        }
     }
 
     @Override
@@ -60,7 +64,8 @@ public class ClassType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) { return this.getID().equals(((ClassType)t).getSuperclassID());
+    public boolean isSuperTypeOf(Type t) {
+        return this.getID().equals(((ClassType) t).getSuperclassID());
     }
 
     @Override
