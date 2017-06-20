@@ -1,21 +1,58 @@
 package util;
 
+import ast.SymbolTableEntry;
+import ast.type.Type;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import ast.SymbolTableEntry;
+import java.util.ListIterator;
 
 public class Environment {
-	
-	//THESE VARIABLES SHOULDN'T BE PUBLIC
-	//THIS CAN BE DONE MUCH BETTER
-	
-	public ArrayList<HashMap<String, SymbolTableEntry>>  symTable = new ArrayList<HashMap<String, SymbolTableEntry>>();
-	public int nestingLevel = -1;
-	public int offset = 0;
-	//livello ambiente con dichiarazioni piu' esterno � 0 (prima posizione ArrayList) invece che 1 (slides)
-	//il "fronte" della lista di tabelle � symTable.get(nestingLevel)
-	
-	
-	
+
+    public int offset = 0;
+    private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();
+
+    public Environment() {
+
+    }
+
+    public int getNestingLevel() {
+        return this.symbolTable.size() - 1;
+    }
+
+    public int getCurrentOffset() {
+        return this.offset;
+    }
+
+    public Environment pushHashMap() {
+        this.symbolTable.add(new HashMap<>());
+        return this;
+    }
+
+    public Environment popHashMap() {
+        this.symbolTable.remove(this.symbolTable.size() - 1);
+        return this;
+    }
+
+    public Environment addEntry(String id, SymbolTableEntry entry) throws RedeclaredVarException {
+        SymbolTableEntry oldEntry = this.symbolTable
+                .get(this.symbolTable.size() - 1)
+                .put(id, entry);
+        if (oldEntry != null) {
+            throw new RedeclaredVarException(id);
+        }
+        return this;
+    }
+
+    public Type getTypeOf(String id) throws UndeclaredVarException {
+        ListIterator<HashMap<String, SymbolTableEntry>> li = symbolTable.listIterator(symbolTable.size());
+        while (li.hasPrevious()) {
+            HashMap<String, SymbolTableEntry> current = li.previous();
+            if (current.containsKey(id)) {
+                return current.get(id).getType();
+            }
+        }
+        throw new UndeclaredVarException(id);
+    }
+
 }
