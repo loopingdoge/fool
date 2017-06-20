@@ -86,49 +86,37 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitFun(FunContext ctx) {
-
-        //initialize @res with the visits to the type and its ID
-        FunNode res = null;
         try {
-            res = new FunNode(ctx, ctx.ID().getText(), visit(ctx.type()).type());
+            // initialize @res with the visits to the type and its ID
+            ArrayList<INode> params = new ArrayList<>();
+
+            // add argument declarations
+            // we are getting a shortcut here by constructing directly the ParameterNode
+            // this could be done differently by visiting instead the VardecContext
+            for (VardecContext vc : ctx.vardec()) {
+                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type()));
+            }
+
+            // add body, create a list for the nested declarations
+            ArrayList<INode> declarations = new ArrayList<INode>();
+            // check whether there are actually nested decs
+            if (ctx.let() != null) {
+                // if there are visit each dec and add it to the @innerDec list
+                for (DecContext dc : ctx.let().dec())
+                    declarations.add(visit(dc));
+            }
+
+            // get the exp body
+            INode body = visit(ctx.exp());
+
+            return new FunNode(ctx, ctx.ID().getText(), visit(ctx.type()).type(), params, declarations, body);
         } catch (TypeException e) {
             return new ErrorNode(e);
         }
-
-        //add argument declarations
-        //we are getting a shortcut here by constructing directly the ParameterNode
-        //this could be done differently by visiting instead the VardecContext
-        for (VardecContext vc : ctx.vardec())
-            try {
-                res.addPar(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type()));
-            } catch (TypeException e) {
-                return new ErrorNode(e);
-            }
-
-        //add body
-        //create a list for the nested declarations
-        ArrayList<INode> innerDec = new ArrayList<INode>();
-
-        //check whether there are actually nested decs
-        if (ctx.let() != null) {
-            //if there are visit each dec and add it to the @innerDec list
-            for (DecContext dc : ctx.let().dec())
-                innerDec.add(visit(dc));
-        }
-
-        //get the exp body
-        INode exp = visit(ctx.exp());
-
-        //add the body and the inner declarations to the function
-        res.addDecBody(innerDec, exp);
-
-        return res;
-
     }
 
     @Override
     public INode visitType(TypeContext ctx) {
-        // TODO: commentato
 //        if (ctx.getText().equals("int"))
 //            return new IntNode(ctx, 0);
 //        else if (ctx.getText().equals("bool"))
@@ -148,7 +136,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             //it is a simple expression
             return visit(ctx.left);
         } else {
-
             //it is a binary expression, you should visit left and right
             if (ctx.operator.getType() == FOOLLexer.PLUS) {
                 return new PlusNode(ctx, visit(ctx.left), visit(ctx.right));
@@ -156,7 +143,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                 return new MinusNode(ctx, visit(ctx.left), visit(ctx.right));
             }
         }
-
     }
 
     @Override

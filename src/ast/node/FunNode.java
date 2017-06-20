@@ -5,7 +5,7 @@ import ast.type.ArrowType;
 import ast.type.Type;
 import ast.type.TypeException;
 import lib.FOOLlib;
-import parser.FOOLParser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import util.Environment;
 import util.SemanticError;
 
@@ -16,19 +16,17 @@ public class FunNode extends Node {
 
     private String id;
     private Type type;
-    private ArrayList<INode> parlist = new ArrayList<INode>();
-    private ArrayList<INode> declist;
+    private ArrayList<INode> params = new ArrayList<INode>();
+    private ArrayList<INode> declarations;
     private INode body;
 
-    public FunNode(FOOLParser.FunContext ctx, String i, Type t) {
+    public FunNode(ParserRuleContext ctx, String id, Type type, ArrayList<INode> params, ArrayList<INode> declarations, INode body) {
         super(ctx);
-        id = i;
-        type = t;
-    }
-
-    public void addDecBody(ArrayList<INode> d, INode b) {
-        declist = d;
-        body = b;
+        this.id = id;
+        this.type = type;
+        this.params = params;
+        this.declarations = declarations;
+        this.body = body;
     }
 
     @Override
@@ -52,7 +50,7 @@ public class FunNode extends Node {
             int paroffset = 1;
 
             //check args
-            for (INode a : parlist) {
+            for (INode a : params) {
                 ParameterNode arg = (ParameterNode) a;
                 parTypes.add(arg.getType());
                 if (hmn.put(arg.getId(), new SymbolTableEntry(env.nestingLevel, arg.getType(), paroffset++)) != null)
@@ -63,10 +61,10 @@ public class FunNode extends Node {
             entry.addType(new ArrowType(parTypes, type));
 
             //check semantics in the dec list
-            if (declist.size() > 0) {
+            if (declarations.size() > 0) {
                 env.offset = -2;
                 //if there are children then check semantics for every child and save the results
-                for (INode n : declist)
+                for (INode n : declarations)
                     res.addAll(n.checkSemantics(env));
             }
 
@@ -81,8 +79,8 @@ public class FunNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        if (declist != null)
-            for (INode dec : declist) {
+        if (declarations != null)
+            for (INode dec : declarations) {
                 dec.type();
             }
         if (!(FOOLlib.isSubtype(body.type(), type))) {  // TODO: [Albi] Controllare che basti exp()
@@ -92,24 +90,20 @@ public class FunNode extends Node {
         return null;
     }
 
-    public void addPar(INode p) {
-        parlist.add(p);
-    }
-
     public String codeGeneration() {
 
         StringBuilder declCode = new StringBuilder();
-        if (declist != null)
-            for (INode dec : declist)
+        if (declarations != null)
+            for (INode dec : declarations)
                 declCode.append(dec.codeGeneration());
 
         StringBuilder popDecl = new StringBuilder();
-        if (declist != null)
-            for (INode dec : declist)
+        if (declarations != null)
+            for (INode dec : declarations)
                 popDecl.append("pop\n");
 
         StringBuilder popParl = new StringBuilder();
-        for (INode dec : parlist)
+        for (INode dec : params)
             popParl.append("pop\n");
 
         String funl = FOOLlib.freshFunLabel();
@@ -135,12 +129,12 @@ public class FunNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 
-        if(parlist != null && parlist.size()>0) {
-            childs.addAll(parlist);
+        if (params != null && params.size() > 0) {
+            childs.addAll(params);
         }
 
-        if(declist != null && declist.size()>0) {
-            childs.addAll(declist);
+        if (declarations != null && declarations.size() > 0) {
+            childs.addAll(declarations);
         }
 
         childs.add(body);
