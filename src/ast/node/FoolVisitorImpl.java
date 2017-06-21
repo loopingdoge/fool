@@ -97,7 +97,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     public INode visitFun(FunContext ctx) {
         try {
             // initialize @res with the visits to the type and its ID
-            ArrayList<INode> params = new ArrayList<>();
+            ArrayList<ParameterNode> params = new ArrayList<>();
 
             // add argument declarations
             // we are getting a shortcut here by constructing directly the ParameterNode

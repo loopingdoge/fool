@@ -9,6 +9,7 @@ import lib.FOOLlib;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
+import util.UndeclaredVarException;
 
 import java.util.ArrayList;
 
@@ -17,14 +18,14 @@ public class CallNode extends Node {
     private String id;
     private ArrayList<INode> params = new ArrayList<INode>();
     private SymbolTableEntry entry;
-    private int nestingLevel;
+    private int callNestingLevel;
 
     public CallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
         super(ctx);
         this.id = id;
         this.params = params;
         this.entry = entry;
-        this.nestingLevel = nestingLevel;
+        this.callNestingLevel = nestingLevel;
     }
 
     public CallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params) {
@@ -38,20 +39,18 @@ public class CallNode extends Node {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        int j = env.nestingLevel;
-        SymbolTableEntry tmp = null;
-        while (j >= 0 && tmp == null)
-            tmp = (env.symTable.get(j--)).get(id);
-        if (tmp == null)
+        try {
+            this.entry = env.getLatestEntryOf(id);
+        } catch (UndeclaredVarException e) {
             res.add(new SemanticError("Id " + id + " not declared"));
-
-        else {
-            this.entry = tmp;
-            this.nestingLevel = env.nestingLevel;
-
-            for (INode arg : params)
-                res.addAll(arg.checkSemantics(env));
         }
+
+        this.callNestingLevel = env.getNestingLevel();
+
+        for (INode arg : params) {
+            res.addAll(arg.checkSemantics(env));
+        }
+
         return res;
     }
 
@@ -81,7 +80,7 @@ public class CallNode extends Node {
             parCode.append(params.get(i).codeGeneration());
 
         StringBuilder getAR = new StringBuilder();
-        for (int i = 0; i < nestingLevel - entry.getNestinglevel(); i++)
+        for (int i = 0; i < callNestingLevel - entry.getNestinglevel(); i++)
             getAR.append("lw\n");
 
         return "lfp\n" + //CL

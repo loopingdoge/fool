@@ -7,6 +7,7 @@ import ast.type.TypeException;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
+import util.UndeclaredVarException;
 
 import java.util.ArrayList;
 
@@ -56,15 +57,11 @@ public class NewNode extends Node {
                 res.addAll(n.checkSemantics(env));
         }
 
-        int j = env.nestingLevel;
-        SymbolTableEntry tmp = null;
-        while ( j >= 0 && tmp == null)
-            tmp=(env.symTable.get(j--)).get(id);
-        if (tmp==null)
-            res.add(new SemanticError("Id "+id+" not declared"));
-        else {
-            entry = tmp;
-            nestinglevel = env.nestingLevel;
+        try {
+            this.entry = env.getLatestEntryOf(this.id);
+            this.nestinglevel = env.getNestingLevel();
+        } catch (UndeclaredVarException e) {
+            res.add(new SemanticError(e.getMessage()));
         }
 
         return res;

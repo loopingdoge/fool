@@ -1,12 +1,12 @@
 class Serpente (bool staStrisciando) {
-	bool striscia()
+	bool isStrisciando()
 		staStrisciando
 	;
 };
 let
 	Serpente s = new Serpente(true);
 in
-	s.striscia();
+	s.isStrisciando();
 
 ------------------------------------------------------
 

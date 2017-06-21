@@ -1,6 +1,5 @@
 package ast.node;
 
-import ast.SymbolTableEntry;
 import ast.type.Type;
 import ast.type.TypeException;
 import lib.FOOLlib;
@@ -9,7 +8,6 @@ import util.Environment;
 import util.SemanticError;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ProgLetInNode extends Node {
 
@@ -24,12 +22,9 @@ public class ProgLetInNode extends Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        env.nestingLevel++;
-        HashMap<String, SymbolTableEntry> hm = new HashMap<String, SymbolTableEntry>();
-        env.symTable.add(hm);
-
-        //declare resulting list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        env.pushHashMap();
 
         //check semantics in the dec list
         if (declist.size() > 0) {
@@ -43,7 +38,7 @@ public class ProgLetInNode extends Node {
         res.addAll(exp.checkSemantics(env));
 
         //clean the scope, we are leaving a let scope
-        env.symTable.remove(env.nestingLevel--);
+        env.popHashMap();
 
         //return the result
         return res;

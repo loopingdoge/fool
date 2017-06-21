@@ -1,15 +1,14 @@
 package ast.node;
 
-import ast.SymbolTableEntry;
 import ast.type.Type;
 import ast.type.TypeException;
 import lib.FOOLlib;
 import parser.FOOLParser;
 import util.Environment;
+import util.RedeclaredVarException;
 import util.SemanticError;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class VarNode extends Node {
 
@@ -38,11 +37,11 @@ public class VarNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         //env.offset = -2;
-        HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
-        SymbolTableEntry entry = new SymbolTableEntry(env.nestingLevel, type, env.offset--); //separo introducendo "entry"
-
-        if (hm.put(id, entry) != null)
-            res.add(new SemanticError("Var id " + id + " already declared"));
+        try {
+            env.addEntry(id, this.type, env.offset--);
+        } catch (RedeclaredVarException e) {
+            res.add(new SemanticError(e.getMessage()));
+        }
 
         res.addAll(exp.checkSemantics(env));
 

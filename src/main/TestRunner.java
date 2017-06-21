@@ -102,12 +102,7 @@ public class TestRunner {
                 System.out.println("Semantic analysis...");
             }
 
-            Type type = null;
-            try {
-                type = semanticAnalysis(ast, enableLogging);
-            } catch (TypeException e) {
-                System.out.println(e);
-            }
+            Type type = semanticAnalysis(ast, enableLogging);
 
             if (enableLogging) {
                 System.out.println("Type: " + type);
@@ -125,7 +120,7 @@ public class TestRunner {
                 System.out.println(actualResult);
             }
 
-        } catch (LexerException | ScopeException | IOException e) {
+        } catch (LexerException | ScopeException | IOException | TypeException e) {
             if (enableLogging) {
                 System.out.println(e.getMessage());
             }

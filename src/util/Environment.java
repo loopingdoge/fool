@@ -34,25 +34,29 @@ public class Environment {
         return this;
     }
 
-    public Environment addEntry(String id, SymbolTableEntry entry) throws RedeclaredVarException {
+    public Environment addEntry(String id, Type type, int offset) throws RedeclaredVarException {
         SymbolTableEntry oldEntry = this.symbolTable
                 .get(this.symbolTable.size() - 1)
-                .put(id, entry);
+                .put(id, new SymbolTableEntry(getNestingLevel(), type, offset));
         if (oldEntry != null) {
             throw new RedeclaredVarException(id);
         }
         return this;
     }
 
-    public Type getTypeOf(String id) throws UndeclaredVarException {
+    public SymbolTableEntry getLatestEntryOf(String id) throws UndeclaredVarException {
         ListIterator<HashMap<String, SymbolTableEntry>> li = symbolTable.listIterator(symbolTable.size());
         while (li.hasPrevious()) {
             HashMap<String, SymbolTableEntry> current = li.previous();
             if (current.containsKey(id)) {
-                return current.get(id).getType();
+                return current.get(id);
             }
         }
         throw new UndeclaredVarException(id);
+    }
+
+    public Type getTypeOf(String id) throws UndeclaredVarException {
+        return this.getLatestEntryOf(id).getType();
     }
 
 }

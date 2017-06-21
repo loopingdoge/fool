@@ -23,7 +23,13 @@ test3:
 -   let
         int x = 5;
         int f ()
-            x;
+            let
+              int g()
+                x
+              ;
+            in
+              g()
+        ;
     in
         print(f());
 -   "5"
@@ -32,20 +38,20 @@ test4:
 -   let
         int y = 5 + 2 ;
         bool f (int n, int m)
-        let
-            int x = m;
-        in
-            x == y;
+            let
+                int x = m;
+            in
+                x == y;
     in
         print(if f(y, 8) then {false} else {10});
--   "Semantic error"
+-   "Error: \"Incompatible types in then else branches\" at line 1, column 77."
 
 test5:
 -   let
-        int gee(int n)
+        int geee(int n)
             n + 1;
         int foo(int n)
-            if (n == 0) then { 1 } else { n * gee(n-1) };
+            if (n == 0) then { 1 } else { n * geee(n-1) };
     in
         print(foo(3));
 -   "9"

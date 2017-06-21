@@ -7,6 +7,7 @@ import ast.type.TypeException;
 import parser.FOOLParser;
 import util.Environment;
 import util.SemanticError;
+import util.UndeclaredVarException;
 
 import java.util.ArrayList;
 
@@ -16,9 +17,9 @@ public class IdNode extends Node {
     private SymbolTableEntry entry;
     private int nestinglevel;
 
-    public IdNode(FOOLParser.VarExpContext ctx, String i) {
+    public IdNode(FOOLParser.VarExpContext ctx, String id) {
         super(ctx);
-        id = i;
+        this.id = id;
     }
 
     @Override
@@ -26,16 +27,11 @@ public class IdNode extends Node {
         //create result list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        int j = env.nestingLevel;
-        SymbolTableEntry tmp = null;
-        while (j >= 0 && tmp == null)
-            tmp = (env.symTable.get(j--)).get(id);
-        if (tmp == null)
-            res.add(new SemanticError("Id " + id + " not declared"));
-
-        else {
-            entry = tmp;
-            nestinglevel = env.nestingLevel;
+        try {
+            this.entry = env.getLatestEntryOf(this.id);
+            this.nestinglevel = env.getNestingLevel();
+        } catch (UndeclaredVarException e) {
+            res.add(new SemanticError(e.getMessage()));
         }
 
         return res;

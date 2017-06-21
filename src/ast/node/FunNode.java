@@ -1,26 +1,25 @@
 package ast.node;
 
-import ast.SymbolTableEntry;
 import ast.type.ArrowType;
 import ast.type.Type;
 import ast.type.TypeException;
 import lib.FOOLlib;
 import org.antlr.v4.runtime.ParserRuleContext;
 import util.Environment;
+import util.RedeclaredVarException;
 import util.SemanticError;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class FunNode extends Node {
 
     private String id;
     private Type type;
-    private ArrayList<INode> params = new ArrayList<INode>();
+    private ArrayList<ParameterNode> params = new ArrayList<>();
     private ArrayList<INode> declarations;
     private INode body;
 
-    public FunNode(ParserRuleContext ctx, String id, Type type, ArrayList<INode> params, ArrayList<INode> declarations, INode body) {
+    public FunNode(ParserRuleContext ctx, String id, Type type, ArrayList<ParameterNode> params, ArrayList<INode> declarations, INode body) {
         super(ctx);
         this.id = id;
         this.type = type;
@@ -33,32 +32,27 @@ public class FunNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create result list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        ArrayList<Type> parTypes = new ArrayList<Type>();
+
+        for (ParameterNode param : params) {
+            parTypes.add(param.getType());
+        }
 
         //env.offset = -2;
-        HashMap<String, SymbolTableEntry> hm = env.symTable.get(env.nestingLevel);
-        SymbolTableEntry entry = new SymbolTableEntry(env.nestingLevel, env.offset--); //separo introducendo "entry"
+        try {
+            env.addEntry(this.id, new ArrowType(parTypes, type), env.offset--);
+            env.pushHashMap();
 
-        if (hm.put(id, entry) != null)
-            res.add(new SemanticError("Fun id " + id + " already declared"));
-        else {
-            //creare una nuova hashmap per la symTable
-            env.nestingLevel++;
-            HashMap<String, SymbolTableEntry> hmn = new HashMap<String, SymbolTableEntry>();
-            env.symTable.add(hmn);
-
-            ArrayList<Type> parTypes = new ArrayList<Type>();
             int paroffset = 1;
 
             //check args
-            for (INode a : params) {
-                ParameterNode arg = (ParameterNode) a;
-                parTypes.add(arg.getType());
-                if (hmn.put(arg.getId(), new SymbolTableEntry(env.nestingLevel, arg.getType(), paroffset++)) != null)
-                    System.out.println("Parameter id " + arg.getId() + " already declared");
+            for (ParameterNode param : params) {
+                try {
+                    env.addEntry(param.getId(), param.getType(), paroffset++);
+                } catch (RedeclaredVarException e) {
+                    res.add(new SemanticError(e.getMessage()));
+                }
             }
-
-            //set func type
-            entry.addType(new ArrowType(parTypes, type));
 
             //check semantics in the dec list
             if (declarations.size() > 0) {
@@ -72,8 +66,12 @@ public class FunNode extends Node {
             res.addAll(body.checkSemantics(env));
 
             //close scope
-            env.symTable.remove(env.nestingLevel--);
+            env.popHashMap();
+        } catch (RedeclaredVarException e) {
+            res.add(new SemanticError("Fun id " + id + " already declared"));
         }
+
+
         return res;
     }
 

@@ -4,19 +4,14 @@ import ast.type.Type;
 
 public class SymbolTableEntry {
 
-    private int nl;
+    private int nestingLevel;
     private Type type;
     private int offset;
 
-    public SymbolTableEntry(int n, int os) {
-        nl = n;
-        offset = os;
-    }
-
-    public SymbolTableEntry(int n, Type t, int os) {
-        nl = n;
-        type = t;
-        offset = os;
+    public SymbolTableEntry(int nestingLevel, Type type, int offset) {
+        this.nestingLevel = nestingLevel;
+        this.type = type;
+        this.offset = offset;
     }
 
     public void addType(Type t) {
@@ -32,11 +27,11 @@ public class SymbolTableEntry {
     }
 
     public int getNestinglevel() {
-        return nl;
+        return nestingLevel;
     }
 
     public String toPrint(String s) { //
-        return    s + "SymbolTableEntry: nestlev " + Integer.toString(nl) + "\n"
+        return s + "SymbolTableEntry: nestlev " + Integer.toString(nestingLevel) + "\n"
                 + s + "SymbolTableEntry: type " + type + "\n"
                 + s + "SymbolTableEntry: offset " + Integer.toString(offset) + "\n";
     }
