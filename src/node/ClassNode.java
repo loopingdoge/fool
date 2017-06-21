@@ -1,15 +1,17 @@
 package node;
 
+import exception.RedeclaredVarException;
+import exception.TypeException;
+import exception.UndeclaredVarException;
+import main.SemanticError;
+import org.antlr.v4.runtime.ParserRuleContext;
+import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
 import type.Type;
-import exception.TypeException;
-import org.antlr.v4.runtime.ParserRuleContext;
-import symbol_table.Environment;
-import exception.RedeclaredVarException;
-import main.SemanticError;
-import exception.UndeclaredVarException;
+import util.Field;
+import util.Method;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,8 +42,11 @@ public class ClassNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        ArrayList<Field> fieldsList = new ArrayList<>();
+        ArrayList<Method> methodsList = new ArrayList<>();
 
         for (ParameterNode var : this.vardeclist) {
+            fieldsList.add(new Field(var.getId(), var.getType()));
             fields.put(var.getId(), var.getType());
         }
         for (FunNode fun : fundeclist) {
@@ -50,11 +55,12 @@ public class ClassNode extends Node {
                 paramsType.add(param.getType());
             }
 
+            methodsList.add(new Method(fun.getId(), new FunType(paramsType, fun.getType())));
             methods.put(fun.getId(), new FunType(paramsType, fun.getType()));
         }
 
         try {
-            env.addEntry(classID, new ClassType(classID, superClassID, fields, methods), 0);
+            env.addEntry(classID, new ClassType(classID, superClassID, fieldsList, methodsList), 0);
         } catch (RedeclaredVarException ex) {
             res.add(new SemanticError(ex.getMessage()));
         }
@@ -79,7 +85,7 @@ public class ClassNode extends Node {
                 SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
                 ClassType superClassType = (ClassType) superClassEntry.getType();
 
-                HashMap<String, Type> superClassFields = superClassType.getFields();
+                HashMap<String, Type> superClassFields = superClassType.getFieldsMap();
                 for (String localField : fields.keySet()) {
                     if (superClassFields.containsKey(localField)) {
                         if (!superClassFields.get(localField).isSubTypeOf(fields.get(localField))) {
@@ -88,7 +94,7 @@ public class ClassNode extends Node {
                     }
                 }
 
-                HashMap<String, FunType> superClassMethods = superClassType.getMethods();
+                HashMap<String, FunType> superClassMethods = superClassType.getMethodsMap();
                 for (String localMethod : methods.keySet()) {
                     if (superClassMethods.containsKey(localMethod)) {
                         if (!superClassMethods.get(localMethod).isSubTypeOf(methods.get(localMethod))) {
