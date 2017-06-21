@@ -14,14 +14,14 @@ public class MethodCallNode extends Node {
 
     private String objectId;
     private String methodId;
-    private ArrayList<ParameterNode> params = new ArrayList<>();
+    private ArgumentsNode args;
     private Type typeDeclaredInClass;
 
-    public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectId, String methodId, ArrayList<ParameterNode> params) {
+    public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectId, String methodId, ArgumentsNode args) {
         super(ctx);
         this.objectId = objectId;
         this.methodId = methodId;
-        this.params = params;
+        this.args = args;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class MethodCallNode extends Node {
             if (classType instanceof ClassType) {
                 ClassType objectClass = (ClassType) classEntry.getType();
                 // Controllo che il metodo esista all'interno della classe
-                this.typeDeclaredInClass = objectClass.getMethods().get(methodId);
+                this.typeDeclaredInClass = objectClass.getTypeOfMethod(methodId);
                 if (this.typeDeclaredInClass == null) {
                     res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + "method."));
                 }
@@ -61,9 +61,7 @@ public class MethodCallNode extends Node {
             res.add(new SemanticError(e.getMessage()));
         }
 
-        for (INode arg : params) {
-            res.addAll(arg.checkSemantics(env));
-        }
+        args.checkSemantics(env);
 
         return res;
     }
@@ -72,12 +70,12 @@ public class MethodCallNode extends Node {
     public Type type() throws TypeException {
         if (this.typeDeclaredInClass instanceof FunType) {
             FunType funType = (FunType) this.typeDeclaredInClass;
-            ArrayList<Type> params = funType.getParams();
-            if (!(params.size() == this.params.size())) {
+            ArrayList<Type> args = funType.getParams();
+            if (!(args.size() == this.args.size())) {
                 throw new TypeException("Wrong number of parameters in the invocation of " + methodId, ctx);
             }
-            for (int i = 0; i < this.params.size(); i++) {
-                if (!this.params.get(i).type().isSubTypeOf(params.get(i))) {
+            for (int i = 0; i < this.args.size(); i++) {
+                if (!this.args.get(i).type().isSubTypeOf(args.get(i))) {
                     throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + methodId, ctx);
                 }
             }
@@ -95,13 +93,12 @@ public class MethodCallNode extends Node {
     @Override
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
-        childs.addAll(params);
+        childs.add(args);
         return childs;
     }
 
     @Override
     public String toString() {
-        // TODO: add parameter names
         return objectId + "." + methodId + "()";
     }
 

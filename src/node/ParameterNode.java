@@ -1,10 +1,10 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import type.Type;
-import exception.TypeException;
 
 import java.util.ArrayList;
 
@@ -37,18 +37,12 @@ public class ParameterNode extends Node {
         return null;
     }
 
-    public String toPrint(String s) {
-        return s + "Par:" + id + "\n"
-                + s + "  " + type + "\n";
-    }
-
-    //non utilizzato
     public String codeGeneration() {
         return "";
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "param " + id + ": " + type;
     }
 
@@ -57,4 +51,4 @@ public class ParameterNode extends Node {
         return new ArrayList<>();
     }
 
-}  
+}

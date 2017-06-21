@@ -5,7 +5,6 @@ import grammar.FOOLBaseVisitor;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.FOOLParser.*;
-import type.FunType;
 import type.Type;
 
 import java.util.ArrayList;
@@ -307,9 +306,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
-        ArrayList<ParameterNode> params = new ArrayList<>();
+        ArrayList<INode> args = new ArrayList<>();
         for (ExpContext exp : ctx.exp()) {
-            params.add((ParameterNode) visit(exp));
+            args.add(visit(exp));
         }
 
         String methodId = ctx.ID(ctx.ID().size() - 1).getText();
@@ -317,7 +316,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                 ctx.THIS().getText()
                 :
                 ctx.ID(0).getText();
-        return new MethodCallNode(ctx, objectId, methodId, params);
+        return new MethodCallNode(ctx, objectId, methodId, new ArgumentsNode(ctx, args));
     }
 
     @Override
