@@ -8,6 +8,10 @@ public class InstanceType implements Type {
         this.classT = classT;
     }
 
+    public ClassType getClassType() {
+        return this.classT;
+    }
+
     @Override
     public TypeID getID() {
         return TypeID.INSTANCE;

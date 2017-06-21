@@ -1,11 +1,11 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLBaseVisitor;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.FOOLParser.*;
 import type.Type;
-import exception.TypeException;
 
 import java.util.ArrayList;
 
@@ -51,9 +51,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             for (VardecContext varctx: dc.vardec()) {
                vars.add((VarNode) visit(varctx));
             }
-            ArrayList<MethodNode> funs = new ArrayList<MethodNode>();
+            ArrayList<FunNode> funs = new ArrayList<FunNode>();
             for (VardecContext functx: dc.vardec()) {
-                funs.add((MethodNode) visit(functx));
+                funs.add((FunNode) visit(functx));
             }
             ClassNode classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID(1).getText(), vars, funs);
             classDeclarations.add(classNode);
@@ -293,9 +293,17 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
-        // TODO: implement
-        MethodNode res = null;
-        return res;
+        ArrayList<ParameterNode> params = new ArrayList<>();
+        for (ExpContext exp : ctx.exp()) {
+            params.add((ParameterNode) visit(exp));
+        }
+
+        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
+        String objectId = ctx.THIS() != null ?
+                ctx.THIS().getText()
+                :
+                ctx.ID(0).getText();
+        return new MethodCallNode(ctx, objectId, methodId, params);
     }
 
     @Override

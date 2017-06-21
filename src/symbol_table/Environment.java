@@ -12,6 +12,7 @@ public class Environment {
 
     public int offset = 0;
     private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();
+    private SymbolTableEntry latestEntry = null;
 
     public Environment() {
 
@@ -36,9 +37,11 @@ public class Environment {
     }
 
     public Environment addEntry(String id, Type type, int offset) throws RedeclaredVarException {
+        SymbolTableEntry newEntry = new SymbolTableEntry(getNestingLevel(), type, offset);
         SymbolTableEntry oldEntry = this.symbolTable
                 .get(this.symbolTable.size() - 1)
-                .put(id, new SymbolTableEntry(getNestingLevel(), type, offset));
+                .put(id, newEntry);
+        latestEntry = newEntry;
         if (oldEntry != null) {
             throw new RedeclaredVarException(id);
         }
@@ -54,6 +57,14 @@ public class Environment {
             }
         }
         throw new UndeclaredVarException(id);
+    }
+
+    public SymbolTableEntry getLatestEntry() throws UndeclaredVarException {
+        if (latestEntry == null) {
+            throw new UndeclaredVarException("symbol table not initialized");
+        } else {
+            return latestEntry;
+        }
     }
 
     public Type getTypeOf(String id) throws UndeclaredVarException {
