@@ -81,6 +81,23 @@ public class ClassNode extends Node {
                 res.add(new SemanticError("Super class " + superClassID + " not defined"));
             }
 
+            //Controllo che la sottoclasse abbia (almeno) gli stessi parametri (Id, Type) della superclasse
+            try {
+                ClassType superClass = (ClassType) env.getLatestEntryOf(superClassID).getType();
+
+                if (vardeclist.size() >= superClass.getFields().size()) {
+                    for (int i = 0; i < superClass.getFields().size(); i++) {
+                        if (!(superClass.getFields().get(i).getId().equals(vardeclist.get(i).getId()) && superClass.getFields().get(i).getType().getID().equals(vardeclist.get(i).getType().getID()))) {
+                            res.add(new SemanticError("Subclass " + this.classID + " missing some superclass " + superClass.getClassID() + " parameters."));
+                        }
+                    }
+                } else {
+                    res.add(new SemanticError("Subclass has not the superclass parameters."));
+                }
+            } catch (UndeclaredVarException e) {
+                res.add(new SemanticError("Super class " + superClassID + " not found in ST."));
+            }
+
             try {
                 SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
                 ClassType superClassType = (ClassType) superClassEntry.getType();
@@ -117,10 +134,14 @@ public class ClassNode extends Node {
         return new ClassType("TODO: ...");
     }
 
+    public ArrayList<ParameterNode> getVardeclist() {
+        return this.vardeclist;
+    }
+
     @Override
     public String codeGeneration() {
         // TODO: implement
-        return null;
+        return "";
     }
 
     @Override

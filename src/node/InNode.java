@@ -1,37 +1,31 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import type.Type;
-import exception.TypeException;
 import util.CodegenUtils;
 
 import java.util.ArrayList;
 
-public class ProgLetInNode extends Node {
+public class InNode extends Node {
 
-    private LetNode let;
-    private InNode in;
+    private INode exp;
+    private boolean isLetIn;
 
-    public ProgLetInNode(FOOLParser.LetInExpContext ctx, LetNode d, InNode e) {
+    public InNode(FOOLParser.LetContext ctx, INode e, boolean f) {
         super(ctx);
-        let = d;
-        in = e;
+        exp = e;
+        isLetIn = f;
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        env.pushHashMap();
-
         //check semantics in the exp body
-        res.addAll(let.checkSemantics(env));
-        res.addAll(in.checkSemantics(env));
-
-        //clean the scope, we are leaving a let scope
-        env.popHashMap();
+        res.addAll(exp.checkSemantics(env));
 
         //return the result
         return res;
@@ -39,26 +33,25 @@ public class ProgLetInNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        let.type();
-        return in.type();
+        return exp.type();
     }
 
     public String codeGeneration() {
-        return let.codeGeneration() + in.codeGeneration();
+        return exp.codeGeneration() + "halt\n" +
+                CodegenUtils.getFunctionsCode();
     }
 
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 
-        childs.add(let);
-        childs.add(in);
+        childs.add(exp);
 
         return childs;
     }
 
     @Override
     public String toString() {
-        return "let in declaration";
+        return isLetIn ? "in" : "exp";
     }
 
-}  
+}

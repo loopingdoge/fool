@@ -39,8 +39,6 @@ public class IdNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        System.out.println("AAA -> " + id);
-
         if (entry.getType() instanceof FunType) {
             throw new TypeException("Wrong usage of function identifier", ctx);
         }

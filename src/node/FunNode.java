@@ -49,6 +49,10 @@ public class FunNode extends Node {
 
         //env.offset = -2;
         try {
+            //TODO: Deve per forza avere un parametro di ritorno definito insieme alla funzione? Nel dubbio ho fatto il controllo, controllare che il parametro di ritorno, se dichiarato ID(classe) esista.
+            if (this.id.equals("<missing ID>")) {
+                res.add(new SemanticError("Missing ID or Type in a function."));
+            }
             env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
             env.pushHashMap();
 

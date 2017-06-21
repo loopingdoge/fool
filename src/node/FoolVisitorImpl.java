@@ -36,7 +36,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         INode exp = visit(ctx.exp());
 
         //build @res accordingly with the result of the visits to its content
-        res = new ProgLetInNode(ctx, declarations, exp);
+        res = new ProgLetInNode(ctx, new LetNode(ctx.let(), declarations), new InNode(ctx.let(), exp, true));
 
         return res;
     }
@@ -62,22 +62,27 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                 if (dc.ID(1) == null) {
                     classNode = new ClassNode(dc, dc.ID(0).getText(), "", vars, funs);
                 } else {
-                    classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID(1).getText(), vars, funs);
+                    classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID().get(1).getText(), vars, funs);
                 }
                 classDeclarations.add(classNode);
             }
 
-            ArrayList<INode> letDeclarations = new ArrayList<INode>();
-            for (DecContext dc : ctx.let().dec()) {
-                letDeclarations.add(visit(dc));
+            if (ctx.let() != null) {
+                ArrayList<INode> letDeclarations = new ArrayList<INode>();
+                for (DecContext dc : ctx.let().dec()) {
+                    letDeclarations.add(visit(dc));
+                }
+
+                System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
+
+                INode exp = visit(ctx.exp());
+
+                res = new ProgClassDecNode(ctx, classDeclarations, new LetNode(ctx.let(), letDeclarations), new InNode(ctx.let(), exp, true));
+            } else {
+                INode exp = visit(ctx.exp());
+
+                res = new ProgClassDecNode(ctx, classDeclarations, null, new InNode(ctx.let(), exp, false));
             }
-
-            System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
-
-            INode exp = visit(ctx.exp());
-
-            res = new ProgClassDecNode(ctx, classDeclarations, letDeclarations, exp);
-
         } catch (TypeException e) {
             return new ErrorNode(e);
         }

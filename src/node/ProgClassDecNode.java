@@ -12,45 +12,68 @@ import java.util.ArrayList;
 public class ProgClassDecNode extends Node {
 
     private ArrayList<ClassNode> classDeclarations;
-    private ArrayList<INode> letDeclarations;
-    private INode exp;
+    private LetNode let;
+    private InNode in;
 
-    public ProgClassDecNode(ParserRuleContext ctx, ArrayList<ClassNode> classDeclarations, ArrayList<INode> letDeclarations, INode exp) {
+    public ProgClassDecNode(ParserRuleContext ctx, ArrayList<ClassNode> classDeclarations, LetNode l, InNode i) {
         super(ctx);
         this.classDeclarations = classDeclarations;
-        this.letDeclarations = letDeclarations;
-        this.exp = exp;
+        this.let = l;
+        this.in = i;
     }
 
     @Override
     public Type type() throws TypeException {
-        return new VoidType();
+        for (ClassNode classdec : classDeclarations) {
+            classdec.type();
+        }
+        if (let != null)
+            let.type();
+
+        return in.type();
     }
 
     @Override
     public String codeGeneration() {
         // TODO: implement
-        return "";
+        String declaration = "";
+        for (ClassNode cl : classDeclarations) {
+            declaration += cl.codeGeneration();
+        }
+
+        if (let != null)
+            return declaration + let.codeGeneration() + in.codeGeneration();
+        else
+            return declaration + in.codeGeneration();
+
     }
 
     @Override
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
         childs.addAll(classDeclarations);
-        childs.addAll(letDeclarations);
-        childs.add(exp);
+
+        if (let != null)
+            childs.add(let);
+
+        childs.add(in);
         return childs;
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
-        // TODO: implement
+
         env.pushHashMap();
 
         for (ClassNode classNode : classDeclarations) {
             res.addAll(classNode.checkSemantics(env));
         }
+
+        if (let != null)
+            res.addAll(let.checkSemantics(env));
+
+        res.addAll(in.checkSemantics(env));
 
         env.popHashMap();
 
