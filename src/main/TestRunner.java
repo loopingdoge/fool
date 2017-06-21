@@ -150,8 +150,12 @@ public class TestRunner {
     //TODO: Mancano all'appello le classi: ProgClassDecNode(che non è finita), MethodNode(incompleta), ThisNode(incompleta)
     private static void recursiveStamp(INode father, String indent) {
         System.out.println(indent + father);
-        for (INode child : father.getChilds()) {
-            recursiveStamp(child, indent + "   ");
+        try {
+            for (INode child : father.getChilds()) {
+                recursiveStamp(child, indent + "   ");
+            }
+        } catch (Exception e) {
+            System.out.println("Error in -> " + father.getClass());
         }
     }
 }
