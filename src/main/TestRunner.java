@@ -1,19 +1,18 @@
 package main;
 
-import ast.node.FoolVisitorImpl;
-import ast.node.INode;
-import ast.type.Type;
-import ast.type.TypeException;
-import lib.ExecuteVM;
+import grammar.FOOLLexer;
+import grammar.FOOLParser;
+import grammar.SVMLexer;
+import grammar.SVMParser;
+import node.FoolVisitorImpl;
+import node.INode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import parser.FOOLLexer;
-import parser.FOOLParser;
-import parser.SVMLexer;
-import parser.SVMParser;
-import util.Environment;
-import util.SemanticError;
+import symbol_table.Environment;
+import type.Type;
+import type.TypeException;
+import vm.ExecuteVM;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

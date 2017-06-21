@@ -1,7 +1,5 @@
 package main;
 
-import util.SemanticError;
-
 import java.util.ArrayList;
 
 public class ScopeException extends Exception {

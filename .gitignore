@@ -5,18 +5,18 @@ input.fool
 # Generated files
 /gen/
 *.asm
-/src/parser/FOOLBaseListener.java
-/src/parser/FOOLBaseVisitor.java
-/src/parser/FOOLLexer.java
-/src/parser/FOOLListener.java
-/src/parser/FOOLParser.java
-/src/parser/FOOLVisitor.java
-/src/parser/SVMBaseListener.java
-/src/parser/SVMBaseVisitor.java
-/src/parser/SVMLexer.java
-/src/parser/SVMListener.java
-/src/parser/SVMParser.java
-/src/parser/SVMVisitor.java
+/grammars/FOOLBaseListener.java
+/grammars/FOOLBaseVisitor.java
+/grammars/FOOLLexer.java
+/grammars/FOOLListener.java
+/grammars/FOOLParser.java
+/grammars/FOOLVisitor.java
+/grammars/SVMBaseListener.java
+/grammars/SVMBaseVisitor.java
+/grammars/SVMLexer.java
+/grammars/SVMListener.java
+/grammars/SVMParser.java
+/grammars/SVMVisitor.java
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
