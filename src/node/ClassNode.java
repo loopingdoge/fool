@@ -55,7 +55,6 @@ public class ClassNode extends Node {
         this.fundeclist = fundeclist;
     }
 
-
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 

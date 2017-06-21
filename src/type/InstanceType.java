@@ -2,7 +2,11 @@ package type;
 
 public class InstanceType implements Type {
 
-    private Type ret;
+    private ClassType classT;
+
+    public InstanceType(ClassType classT) {
+        this.classT = classT;
+    }
 
     @Override
     public TypeID getID() {
@@ -11,14 +15,12 @@ public class InstanceType implements Type {
 
     @Override
     public boolean isSubTypeOf(Type t) {
-        // TODO: implement
-        return false;
+        return classT.isSubTypeOf(t);
     }
 
     @Override
     public boolean isSuperTypeOf(Type t) {
-        // TODO: implement
-        return false;
+        return classT.isSuperTypeOf(t);
     }
 
     @Override

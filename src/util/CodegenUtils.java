@@ -1,5 +1,10 @@
 package util;
 
+import symbol_table.SymbolTableEntry;
+import type.ClassType;
+
+import java.util.HashMap;
+
 public class CodegenUtils {
 
     private static int label = 0;
@@ -20,6 +25,16 @@ public class CodegenUtils {
 
     public static String getFunctionsCode() {
         return functionsCode;
+    }
+
+    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
+
+    public static void addClassEntry( String classID, ClassType classT ) {
+        classTable.put( classID, classT );
+    }
+
+    public static ClassType getClassEntry( String classID ) {
+        return classTable.get( classID );
     }
 
 }

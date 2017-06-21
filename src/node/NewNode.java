@@ -5,6 +5,7 @@ import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import symbol_table.UndeclaredVarException;
+import type.ClassType;
 import type.InstanceType;
 import type.Type;
 import type.TypeException;
@@ -13,27 +14,21 @@ import java.util.ArrayList;
 
 public class NewNode extends Node {
 
-    private String id;
+    private String classID;
     private ArrayList<INode> params;
     private SymbolTableEntry entry;
     private int nestinglevel;
 
-    public NewNode(FOOLParser.NewExpContext ctx, String id, ArrayList<INode> params) {
+    public NewNode(FOOLParser.NewExpContext ctx, String classID, ArrayList<INode> params) {
         super(ctx);
-        this.id = id;
+        this.classID = classID;
         this.params = params;
     }
 
     @Override
     public Type type() throws TypeException {
-        for (INode param : params)
-            param.type();
 
-        if (entry.getType() instanceof InstanceType) {
-            throw new TypeException("Wrong usage of new operator", ctx);
-        }
-
-        return new InstanceType();//entry.getType();
+        return null;//new InstanceType(  );
     }
 
     @Override
@@ -43,7 +38,11 @@ public class NewNode extends Node {
 
     @Override
     public ArrayList<INode> getChilds() {
-        return new ArrayList<>();
+        ArrayList<INode> res = new ArrayList<INode>();
+
+        res.addAll(params);
+
+        return res;
     }
 
     @Override
@@ -58,7 +57,7 @@ public class NewNode extends Node {
         }
 
         try {
-            this.entry = env.getLatestEntryOf(this.id);
+            this.entry = env.getLatestEntryOf(this.classID);
             this.nestinglevel = env.getNestingLevel();
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
@@ -69,7 +68,7 @@ public class NewNode extends Node {
 
     @Override
     public String toString() {
-        return "new";
+        return "new " + classID ;
     }
 
 }

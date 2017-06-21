@@ -63,4 +63,3 @@ Le seguenti richieste non sono obbligatorie:
 
 -- La deallocazione degli oggetti nello heap (garbage collection) NON E` OBBLIGATORIA.
    Chi e` interessato puo` scrivere il modulo relativo.
-
