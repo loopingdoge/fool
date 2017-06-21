@@ -4,7 +4,7 @@ import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 import type.VoidType;
 
 import java.util.ArrayList;

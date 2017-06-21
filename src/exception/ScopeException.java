@@ -1,4 +1,6 @@
-package main;
+package exception;
+
+import main.SemanticError;
 
 import java.util.ArrayList;
 

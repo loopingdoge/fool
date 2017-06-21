@@ -1,20 +1,22 @@
 package node;
 
+import exception.UndeclaredClassException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import symbol_table.UndeclaredVarException;
+import exception.UndeclaredVarException;
+import type.Type;
 import type.ClassType;
 import type.InstanceType;
-import type.Type;
-import type.TypeException;
+import util.CodegenUtils;
 
 import java.util.ArrayList;
 
 public class NewNode extends Node {
 
     private String classID;
+    private ClassType classT;
     private ArrayList<INode> params;
     private SymbolTableEntry entry;
     private int nestinglevel;
@@ -26,9 +28,8 @@ public class NewNode extends Node {
     }
 
     @Override
-    public Type type() throws TypeException {
-
-        return null;//new InstanceType(  );
+    public Type type() {
+        return new InstanceType( classT );
     }
 
     @Override
@@ -49,6 +50,12 @@ public class NewNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        try {
+            classT = CodegenUtils.getClassEntry( classID );
+        } catch (UndeclaredClassException e) {
+            res.add(new SemanticError( e.getMessage() ));
+        }
 
         if (params.size() > 0) {
             //if there are children then check semantics for every child and save the results

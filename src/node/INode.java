@@ -3,7 +3,7 @@ package node;
 import main.SemanticError;
 import symbol_table.Environment;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 
 import java.util.ArrayList;
 

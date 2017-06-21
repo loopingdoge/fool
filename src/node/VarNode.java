@@ -3,9 +3,9 @@ package node;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
-import symbol_table.RedeclaredVarException;
+import exception.RedeclaredVarException;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 
 import java.util.ArrayList;
 

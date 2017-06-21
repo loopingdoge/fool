@@ -1,4 +1,4 @@
-package type;
+package exception;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 

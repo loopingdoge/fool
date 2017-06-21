@@ -1,5 +1,7 @@
 package symbol_table;
 
+import exception.RedeclaredVarException;
+import exception.UndeclaredVarException;
 import type.Type;
 
 import java.util.ArrayList;

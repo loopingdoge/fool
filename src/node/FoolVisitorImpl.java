@@ -5,7 +5,7 @@ import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.FOOLParser.*;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 
 import java.util.ArrayList;
 

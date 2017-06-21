@@ -3,10 +3,10 @@ package node;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
-import symbol_table.RedeclaredVarException;
+import exception.RedeclaredVarException;
 import type.ArrowType;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 import util.CodegenUtils;
 
 import java.util.ArrayList;

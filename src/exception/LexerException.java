@@ -1,4 +1,4 @@
-package main;
+package exception;
 
 public class LexerException extends Exception {
 

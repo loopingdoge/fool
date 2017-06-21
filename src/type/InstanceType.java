@@ -4,7 +4,7 @@ public class InstanceType implements Type {
 
     private ClassType classT;
 
-    public InstanceType(ClassType classT) {
+    public InstanceType( ClassType classT ) {
         this.classT = classT;
     }
 

@@ -1,5 +1,7 @@
 package util;
 
+import exception.RedeclaredClassException;
+import exception.UndeclaredClassException;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 
@@ -29,11 +31,14 @@ public class CodegenUtils {
 
     public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
 
-    public static void addClassEntry( String classID, ClassType classT ) {
+    public static void addClassEntry( String classID, ClassType classT ) throws RedeclaredClassException {
+        if( classTable.get( classID ) != null ) throw new RedeclaredClassException( classID );
         classTable.put( classID, classT );
     }
 
-    public static ClassType getClassEntry( String classID ) {
+    public static ClassType getClassEntry( String classID ) throws UndeclaredClassException {
+        ClassType classT = classTable.get( classID );
+        if( classT == null ) throw new UndeclaredClassException( classID );
         return classTable.get( classID );
     }
 

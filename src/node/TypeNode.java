@@ -6,7 +6,7 @@ import symbol_table.Environment;
 import type.BoolType;
 import type.IntType;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 
 import java.util.ArrayList;
 

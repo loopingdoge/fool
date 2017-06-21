@@ -3,14 +3,12 @@ package node;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.Type;
-import type.TypeException;
-import type.TypeID;
+import exception.TypeException;
 import org.antlr.v4.runtime.ParserRuleContext;
-import grammar.FOOLParser;
 import symbol_table.Environment;
-import symbol_table.RedeclaredVarException;
+import exception.RedeclaredVarException;
 import main.SemanticError;
-import symbol_table.UndeclaredVarException;
+import exception.UndeclaredVarException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

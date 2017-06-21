@@ -1,9 +1,9 @@
-package symbol_table;
+package exception;
 
 public class RedeclaredVarException extends Exception {
 
     public RedeclaredVarException(String id) {
-        super("multiply declared variable " + id);
+        super("multiple definitions of variable: " + id);
     }
 
 }

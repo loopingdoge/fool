@@ -4,10 +4,10 @@ import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import symbol_table.UndeclaredVarException;
+import exception.UndeclaredVarException;
 import type.ArrowType;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 import type.TypeID;
 
 import java.util.ArrayList;

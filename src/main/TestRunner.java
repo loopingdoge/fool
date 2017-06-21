@@ -1,5 +1,7 @@
 package main;
 
+import exception.LexerException;
+import exception.ScopeException;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.SVMLexer;
@@ -10,16 +12,14 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import symbol_table.Environment;
-import symbol_table.SymbolTableEntry;
 import type.Type;
-import type.TypeException;
+import exception.TypeException;
 import vm.ExecuteVM;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TestRunner {
 

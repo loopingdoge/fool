@@ -1,4 +1,4 @@
-package symbol_table;
+package exception;
 
 public class UndeclaredVarException extends Exception {
 
