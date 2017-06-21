@@ -2,6 +2,7 @@ package node;
 
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
+import type.FunType;
 import type.Type;
 import exception.TypeException;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -18,34 +19,16 @@ public class ClassNode extends Node {
 
     private String classID;
     private String superClassID;
-    private ArrayList<VarNode> vardeclist;
-    private ArrayList<MethodNode> fundeclist;
+    private ArrayList<ParameterNode> vardeclist;
+    private ArrayList<FunNode> fundeclist;
 
     private HashMap<String, Type> fields = new HashMap<>();
-    private HashMap<String, Type> methods = new HashMap<>();
+    private HashMap<String, FunType> methods = new HashMap<>();
 
     private SymbolTableEntry stEntry;
     private int nestinglevel = 0;
 
-    public ClassNode(ParserRuleContext ctx, String classID) {
-        super(ctx);
-        this.classID = classID;
-    }
-
-    public ClassNode(ParserRuleContext ctx, String classID, ArrayList<MethodNode> fundeclist) {
-        super(ctx);
-        this.classID = classID;
-        this.fundeclist = fundeclist;
-    }
-
-    public ClassNode(ParserRuleContext ctx, String classID, ArrayList<VarNode> vardeclist, ArrayList<MethodNode> fundeclist) {
-        super(ctx);
-        this.classID = classID;
-        this.vardeclist = vardeclist;
-        this.fundeclist = fundeclist;
-    }
-
-    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<VarNode> vardeclist, ArrayList<MethodNode> fundeclist) {
+    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> vardeclist, ArrayList<FunNode> fundeclist) {
         super(ctx);
         this.classID = classID;
         this.superClassID = superClassID;
@@ -58,11 +41,16 @@ public class ClassNode extends Node {
 
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        for (VarNode var : vardeclist) {
+        for (ParameterNode var : this.vardeclist) {
             fields.put(var.getId(), var.getType());
         }
-        for (MethodNode fun : fundeclist) {
-            methods.put(fun.getId(), fun.getType());
+        for (FunNode fun : fundeclist) {
+            ArrayList<Type> paramsType = new ArrayList<>();
+            for (ParameterNode param : fun.getParams()) {
+                paramsType.add(param.getType());
+            }
+
+            methods.put(fun.getId(), new FunType(paramsType, fun.getType()));
         }
 
         try {
@@ -72,39 +60,38 @@ public class ClassNode extends Node {
         }
 
 
-        for (VarNode var : vardeclist) {
+        for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));
         }
-        for (MethodNode fun : fundeclist) {
+        for (FunNode fun : fundeclist) {
             res.addAll(fun.checkSemantics(env));
         }
 
-        try {
-            if (!(env.getTypeOf(superClassID) instanceof ClassType))
-                res.add(new SemanticError("ID of super class " + superClassID + " is not related to a class type"));
-        } catch (UndeclaredVarException exp) {
-            res.add(new SemanticError("Super class " + superClassID + "not defined"));
-        }
+        if (!superClassID.isEmpty()) {
+            try {
+                if (!(env.getTypeOf(superClassID) instanceof ClassType))
+                    res.add(new SemanticError("ID of super class " + superClassID + " is not related to a class type"));
+            } catch (UndeclaredVarException exp) {
+                res.add(new SemanticError("Super class " + superClassID + " not defined"));
+            }
 
-
-        if(superClassID != null && !superClassID.isEmpty()) {
             try {
                 SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
                 ClassType superClassType = (ClassType) superClassEntry.getType();
 
                 HashMap<String, Type> superClassFields = superClassType.getFields();
-                for(String localField : fields.keySet()){
-                    if(superClassFields.containsKey(localField)){
-                        if(!superClassFields.get(localField).isSubTypeOf(fields.get(localField))) {
+                for (String localField : fields.keySet()) {
+                    if (superClassFields.containsKey(localField)) {
+                        if (!superClassFields.get(localField).isSubTypeOf(fields.get(localField))) {
                             res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type."));
                         }
                     }
                 }
 
-                HashMap<String, Type> superClassMethods = superClassType.getMethods();
-                for(String localMethod : methods.keySet()){
-                    if(superClassMethods.containsKey(localMethod)){
-                        if(!superClassMethods.get(localMethod).isSubTypeOf(methods.get(localMethod))){
+                HashMap<String, FunType> superClassMethods = superClassType.getMethods();
+                for (String localMethod : methods.keySet()) {
+                    if (superClassMethods.containsKey(localMethod)) {
+                        if (!superClassMethods.get(localMethod).isSubTypeOf(methods.get(localMethod))) {
                             res.add(new SemanticError("Method '" + localMethod + "'  overrided from super class with different type."));
                         }
                     }
@@ -140,7 +127,10 @@ public class ClassNode extends Node {
 
     @Override
     public String toString() {
-        return "class " + classID + " extends " + superClassID;
+        if (!superClassID.isEmpty())
+            return "class " + classID + " extends " + superClassID;
+        else
+            return "class " + classID;
     }
 
 }

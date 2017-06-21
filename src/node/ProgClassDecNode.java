@@ -46,11 +46,13 @@ public class ProgClassDecNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
         // TODO: implement
+        env.pushHashMap();
 
         for (ClassNode classNode : classDeclarations) {
             res.addAll(classNode.checkSemantics(env));
         }
 
+        env.popHashMap();
 
         return res;
     }

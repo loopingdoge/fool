@@ -5,7 +5,7 @@ import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import exception.UndeclaredVarException;
-import type.ArrowType;
+import type.FunType;
 import type.Type;
 import exception.TypeException;
 import type.TypeID;
@@ -55,9 +55,9 @@ public class CallNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        ArrowType t;
-        if (entry.getType().getID().equals(TypeID.ARROW)) {
-            t = (ArrowType) entry.getType();
+        FunType t;
+        if (entry.getType().getID().equals(TypeID.FUN)) {
+            t = (FunType) entry.getType();
         } else {
             throw new TypeException("Invocation of a non-function " + id, ctx);
         }

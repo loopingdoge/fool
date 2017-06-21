@@ -70,8 +70,8 @@ public class MethodCallNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        if (this.typeDeclaredInClass instanceof ArrowType) {
-            ArrowType funType = (ArrowType) this.typeDeclaredInClass;
+        if (this.typeDeclaredInClass instanceof FunType) {
+            FunType funType = (FunType) this.typeDeclaredInClass;
             ArrayList<Type> params = funType.getParams();
             if (!(params.size() == this.params.size())) {
                 throw new TypeException("Wrong number of parameters in the invocation of " + methodId, ctx);

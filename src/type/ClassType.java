@@ -8,24 +8,13 @@ public class ClassType implements Type {
     private String superclassID = "";
 
     private HashMap<String, Type> fields = new HashMap<>();
-    private HashMap<String, Type> methods = new HashMap<>();
+    private HashMap<String, FunType> methods = new HashMap<>();
 
-    public ClassType(String classID, String superclassID, HashMap<String, Type> fields, HashMap<String, Type> methods) {
+    public ClassType(String classID, String superclassID, HashMap<String, Type> fields, HashMap<String, FunType> methods) {
         this.classID = classID;
         this.superclassID = superclassID;
         this.fields = fields;
         this.methods = methods;
-    }
-
-    public ClassType(String classID, String superclassID, HashMap<String, Type> fields) {
-        this.classID = classID;
-        this.superclassID = superclassID;
-        this.fields = fields;
-    }
-
-    public ClassType(String classID, String superclassID) {
-        this.classID = classID;
-        this.superclassID = superclassID;
     }
 
     public ClassType(String classID) {
@@ -44,7 +33,7 @@ public class ClassType implements Type {
         return fields;
     }
 
-    public HashMap<String, Type> getMethods() {
+    public HashMap<String, FunType> getMethods() {
         return methods;
     }
 

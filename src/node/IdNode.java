@@ -6,7 +6,7 @@ import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import type.ArrowType;
+import type.FunType;
 import type.Type;
 
 import java.util.ArrayList;
@@ -39,7 +39,9 @@ public class IdNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        if (entry.getType() instanceof ArrowType) {
+        System.out.println("AAA -> " + id);
+
+        if (entry.getType() instanceof FunType) {
             throw new TypeException("Wrong usage of function identifier", ctx);
         }
         return entry.getType();

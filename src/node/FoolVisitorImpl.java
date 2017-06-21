@@ -5,6 +5,7 @@ import grammar.FOOLBaseVisitor;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.FOOLParser.*;
+import type.FunType;
 import type.Type;
 
 import java.util.ArrayList;
@@ -45,30 +46,43 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     public INode visitClassExp(FOOLParser.ClassExpContext ctx) {
         ProgClassDecNode res;
 
-        ArrayList<ClassNode> classDeclarations = new ArrayList<ClassNode>();
-        for (FOOLParser.ClassdecContext dc : ctx.classdec()) {
-            ArrayList<VarNode> vars = new ArrayList<VarNode>();
-            for (VardecContext varctx: dc.vardec()) {
-               vars.add((VarNode) visit(varctx));
+        try {
+            ArrayList<ClassNode> classDeclarations = new ArrayList<ClassNode>();
+            for (FOOLParser.ClassdecContext dc : ctx.classdec()) {
+                ArrayList<ParameterNode> vars = new ArrayList<ParameterNode>();
+                for (VardecContext varctx : dc.vardec()) {
+                    vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type()));
+                }
+                ArrayList<FunNode> funs = new ArrayList<FunNode>();
+                for (FunContext functx : dc.fun()) {
+                    funs.add((FunNode) visit(functx));
+                }
+
+                ClassNode classNode;
+                //[CIVO]Controllo se ha una superclasse o meno
+                if (dc.ID(1) == null) {
+                    classNode = new ClassNode(dc, dc.ID(0).getText(), "", vars, funs);
+                } else {
+                    classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID(1).getText(), vars, funs);
+                }
+                classDeclarations.add(classNode);
             }
-            ArrayList<FunNode> funs = new ArrayList<FunNode>();
-            for (VardecContext functx: dc.vardec()) {
-                funs.add((FunNode) visit(functx));
+
+            ArrayList<INode> letDeclarations = new ArrayList<INode>();
+            for (DecContext dc : ctx.let().dec()) {
+                letDeclarations.add(visit(dc));
             }
-            ClassNode classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID(1).getText(), vars, funs);
-            classDeclarations.add(classNode);
+
+            System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
+
+            INode exp = visit(ctx.exp());
+
+            res = new ProgClassDecNode(ctx, classDeclarations, letDeclarations, exp);
+
+        } catch (TypeException e) {
+            return new ErrorNode(e);
         }
 
-        ArrayList<INode> letDeclarations = new ArrayList<INode>();
-        for (DecContext dc : ctx.let().dec()) {
-            letDeclarations.add(visit(dc));
-        }
-
-        System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
-
-        INode exp = visit(ctx.exp());
-
-        res = new ProgClassDecNode(ctx, classDeclarations, letDeclarations, exp);
 
         return res;
     }

@@ -5,7 +5,8 @@ import exception.TypeException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
-import type.ArrowType;
+import type.FunType;
+import type.FunType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -48,7 +49,7 @@ public class FunNode extends Node {
 
         //env.offset = -2;
         try {
-            env.addEntry(this.id, new ArrowType(parTypes, type), env.offset--);
+            env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
             env.pushHashMap();
 
             int paroffset = 1;
@@ -83,6 +84,10 @@ public class FunNode extends Node {
         return res;
     }
 
+    public ArrayList<ParameterNode> getParams() {
+        return params;
+    }
+
     @Override
     public Type type() throws TypeException {
         if (declarations != null)
@@ -92,8 +97,12 @@ public class FunNode extends Node {
         if (!body.type().isSubTypeOf(type)) {  // TODO: [Albi] Controllare che basti exp()
             throw new TypeException("Wrong return type for function: " + id, ctx);
         }
-        // TODO: [Albi] secondo me anche le funzioni hanno un tipo
-        return null;
+        // FATTO: [Albi] secondo me anche le funzioni hanno un tipo
+        ArrayList<Type> paramsType = new ArrayList<>();
+        for (ParameterNode param : params) {
+            paramsType.add(param.getType());
+        }
+        return new FunType(paramsType, type).getReturnType();
     }
 
     public String codeGeneration() {
