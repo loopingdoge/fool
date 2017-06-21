@@ -1,16 +1,16 @@
 package node;
 
-import grammar.FOOLParser;
+import exception.TypeException;
 import main.SemanticError;
+import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import type.Type;
-import exception.TypeException;
 
 import java.util.ArrayList;
 
 public class ThisNode extends Node {
 
-    public ThisNode(FOOLParser.SingleExpContext ctx) {
+    public ThisNode(ParserRuleContext ctx) {
         super(ctx);
     }
 

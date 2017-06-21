@@ -1,12 +1,12 @@
 package node;
 
+import exception.RedeclaredVarException;
+import exception.TypeException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
-import exception.RedeclaredVarException;
 import type.ArrowType;
 import type.Type;
-import exception.TypeException;
 import util.CodegenUtils;
 
 import java.util.ArrayList;
@@ -26,6 +26,14 @@ public class FunNode extends Node {
         this.params = params;
         this.declarations = declarations;
         this.body = body;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public Type getType() {
+        return this.type;
     }
 
     @Override

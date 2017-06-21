@@ -1,13 +1,13 @@
 package node;
 
-import grammar.FOOLParser;
+import exception.TypeException;
+import exception.UndeclaredVarException;
 import main.SemanticError;
+import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import exception.UndeclaredVarException;
 import type.ArrowType;
 import type.Type;
-import exception.TypeException;
 
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ public class IdNode extends Node {
     private SymbolTableEntry entry;
     private int nestinglevel;
 
-    public IdNode(FOOLParser.VarExpContext ctx, String id) {
+    public IdNode(ParserRuleContext ctx, String id) {
         super(ctx);
         this.id = id;
     }
