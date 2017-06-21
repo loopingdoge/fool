@@ -70,3 +70,26 @@ test6:
 test7:
 -   print(1);
 -   "1"
+
+# Test one method without params call
+test8:
+-   class Numero {
+        int uno() 1;
+    };
+    let
+        Numero num = new Numero;
+    in
+        print(num.uno());
+-   "1"
+
+# Test two method without params calls
+test9:
+-   class Numeri {
+        int uno() 1;
+        int due() 2;
+    };
+    let
+        Numeri num = new Numeri;
+    in
+        num.uno() + num.due();
+-   "3"
