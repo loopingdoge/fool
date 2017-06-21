@@ -29,6 +29,24 @@ public class ClassNode extends Node {
     private SymbolTableEntry stEntry;
     private int nestinglevel = 0;
 
+    public ClassNode(ParserRuleContext ctx, String classID) {
+        super(ctx);
+        this.classID = classID;
+    }
+
+    public ClassNode(ParserRuleContext ctx, String classID, ArrayList<MethodNode> fundeclist) {
+        super(ctx);
+        this.classID = classID;
+        this.fundeclist = fundeclist;
+    }
+
+    public ClassNode(ParserRuleContext ctx, String classID, ArrayList<VarNode> vardeclist, ArrayList<MethodNode> fundeclist) {
+        super(ctx);
+        this.classID = classID;
+        this.vardeclist = vardeclist;
+        this.fundeclist = fundeclist;
+    }
+
     public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<VarNode> vardeclist, ArrayList<MethodNode> fundeclist) {
         super(ctx);
         this.classID = classID;
@@ -71,19 +89,40 @@ public class ClassNode extends Node {
             res.add(new SemanticError("Super class " + superClassID + "not defined"));
         }
 
+
+        if(superClassID != null && !superClassID.isEmpty()) {
+            try {
+                SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
+                ClassType superClassType = (ClassType) superClassEntry.getType();
+
+                HashMap<String, Type> superClassFields = superClassType.getFields();
+                for(String localField : fields.keySet()){
+                    if(superClassFields.containsKey(localField)){
+                        if(!superClassFields.get(localField).isSubTypeOf(fields.get(localField))) {
+                            res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type."));
+                        }
+                    }
+                }
+
+                HashMap<String, Type> superClassMethods = superClassType.getMethods();
+                for(String localMethod : methods.keySet()){
+                    if(superClassMethods.containsKey(localMethod)){
+                        if(!superClassMethods.get(localMethod).isSubTypeOf(methods.get(localMethod))){
+                            res.add(new SemanticError("Method '" + localMethod + "'  overrided from super class with different type."));
+                        }
+                    }
+                }
+
+            } catch (UndeclaredVarException ex) {
+                res.add(new SemanticError("Super class " + superClassID + " not defined. " + ex.getMessage()));
+            }
+        }
+
         return res;
     }
 
     @Override
     public Type type() throws TypeException {
-
-        // TODO: check for duplicate variables (superclass)
-        for (INode dec : vardeclist)
-            dec.type();
-
-        // TODO: correct method overriding check
-        for (INode dec : fundeclist)
-            dec.type();
 
         return new ClassType("TODO: ...");
     }

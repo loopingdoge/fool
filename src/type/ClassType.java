@@ -6,6 +6,7 @@ public class ClassType implements Type {
 
     private String classID = "";
     private String superclassID = "";
+
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, Type> methods = new HashMap<>();
 
@@ -37,6 +38,14 @@ public class ClassType implements Type {
 
     public String getSuperclassID() {
         return superclassID;
+    }
+
+    public HashMap<String, Type> getFields() {
+        return fields;
+    }
+
+    public HashMap<String, Type> getMethods() {
+        return methods;
     }
 
     public boolean containsID(String id) {
