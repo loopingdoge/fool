@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class VarNode extends Node {
 
     private String id;
-    private Type type;
+    private Type type;   // TODO: [Pietro] quando viene istanziato un oggetto rimane null e crasha tutto nel type checking
     private INode exp;
 
     public VarNode(FOOLParser.VarasmContext ctx, String i, Type t, INode v) {
