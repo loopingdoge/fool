@@ -26,20 +26,20 @@ public class FunType implements Type {
     }
 
     @Override
-    public boolean isSubTypeOf(Type t) {
+    public boolean isSuperTypeOf(Type t) {
         if (t instanceof FunType) {
             FunType funType = (FunType) t;
             boolean check = true;
 
             //Se hanno lo stesso numero di parametri
-            if (params.size() == funType.getParams().size()) {
+            if (this.params.size() == funType.getParams().size()) {
                 //Controllo che tutti i parametri abbiano lo stesso tipo(supertype, come da cosegna)
-                for (int i = 0; i < params.size(); i++) {
-                    check &= funType.getParams().get(i).isSuperTypeOf(params.get(i));
+                for (int i = 0; i < this.params.size(); i++) {
+                    check &= funType.getParams().get(i).isSuperTypeOf(this.params.get(i));
                 }
 
                 //Controllo che anche il valore di ritorno della funzione
-                check &= funType.returnType.isSubTypeOf(returnType);
+                check &= funType.returnType.isSubTypeOf(this.returnType);
             } else {
                 check = false;
             }
@@ -50,20 +50,20 @@ public class FunType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) {
+    public boolean isSubTypeOf(Type t) {
         if (t instanceof FunType) {
             FunType funType = (FunType) t;
             boolean check = true;
 
             //Se hanno lo stesso numero di parametri
-            if (params.size() == funType.getParams().size()) {
+            if (this.params.size() == funType.getParams().size()) {
                 //Controllo che tutti i parametri abbiano lo stesso tipo(supertype, come da cosegna)
-                for (int i = 0; i < params.size(); i++) {
-                    check &= funType.getParams().get(i).isSubTypeOf(params.get(i));
+                for (int i = 0; i < this.params.size(); i++) {
+                    check &= funType.getParams().get(i).isSubTypeOf(this.params.get(i));
                 }
 
                 //Controllo che anche il valore di ritorno della funzione
-                check &= funType.returnType.isSuperTypeOf(returnType);
+                check &= funType.returnType.isSuperTypeOf(this.returnType);
             } else {
                 check = false;
             }

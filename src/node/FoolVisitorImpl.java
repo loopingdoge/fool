@@ -58,7 +58,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                 }
 
                 ClassNode classNode;
-                //[CIVO]Controllo se ha una superclasse o meno
                 if (dc.ID(1) == null) {
                     classNode = new ClassNode(dc, dc.ID(0).getText(), "", vars, funs);
                 } else {
