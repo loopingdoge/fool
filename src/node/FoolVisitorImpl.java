@@ -72,7 +72,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                     letDeclarations.add(visit(dc));
                 }
 
-                System.err.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
+                System.out.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
 
                 INode exp = visit(ctx.exp());
 

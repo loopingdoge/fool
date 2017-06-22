@@ -12,6 +12,7 @@ public class CodegenUtils {
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
+    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
 
     public static String freshLabel() {
         return "label" + (label++);
@@ -28,8 +29,6 @@ public class CodegenUtils {
     public static String getFunctionsCode() {
         return functionsCode;
     }
-
-    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
 
     public static void addClassEntry( String classID, ClassType classT ) throws RedeclaredClassException {
         if( classTable.get( classID ) != null ) throw new RedeclaredClassException( classID );

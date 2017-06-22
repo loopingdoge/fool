@@ -1,5 +1,7 @@
 package node;
 
+import com.sun.org.apache.bcel.internal.classfile.Code;
+import exception.RedeclaredClassException;
 import exception.RedeclaredVarException;
 import exception.TypeException;
 import exception.UndeclaredVarException;
@@ -10,6 +12,7 @@ import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
 import type.Type;
+import util.CodegenUtils;
 import util.Field;
 import util.Method;
 
@@ -27,8 +30,7 @@ public class ClassNode extends Node {
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, FunType> methods = new HashMap<>();
 
-    private SymbolTableEntry stEntry;
-    private int nestinglevel = 0;
+    private ClassType type;
 
     public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> vardeclist, ArrayList<FunNode> fundeclist) {
         super(ctx);
@@ -60,8 +62,10 @@ public class ClassNode extends Node {
         }
 
         try {
-            env.addEntry(classID, new ClassType(classID, superClassID, fieldsList, methodsList), 0);
-        } catch (RedeclaredVarException ex) {
+            this.type = new ClassType(classID, superClassID, fieldsList, methodsList);
+            env.addEntry(classID, this.type, 0);
+            CodegenUtils.addClassEntry(classID, this.type);
+        } catch (RedeclaredVarException | RedeclaredClassException ex) {
             res.add(new SemanticError(ex.getMessage()));
         }
 
@@ -81,7 +85,7 @@ public class ClassNode extends Node {
                 res.add(new SemanticError("Super class " + superClassID + " not defined"));
             }
 
-            //Controllo che la sottoclasse abbia (almeno) gli stessi parametri (Id, Type) della superclasse
+            // TODO: accordarsi sul funzionamento dell'eredetarietà (spostare controlli in ClassType?)
             try {
                 ClassType superClass = (ClassType) env.getLatestEntryOf(superClassID).getType();
 
@@ -131,7 +135,15 @@ public class ClassNode extends Node {
     @Override
     public Type type() throws TypeException {
 
-        return new ClassType("TODO: ...");
+        for (ParameterNode vardec : vardeclist){
+            vardec.type();
+        }
+
+        for (FunNode fundec : fundeclist) {
+            fundec.type();
+        }
+
+        return this.type;
     }
 
     public ArrayList<ParameterNode> getVardeclist() {
