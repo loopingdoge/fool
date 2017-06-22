@@ -1,9 +1,11 @@
 package node;
 
+import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import exception.RedeclaredVarException;
+import type.ClassType;
 import type.Type;
 import exception.TypeException;
 
@@ -15,11 +17,15 @@ public class VarNode extends Node {
     private Type type;   // TODO: [Pietro] quando viene istanziato un oggetto rimane null e crasha tutto nel type checking
     private INode exp;
 
+    private String className;
+
     public VarNode(FOOLParser.VarasmContext ctx, String i, Type t, INode v) {
         super(ctx);
         id = i;
         type = t;
         exp = v;
+        //SPORCHISSIMA MA FUNZIONA
+        className = ctx.children.get(0).getChild(0).getText();
     }
 
     public Type getType() {
@@ -34,6 +40,15 @@ public class VarNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create result list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        //Se è un ID controllo che esista come tipo di classe precedentemente dichiarata
+        if (this.type == null) {
+            try {
+                this.type = env.getTypeOf(className);
+            } catch (UndeclaredVarException e) {
+                res.add(new SemanticError(e.getMessage()));
+            }
+        }
 
         //env.offset = -2;
         try {
@@ -53,8 +68,8 @@ public class VarNode extends Node {
         if (!exp.type().isSubTypeOf(type)) {
             throw new TypeException("incompatible value for variable " + id, varasmContext.exp());
         }
-        // TODO: [Albi] Controllare questo null
-        return null;
+
+        return this.type;
     }
 
     @Override

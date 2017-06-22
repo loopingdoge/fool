@@ -188,7 +188,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         }
     }
 
-
     @Override
     public INode visitFactor(FactorContext ctx) {
         //check whether this is a simple or binary expression
@@ -272,6 +271,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     @Override
     public INode visitVarExp(VarExpContext ctx) {
         //this corresponds to a variable access
+
         return new IdNode(ctx, ctx.ID().getText());
     }
 

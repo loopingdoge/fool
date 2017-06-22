@@ -35,7 +35,7 @@ public class ProgClassDecNode extends Node {
 
     @Override
     public String codeGeneration() {
-        // TODO: implement
+        // TODO: implement ( In teoria è gia finito così questo codgen
         String declaration = "";
         for (ClassNode cl : classDeclarations) {
             declaration += cl.codeGeneration();
@@ -45,7 +45,6 @@ public class ProgClassDecNode extends Node {
             return declaration + let.codeGeneration() + in.codeGeneration();
         else
             return declaration + in.codeGeneration();
-
     }
 
     @Override
