@@ -22,6 +22,8 @@ public class TestComplete {
             InputStream is = new FileInputStream(new File(fileName));
             Map<String, ArrayList<String>> tests = (Map<String, ArrayList<String>>) yaml.load(is);
 
+            int passed = 0;
+
             for (String testID : tests.keySet()) {
 
                 ArrayList<String> test = tests.get(testID);
@@ -32,8 +34,10 @@ public class TestComplete {
                 CharStream input = CharStreams.fromString(code);
                 String output = TestRunner.test(testID, input, result, false);
                 System.out.println(output);
+                if(output.startsWith("Test PASSED")) passed++;
             }
 
+            System.out.println("TESTING COMPLETED. TESTS PASSED " + passed + "/" + tests.keySet().size());
         } catch (Exception e) {
             e.printStackTrace();
         }

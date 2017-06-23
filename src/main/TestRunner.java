@@ -130,9 +130,9 @@ public class TestRunner {
 
         StringBuilder output = new StringBuilder();
         if (actualResult.trim().equals(expectedResult.trim())) {
-            output.append("Test passed!" + "\n");
+            output.append("Test PASSED!" + "\n");
         } else {
-            output.append("Test failed!" + "\n");
+            output.append("Test FAILED!" + "\n");
         }
         output.append("Expected: ").append(expectedResult).append("\n")
                 .append("Got: ").append(actualResult).append("\n");

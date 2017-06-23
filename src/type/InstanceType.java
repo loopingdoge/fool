@@ -29,7 +29,6 @@ public class InstanceType implements Type {
 
     @Override
     public String toString() {
-        // TODO: describe the instance type
-        return "Instance";
+        return "instance: " + classT.getClassID();
     }
 }
