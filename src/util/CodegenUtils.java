@@ -2,17 +2,16 @@ package util;
 
 import exception.RedeclaredClassException;
 import exception.UndeclaredClassException;
-import symbol_table.SymbolTableEntry;
 import type.ClassType;
 
 import java.util.HashMap;
 
 public class CodegenUtils {
 
+    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
-    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
 
     public static String freshLabel() {
         return "label" + (label++);
@@ -39,6 +38,13 @@ public class CodegenUtils {
         ClassType classT = classTable.get( classID );
         if( classT == null ) throw new UndeclaredClassException( classID );
         return classTable.get( classID );
+    }
+
+    public static void reset() {
+        label = 0;
+        functionsLabelCount = 0;
+        functionsCode = "";
+        classTable = new HashMap<>();
     }
 
 }

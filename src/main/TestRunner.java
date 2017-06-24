@@ -2,6 +2,7 @@ package main;
 
 import exception.LexerException;
 import exception.ScopeException;
+import exception.TypeException;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.SVMLexer;
@@ -13,7 +14,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import symbol_table.Environment;
 import type.Type;
-import exception.TypeException;
+import util.CodegenUtils;
 import vm.ExecuteVM;
 
 import java.io.BufferedWriter;
@@ -89,6 +90,7 @@ public class TestRunner {
 
     public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging) {
 
+        CodegenUtils.reset();
         String actualResult = "";
 
         try {
