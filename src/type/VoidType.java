@@ -12,9 +12,4 @@ public class VoidType implements Type {
         return t.getID() == t.getID();
     }
 
-    @Override
-    public boolean isSuperTypeOf(Type t) {
-        return t.getID() == t.getID();
-    }
-
 }

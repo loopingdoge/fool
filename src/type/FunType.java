@@ -26,30 +26,6 @@ public class FunType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) {
-        if (t instanceof FunType) {
-            FunType funType = (FunType) t;
-            boolean check = true;
-
-            //Se hanno lo stesso numero di parametri
-            if (this.params.size() == funType.getParams().size()) {
-                //Controllo che tutti i parametri abbiano lo stesso tipo(supertype, come da cosegna)
-                for (int i = 0; i < this.params.size(); i++) {
-                    check &= funType.getParams().get(i).isSuperTypeOf(this.params.get(i));
-                }
-
-                //Controllo che anche il valore di ritorno della funzione
-                check &= funType.returnType.isSubTypeOf(this.returnType);
-            } else {
-                check = false;
-            }
-            return check;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public boolean isSubTypeOf(Type t) {
         if (t instanceof FunType) {
             FunType funType = (FunType) t;
@@ -63,7 +39,7 @@ public class FunType implements Type {
                 }
 
                 //Controllo che anche il valore di ritorno della funzione
-                check &= funType.returnType.isSuperTypeOf(this.returnType);
+                check &= this.returnType.isSubTypeOf(funType.returnType);
             } else {
                 check = false;
             }

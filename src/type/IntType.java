@@ -13,11 +13,6 @@ public class IntType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) {
-        return this.getID() == t.getID();
-    }
-
-    @Override
     public String toString() {
         return "int";
     }

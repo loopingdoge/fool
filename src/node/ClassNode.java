@@ -115,7 +115,8 @@ public class ClassNode extends Node {
                 HashMap<String, Type> superClassFields = superClassType.getFieldsMap();
                 for (String localField : this.fields.keySet()) {
                     if (superClassFields.containsKey(localField)) {
-                        if (!superClassFields.get(localField).isSuperTypeOf(this.fields.get(localField))) {
+
+                        if (!this.fields.get(localField).isSubTypeOf(superClassFields.get(localField))) {
                             res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type."));
                         }
                     }
@@ -124,7 +125,7 @@ public class ClassNode extends Node {
                 HashMap<String, FunType> superClassMethods = superClassType.getMethodsMap();
                 for (String localMethod : methods.keySet()) {
                     if (superClassMethods.containsKey(localMethod)) {
-                        if (!superClassMethods.get(localMethod).isSuperTypeOf(methods.get(localMethod))) {
+                        if (!methods.get(localMethod).isSubTypeOf(superClassMethods.get(localMethod))) {
                             res.add(new SemanticError("Method '" + localMethod + "'  overrided from super class with different type."));
                         }
                     }

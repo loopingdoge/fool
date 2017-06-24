@@ -28,11 +28,6 @@ public class InstanceType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) {
-        return classT.isSuperTypeOf(t);
-    }
-
-    @Override
     public String toString() {
         return "instance: " + classT.getClassID();
     }

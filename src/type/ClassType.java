@@ -123,11 +123,6 @@ public class ClassType implements Type {
     }
 
     @Override
-    public boolean isSuperTypeOf(Type t) {
-        return this.getID().equals(((ClassType) t).getSuperclassID());
-    }
-
-    @Override
     public String toString() {
         return "class " + classID;
     }

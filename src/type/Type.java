@@ -6,6 +6,4 @@ public interface Type {
 
     boolean isSubTypeOf(Type t);
 
-    boolean isSuperTypeOf(Type t);
-
 }
