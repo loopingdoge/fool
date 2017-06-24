@@ -1,35 +1,32 @@
 package node;
 
+import exception.TypeException;
 import exception.UndeclaredClassException;
+import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import exception.UndeclaredVarException;
-import type.Type;
 import type.ClassType;
 import type.InstanceType;
+import type.Type;
 import util.CodegenUtils;
+import util.Field;
 
 import java.util.ArrayList;
 
 public class NewNode extends Node {
 
     private String classID;
-    private ClassType classT;
-    private ArrayList<INode> params;
+    private ClassType classType;
+    private ArrayList<INode> args;
     private SymbolTableEntry entry;
     private int nestinglevel;
 
-    public NewNode(FOOLParser.NewExpContext ctx, String classID, ArrayList<INode> params) {
+    public NewNode(FOOLParser.NewExpContext ctx, String classID, ArrayList<INode> args) {
         super(ctx);
         this.classID = classID;
-        this.params = params;
-    }
-
-    @Override
-    public Type type() {
-        return new InstanceType( classT );
+        this.args = args;
     }
 
     @Override
@@ -41,7 +38,7 @@ public class NewNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> res = new ArrayList<INode>();
 
-        res.addAll(params);
+        res.addAll(args);
 
         return res;
     }
@@ -52,14 +49,14 @@ public class NewNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         try {
-            classT = CodegenUtils.getClassEntry( classID );
+            classType = CodegenUtils.getClassEntry(classID);
         } catch (UndeclaredClassException e) {
             res.add(new SemanticError( e.getMessage() ));
         }
 
-        if (params.size() > 0) {
+        if (args.size() > 0) {
             //if there are children then check semantics for every child and save the results
-            for (INode n : params)
+            for (INode n : args)
                 res.addAll(n.checkSemantics(env));
         }
 
@@ -71,6 +68,19 @@ public class NewNode extends Node {
         }
 
         return res;
+    }
+
+    @Override
+    public Type type() throws TypeException {
+        ArrayList<Field> classFields = classType.getFields();
+        for (int i = 0; i < args.size(); i++) {
+            Type currentArgType = args.get(i).type();
+            Type requestedType = classFields.get(i).getType();
+            if (!currentArgType.isSubTypeOf(requestedType)) {
+                throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + classID + " constructor", ctx);
+            }
+        }
+        return new InstanceType(classType);
     }
 
     @Override
