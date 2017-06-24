@@ -28,7 +28,7 @@ public class IdNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         try {
-            this.entry = env.getLatestEntryOf(this.id);
+            this.entry = env.getLatestEntryOfNotFun(this.id);
             this.nestinglevel = env.getNestingLevel();
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));

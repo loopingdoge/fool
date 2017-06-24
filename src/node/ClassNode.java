@@ -76,12 +76,15 @@ public class ClassNode extends Node {
             res.add(new SemanticError(ex.getMessage()));
         }
 
+        env.pushHashMap();
         for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));
         }
+        env.pushHashMap();
         for (FunNode fun : fundeclist) {
             res.addAll(fun.checkSemantics(env));
         }
+        env.popHashMap().popHashMap();
 
         if (!superClassID.isEmpty()) {
             try {

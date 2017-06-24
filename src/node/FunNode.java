@@ -47,35 +47,36 @@ public class FunNode extends Node {
         }
 
         //env.offset = -2;
-        try {
-            //TODO: Deve per forza avere un parametro di ritorno definito insieme alla funzione? Nel dubbio ho fatto il controllo, controllare che il parametro di ritorno, se dichiarato ID(classe) esista.
-            if (this.id.equals("<missing ID>")) {
-                res.add(new SemanticError("Missing ID or Type in a function."));
-            }
-            env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
-            env.pushHashMap();
 
-            //check args
-            for (ParameterNode param : params) {
-                res.addAll(param.checkSemantics(env));
-            }
-
-            //check semantics in the dec list
-            if (declarations.size() > 0) {
-                env.offset = -2;
-                //if there are children then check semantics for every child and save the results
-                for (INode n : declarations)
-                    res.addAll(n.checkSemantics(env));
-            }
-
-            //check body
-            res.addAll(body.checkSemantics(env));
-
-            //close scope
-            env.popHashMap();
-        } catch (RedeclaredVarException e) {
-            res.add(new SemanticError("Fun id " + id + " already declared"));
+        //TODO: Deve per forza avere un parametro di ritorno definito insieme alla funzione? Nel dubbio ho fatto il controllo, controllare che il parametro di ritorno, se dichiarato ID(classe) esista.
+        if (this.id.equals("<missing ID>")) {
+            res.add(new SemanticError("Missing ID or Type in a function."));
         }
+        try {
+            env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
+        } catch (RedeclaredVarException e) {
+            res.add(new SemanticError("function " + id + " already declared"));
+        }
+        env.pushHashMap();
+
+        //check args
+        for (ParameterNode param : params) {
+            res.addAll(param.checkSemantics(env));
+        }
+
+        //check semantics in the dec list
+        if (declarations.size() > 0) {
+            env.offset = -2;
+            //if there are children then check semantics for every child and save the results
+            for (INode n : declarations)
+                res.addAll(n.checkSemantics(env));
+        }
+
+        //check body
+        res.addAll(body.checkSemantics(env));
+
+        //close scope
+        env.popHashMap();
 
 
         return res;
@@ -87,10 +88,11 @@ public class FunNode extends Node {
 
     @Override
     public Type type() throws TypeException {
-        if (declarations != null)
+        if (declarations != null) {
             for (INode dec : declarations) {
                 dec.type();
             }
+        }
         if (!body.type().isSubTypeOf(type)) {  // TODO: [Albi] Controllare che basti exp()
             throw new TypeException("Wrong return type for function: " + id, ctx);
         }

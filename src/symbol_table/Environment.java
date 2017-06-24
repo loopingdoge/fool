@@ -2,6 +2,7 @@ package symbol_table;
 
 import exception.RedeclaredVarException;
 import exception.UndeclaredVarException;
+import type.FunType;
 import type.Type;
 
 import java.util.ArrayList;
@@ -53,6 +54,17 @@ public class Environment {
         while (li.hasPrevious()) {
             HashMap<String, SymbolTableEntry> current = li.previous();
             if (current.containsKey(id)) {
+                return current.get(id);
+            }
+        }
+        throw new UndeclaredVarException(id);
+    }
+
+    public SymbolTableEntry getLatestEntryOfNotFun(String id) throws UndeclaredVarException {
+        ListIterator<HashMap<String, SymbolTableEntry>> li = symbolTable.listIterator(symbolTable.size());
+        while (li.hasPrevious()) {
+            HashMap<String, SymbolTableEntry> current = li.previous();
+            if (current.containsKey(id) && !(current.get(id).getType() instanceof FunType)) {
                 return current.get(id);
             }
         }

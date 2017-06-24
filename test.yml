@@ -148,3 +148,23 @@ test14:
     in
         print(num.getX());
 -   "Error: \"Wrong type for 1-th parameter in the invocation of Numero constructor\" at line 1, column 56."
+
+test15:
+-   class X(int x) {
+        int x() x;
+    };
+    let
+        X x = new X(2);
+    in
+        print(x.x());
+-   "2"
+
+test16:
+-   class X(int x) {
+        int x(int x) x;
+    };
+    let
+        X x = new X(2);
+    in
+        print(x.x(1));
+-   "1"
