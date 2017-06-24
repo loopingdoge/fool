@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 public class ClassType implements Type {
 
     private String classID = "";
-    private String superclassID = "";
+    private ClassType superType = null;
 
     private ArrayList<Field> fields = new ArrayList<>();
     private ArrayList<Method> methods = new ArrayList<>();
 
-    public ClassType(String classID, String superclassID, ArrayList<Field> fields, ArrayList<Method> methods) {
+    public ClassType(String classID, ClassType superType, ArrayList<Field> fields, ArrayList<Method> methods) {
         this.classID = classID;
-        this.superclassID = superclassID;
+        this.superType = superType;
         this.fields = fields;
         this.methods = methods;
     }
@@ -31,7 +31,11 @@ public class ClassType implements Type {
     }
 
     public String getSuperclassID() {
-        return superclassID;
+        return superType.getClassID();
+    }
+
+    public ClassType getSuperClassType() {
+        return superType;
     }
 
     public ArrayList<Field> getFields() {
@@ -85,7 +89,7 @@ public class ClassType implements Type {
     }
 
     public Type getTypeOfMethod(String id) {
-        Field method = this.fields
+        Method method = this.methods
                 .stream()
                 .filter(m -> m.getId().equals(id))
                 .reduce(null, (prev, curr) -> curr);
@@ -102,8 +106,20 @@ public class ClassType implements Type {
     }
 
     @Override
-    public boolean isSubTypeOf(Type t) {
-        return this.getClassID().equals(((ClassType)t).getClassID()) || this.getSuperclassID().equals(((ClassType)t).getClassID());
+    public boolean isSubTypeOf(Type t2) {
+        // Procedo solo se l'altro tipo e' una classe
+        if (t2 instanceof ClassType) {
+            ClassType ct2 = (ClassType) t2;
+            // Se e' della stessa classe
+            if (this.getClassID().equals(ct2.getClassID())) {
+                return true;
+            }
+            // Procedo solo se la mia classe ha un supertipo
+            if (superType != null) {
+                return this.getSuperclassID().equals(ct2.getSuperclassID()) || superType.isSubTypeOf(t2);
+            }
+        }
+        return false;
     }
 
     @Override

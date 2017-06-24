@@ -18,8 +18,13 @@ public class InstanceType implements Type {
     }
 
     @Override
-    public boolean isSubTypeOf(Type t) {
-        return classT.isSubTypeOf(t);
+    public boolean isSubTypeOf(Type t2) {
+        if (t2 instanceof InstanceType) {
+            InstanceType it2 = (InstanceType) t2;
+            return classT.isSubTypeOf(it2.getClassType());
+        } else {
+            return false;
+        }
     }
 
     @Override

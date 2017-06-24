@@ -1,6 +1,5 @@
 package node;
 
-import com.sun.org.apache.bcel.internal.classfile.Code;
 import exception.RedeclaredClassException;
 import exception.RedeclaredVarException;
 import exception.TypeException;
@@ -61,8 +60,15 @@ public class ClassNode extends Node {
             methods.put(fun.getId(), new FunType(paramsType, fun.getType()));
         }
 
+        ClassType superclassType;
         try {
-            this.type = new ClassType(classID, superClassID, fieldsList, methodsList);
+            superclassType = (ClassType) env.getLatestEntryOf(superClassID).getType();
+        } catch (UndeclaredVarException e) {
+            superclassType = null;
+        }
+
+        try {
+            this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.addEntry(classID, this.type, 0);
             CodegenUtils.addClassEntry(classID, this.type);
         } catch (RedeclaredVarException | RedeclaredClassException ex) {

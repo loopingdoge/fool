@@ -1,12 +1,10 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
-import type.BoolType;
-import type.IntType;
-import type.Type;
-import exception.TypeException;
+import type.*;
 
 import java.util.ArrayList;
 
@@ -22,6 +20,9 @@ public class TypeNode extends Node {
                 break;
             case "bool":
                 this.type = new BoolType();
+                break;
+            default:
+                this.type = new InstanceType(new ClassType(type));
                 break;
         }
     }
