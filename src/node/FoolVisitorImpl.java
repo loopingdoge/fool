@@ -49,8 +49,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             ArrayList<ClassNode> classDeclarations = new ArrayList<ClassNode>();
             for (FOOLParser.ClassdecContext dc : ctx.classdec()) {
                 ArrayList<ParameterNode> vars = new ArrayList<ParameterNode>();
-                for (VardecContext varctx : dc.vardec()) {
-                    vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type()));
+                for (int i = 0; i < dc.vardec().size(); i++) {
+                    VardecContext varctx = dc.vardec().get(i);
+                    vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type(), i + 1));
                 }
                 ArrayList<FunNode> funs = new ArrayList<FunNode>();
                 for (FunContext functx : dc.fun()) {
@@ -119,8 +120,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             // add argument declarations
             // we are getting a shortcut here by constructing directly the ParameterNode
             // this could be done differently by visiting instead the VardecContext
-            for (VardecContext vc : ctx.vardec()) {
-                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type()));
+            for (int i = 0; i < ctx.vardec().size(); i++) {
+                VardecContext vc = ctx.vardec().get(i);
+                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type(), i + 1));
             }
 
             // add body, create a list for the nested declarations

@@ -6,7 +6,6 @@ import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import type.FunType;
-import type.FunType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -56,15 +55,9 @@ public class FunNode extends Node {
             env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
             env.pushHashMap();
 
-            int paroffset = 1;
-
             //check args
             for (ParameterNode param : params) {
-                try {
-                    env.addEntry(param.getId(), param.getType(), paroffset++);
-                } catch (RedeclaredVarException e) {
-                    res.add(new SemanticError(e.getMessage()));
-                }
+                res.addAll(param.checkSemantics(env));
             }
 
             //check semantics in the dec list

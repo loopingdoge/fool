@@ -42,7 +42,7 @@ public class ClassNode extends Node {
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
-        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        ArrayList<SemanticError> res = new ArrayList<>();
         ArrayList<Field> fieldsList = new ArrayList<>();
         ArrayList<Method> methodsList = new ArrayList<>();
 
@@ -60,13 +60,14 @@ public class ClassNode extends Node {
             methods.put(fun.getId(), new FunType(paramsType, fun.getType()));
         }
 
-        ClassType superclassType;
+        ClassType superclassType = null;
         try {
             superclassType = (ClassType) env.getLatestEntryOf(superClassID).getType();
         } catch (UndeclaredVarException e) {
             superclassType = null;
         }
 
+        // Creo una entry nella symbol table
         try {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.addEntry(classID, this.type, 0);
@@ -74,7 +75,6 @@ public class ClassNode extends Node {
         } catch (RedeclaredVarException | RedeclaredClassException ex) {
             res.add(new SemanticError(ex.getMessage()));
         }
-
 
         for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));

@@ -1,5 +1,6 @@
 package node;
 
+import exception.RedeclaredVarException;
 import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
@@ -12,11 +13,13 @@ public class ParameterNode extends Node {
 
     private String id;
     private Type type;
+    private int offset;
 
-    public ParameterNode(FOOLParser.VardecContext ctx, String i, Type t) {
+    public ParameterNode(FOOLParser.VardecContext ctx, String id, Type type, int offset) {
         super(ctx);
-        id = i;
-        type = t;
+        this.id = id;
+        this.type = type;
+        this.offset = offset;
     }
 
     public String getId() {
@@ -29,7 +32,13 @@ public class ParameterNode extends Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return new ArrayList<SemanticError>();
+        ArrayList<SemanticError> errors = new ArrayList<>();
+        try {
+            env.addEntry(id, type, offset);
+        } catch (RedeclaredVarException e) {
+            errors.add(new SemanticError(e.getMessage()));
+        }
+        return errors;
     }
 
     @Override
