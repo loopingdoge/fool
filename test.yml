@@ -71,7 +71,7 @@ test7:
 -   print(1);
 -   "1"
 
-# Test one method without params call
+# Test one method without args call
 test8:
 -   class Numero {
         int uno() 1;
@@ -82,7 +82,7 @@ test8:
         print(num.uno());
 -   "1"
 
-# Test two method without params calls
+# Test two method without args calls
 test9:
 -   class Numeri {
         int uno() 1;
@@ -93,3 +93,58 @@ test9:
     in
         num.uno() + num.due();
 -   "3"
+
+# Test one method arguments
+test10:
+-   class Numero {
+        int id(int x) x;
+    };
+    let
+        Numero num = new Numero;
+    in
+        print(num.id(1));
+-   "1"
+
+# Test two method's arguments
+test11:
+-   class Numero {
+        int plus(int x, int y) x + y;
+    };
+    let
+        Numero num = new Numero;
+    in
+        print(num.plus(3, 5));
+-   "8"
+
+# Test wrong method's argument
+test12:
+-   class Numero {
+        int plus(int x, int y) x + y;
+    };
+    let
+        Numero num = new Numero;
+    in
+        print(num.plus(false, 5));
+-   "Error: \"Wrong type for 1-th parameter in the invocation of plus\" at line 1, column 86."
+
+# Test field
+test13:
+-   class Numero(int x) {
+        int getX() x;
+    };
+    let
+        Numero num = new Numero(2);
+    in
+        print(num.getX());
+-   "2"
+
+# Test wrong constructor
+test14:
+-   class Numero(int x) {
+        int getX() x;
+    };
+    let
+        Numero num = new Numero(false);
+    in
+        print(num.getX());
+-   "Error: \"Wrong type for 1-th parameter in the invocation of Numero constructor\" at line 1, column 56."
