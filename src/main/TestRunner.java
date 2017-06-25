@@ -53,12 +53,15 @@ public class TestRunner {
 
     private static int[] codeGeneration(INode ast, String testID, boolean enableLogging) throws IOException {
         String code = ast.codeGeneration();
+        code += CodegenUtils.generateDispatchTablesCode();
+
+
         BufferedWriter out = new BufferedWriter(new FileWriter(testID + ".asm"));
         out.write(code);
         out.close();
 
         if (enableLogging) {
-            System.out.println("Code generated! Assembling and running generated code.");
+            System.out.println("Code generated! Assembling and running generated code: \n" + code);
         }
 
         CharStream inputASM = CharStreams.fromFileName(testID + ".asm");

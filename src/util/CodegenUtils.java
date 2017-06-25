@@ -5,13 +5,16 @@ import exception.UndeclaredClassException;
 import type.ClassType;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class CodegenUtils {
 
-    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
+
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
+    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
+    private static HashMap<String, HashMap<String, String>> dispatchTables = new HashMap<String, HashMap<String, String>>();
 
     public static String freshLabel() {
         return "label" + (label++);
@@ -29,6 +32,7 @@ public class CodegenUtils {
         return functionsCode;
     }
 
+
     public static void addClassEntry( String classID, ClassType classT ) throws RedeclaredClassException {
         if( classTable.get( classID ) != null ) throw new RedeclaredClassException( classID );
         classTable.put( classID, classT );
@@ -38,6 +42,28 @@ public class CodegenUtils {
         ClassType classT = classTable.get( classID );
         if( classT == null ) throw new UndeclaredClassException( classID );
         return classTable.get( classID );
+    }
+
+    public static void addDispatchTable(String classID, HashMap<String, String> dt) {
+        dispatchTables.put(classID, dt);
+    }
+
+    public static HashMap<String, String> getDispatchTable(String classID) {
+        return dispatchTables.get(classID);
+    }
+
+    public static String generateDispatchTablesCode() {
+        String dtCodes = "";
+        // For every dispatch table
+        for(Map.Entry<String, HashMap<String, String>> dt : dispatchTables.entrySet()) {
+            // TODO: [DEVID] vedere se e' il caso di togliere dei newline qui sotto. Occupano una cella nel codice?
+            dtCodes += "\n" + "class_" + dt.getKey().toLowerCase() + ": \n";
+            // For every method in the dispatch table
+            for(Map.Entry<String, String> method : dispatchTables.get(dt.getKey()).entrySet()) {
+                dtCodes += method.getValue();
+            }
+        }
+        return dtCodes;
     }
 
     public static void reset() {

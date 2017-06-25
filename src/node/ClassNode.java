@@ -162,7 +162,19 @@ public class ClassNode extends Node {
 
     @Override
     public String codeGeneration() {
-        // TODO: implement
+
+        // creo una nuova dispatch table
+        HashMap<String, String> dispatchTable = new HashMap<String, String>();
+        if (superClassID != "") dispatchTable = new HashMap<String, String>(CodegenUtils.getDispatchTable(superClassID));
+
+        // aggiungo i metodi nuovi / sovrascrivo quelli sovrascritti
+        if(fundeclist != null)
+            for (FunNode method : fundeclist)
+                dispatchTable.put(method.getId(), method.codeGeneration());
+
+        // la aggiungo alla lista di dispatch tables
+        CodegenUtils.addDispatchTable(classID, dispatchTable);
+
         return "";
     }
 
