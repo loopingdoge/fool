@@ -16,7 +16,7 @@ public class FunCallNode extends Node {
 
     protected String id;
     protected ArrayList<INode> params = new ArrayList<INode>();
-    protected SymbolTableEntry entry;
+    protected SymbolTableEntry entry = null;
     protected int callNestingLevel;
 
     public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
@@ -56,6 +56,7 @@ public class FunCallNode extends Node {
     @Override
     public Type type() throws TypeException {
         FunType t;
+
         if (entry.getType().getID().equals(TypeID.FUN)) {
             t = (FunType) entry.getType();
         } else {

@@ -329,11 +329,12 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     @Override
     public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
         ArrayList<INode> args = new ArrayList<>();
-        for (ExpContext exp : ctx.exp()) {
+        for (ExpContext exp : ctx.funcall().exp()) {
             args.add(visit(exp));
         }
 
-        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
+//        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
+        String methodId = ctx.funcall().ID().getText();
         String objectId = ctx.THIS() != null ?
                 ctx.THIS().getText()
                 :

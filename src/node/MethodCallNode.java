@@ -1,13 +1,12 @@
 package node;
 
+import exception.TypeException;
 import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import type.ClassType;
-import type.InstanceType;
-import type.Type;
+import type.*;
 
 import java.util.ArrayList;
 

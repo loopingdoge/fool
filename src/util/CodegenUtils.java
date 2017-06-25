@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class CodegenUtils {
 
-
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
