@@ -72,11 +72,14 @@ value
     | IF cond=exp THEN CLPAR thenBranch=exp CRPAR ELSE CLPAR elseBranch=exp CRPAR   #ifExp
     | ID                                                                            #varExp
     | THIS                                                                          #thisExp
-    | ID ( LPAR (exp (COMMA exp)* )? RPAR )                                         #funExp
-    | (ID | THIS) DOT ID ( LPAR (exp (COMMA exp)* )? RPAR )	                        #methodExp
+    | funcall                                                                       #funExp
+    | (ID | THIS) DOT funcall                           	                        #methodExp
     | NEW ID (LPAR exp (COMMA exp)* RPAR)?			                                #newExp
     ;
 
+funcall
+    : ID ( LPAR (exp (COMMA exp)* )? RPAR )
+    ;
 
 /*------------------------------------------------------------------
  * LEXER RULES

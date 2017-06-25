@@ -137,6 +137,9 @@ public class ExecuteVM {
                     }
                     // A questo punto dovrei aver usato tutta la memoria allocata
                     assert allocatedMemory == null;
+                    System.out.println("Memory:");
+                    for (int mem : memory)
+                        System.out.println(mem);
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;

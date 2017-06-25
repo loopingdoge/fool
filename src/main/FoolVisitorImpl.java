@@ -7,7 +7,6 @@ import grammar.FOOLParser;
 import grammar.FOOLParser.*;
 import node.*;
 import type.Type;
-import util.Method;
 
 import java.util.ArrayList;
 
@@ -324,6 +323,26 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitFunExp(FunExpContext ctx) {
+        return visit(ctx.funcall());
+    }
+
+    @Override
+    public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
+        ArrayList<INode> args = new ArrayList<>();
+        for (ExpContext exp : ctx.exp()) {
+            args.add(visit(exp));
+        }
+
+        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
+        String objectId = ctx.THIS() != null ?
+                ctx.THIS().getText()
+                :
+                ctx.ID().getText();
+        return new MethodCallNode(ctx, objectId, methodId, new ArgumentsNode(ctx, args));
+    }
+
+    @Override
+    public INode visitFuncall(FOOLParser.FuncallContext ctx) {
         //this corresponds to a function invocation
 
         //declare the result
@@ -342,25 +361,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             res = new PrintNode(ctx, args.get(0));
         } else {
             //instantiate the invocation
-            res = new CallNode(ctx, ctx.ID().getText(), args);
+            res = new FunCallNode(ctx, ctx.ID().getText(), args);
         }
-
         return res;
-    }
-
-    @Override
-    public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
-        ArrayList<INode> args = new ArrayList<>();
-        for (ExpContext exp : ctx.exp()) {
-            args.add(visit(exp));
-        }
-
-        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
-        String objectId = ctx.THIS() != null ?
-                ctx.THIS().getText()
-                :
-                ctx.ID(0).getText();
-        return new MethodCallNode(ctx, objectId, methodId, new ArgumentsNode(ctx, args));
     }
 
     @Override

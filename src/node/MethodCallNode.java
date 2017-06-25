@@ -1,16 +1,17 @@
 package node;
 
-import exception.TypeException;
 import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import type.*;
+import type.ClassType;
+import type.InstanceType;
+import type.Type;
 
 import java.util.ArrayList;
 
-public class MethodCallNode extends Node {
+public class MethodCallNode extends FunCallNode {
 
     private String objectId;
     private String methodId;
@@ -18,7 +19,7 @@ public class MethodCallNode extends Node {
     private Type methodType;
 
     public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectId, String methodId, ArgumentsNode args) {
-        super(ctx);
+        super(ctx.funcall(), methodId, args.getChilds());
         this.objectId = objectId;
         this.methodId = methodId;
         this.args = args;
@@ -29,10 +30,14 @@ public class MethodCallNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<>();
 
         try {
-            Type tempClassType = new VoidType();
             ClassType classType = null;
             if (objectId.equals("this")) {
-                tempClassType = env.getLatestEntry().getType();
+                Type objectType = env.getLatestEntry().getType();
+                if (objectType instanceof ClassType) {
+                    classType = (ClassType) objectType;
+                } else {
+                    res.add(new SemanticError("Can't call this outside a class"));
+                }
             } else {
                 Type objectType = env.getLatestEntryOf(objectId).getType();
                 // Controllo che il metodo sia stato chiamato su un oggetto
@@ -66,34 +71,16 @@ public class MethodCallNode extends Node {
     }
 
     @Override
-    public Type type() throws TypeException {
-        if (this.methodType instanceof FunType) {
-            FunType funType = (FunType) this.methodType;
-            ArrayList<Type> args = funType.getParams();
-            if (!(args.size() == this.args.size())) {
-                throw new TypeException("Wrong number of parameters in the invocation of " + methodId, ctx);
-            }
-            for (int i = 0; i < this.args.size(); i++) {
-                if (!this.args.get(i).type().isSubTypeOf(args.get(i))) {
-                    throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + methodId, ctx);
-                }
-            }
-            return funType.getReturnType();
-        } else {
-            throw new TypeException("Invocation of a non-method " + methodId, ctx);
-        }
-    }
-
-    @Override
     public String codeGeneration() {
-        return "Method codegen not implemented yet";
-    }
+        StringBuilder parCode = new StringBuilder();
+        for (int i = params.size() - 1; i >= 0; i--)
+            parCode.append(params.get(i).codeGeneration());
 
-    @Override
-    public ArrayList<INode> getChilds() {
-        ArrayList<INode> childs = new ArrayList<>();
-        childs.add(args);
-        return childs;
+        return "lfp\n" + //CL
+                parCode +
+                "push " + objectId +
+                "lw\n" + //carico sullo stack il valore all'indirizzo ottenuto
+                "js\n";
     }
 
     @Override
