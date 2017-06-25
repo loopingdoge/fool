@@ -333,7 +333,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             args.add(visit(exp));
         }
 
-//        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
         String methodId = ctx.funcall().ID().getText();
         String objectId = ctx.THIS() != null ?
                 ctx.THIS().getText()
@@ -358,7 +357,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         //especial check for stdlib func
         //this is WRONG, THIS SHOULD BE DONE IN A DIFFERENT WAY
         //JUST IMAGINE THERE ARE 800 stdlib functions...
-        if (ctx.ID().getText().equals("print")) {
+        if (ctx.ID().getText().equals("print")) { // TODO: [DEVID] si potrebbe modificare la grammatica per gestire la print per conto suo
             res = new PrintNode(ctx, args.get(0));
         } else {
             //instantiate the invocation

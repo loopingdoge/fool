@@ -57,6 +57,7 @@ public class FunCallNode extends Node {
     public Type type() throws TypeException {
         FunType t;
 
+        // TODO: [DEVID] questi controlli non dovrebbero essere in checksemantics?
         if (entry.getType().getID().equals(TypeID.FUN)) {
             t = (FunType) entry.getType();
         } else {

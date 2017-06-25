@@ -29,6 +29,7 @@ public class MethodCallNode extends FunCallNode {
         ArrayList<SemanticError> res = new ArrayList<>();
 
         try {
+
             ClassType classType = null;
             if (objectId.equals("this")) {
                 Type objectType = env.getLatestEntry().getType();
@@ -56,6 +57,7 @@ public class MethodCallNode extends FunCallNode {
             ClassType objectClass = (ClassType) classEntry.getType();
             // Controllo che il metodo esista all'interno della classe
             this.methodType = objectClass.getTypeOfMethod(methodId);
+
             if (this.methodType == null) {
                 res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + "method."));
             }
@@ -67,6 +69,21 @@ public class MethodCallNode extends FunCallNode {
         args.checkSemantics(env);
 
         return res;
+    }
+
+    @Override
+    public Type type() throws TypeException {
+        FunType t = (FunType) this.methodType;
+
+        ArrayList<Type> p = t.getParams();
+        if (!(p.size() == params.size())) {
+            throw new TypeException("Wrong number of parameters in the invocation of " + id, ctx);
+        }
+        for (int i = 0; i < params.size(); i++)
+            if (!params.get(i).type().isSubTypeOf(p.get(i))) {
+                throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + id, ctx);
+            }
+        return t.getReturnType();
     }
 
     @Override
