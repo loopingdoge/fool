@@ -7,7 +7,6 @@ import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.SVMLexer;
 import grammar.SVMParser;
-import node.FoolVisitorImpl;
 import node.INode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

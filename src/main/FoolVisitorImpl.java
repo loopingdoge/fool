@@ -1,10 +1,11 @@
-package node;
+package main;
 
 import exception.TypeException;
 import grammar.FOOLBaseVisitor;
 import grammar.FOOLLexer;
 import grammar.FOOLParser;
 import grammar.FOOLParser.*;
+import node.*;
 import type.Type;
 
 import java.util.ArrayList;
