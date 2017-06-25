@@ -22,6 +22,9 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
+    private HeapMemory heap = new HeapMemory(2000);
+    private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
+
     public ExecuteVM(int[] code) {
         this.code = code;
     }
@@ -116,6 +119,24 @@ public class ExecuteVM {
                 case SVMParser.PRINT:
                     System.out.println((sp < MEMSIZE) ? memory[sp] : "Empty stack!");
                     outputBuffer.add((sp < MEMSIZE) ? Integer.toString(memory[sp]) : "Empty stack!");
+                    break;
+                case SVMParser.NEW:
+                    // Il numero di argomenti per il new e' sulla testa dello stack
+                    int nargs = pop();
+                    // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
+                    HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
+                    // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
+                    heapMemoryInUse.add(allocatedMemory);
+                    // Inserisco l'indirizzo della dispatch table ed avanzo nella memoria ottenuta
+                    memory[allocatedMemory.getIndex()] = 0; // TODO: al posto di zero ci va l'indirizzo di memoria della dispatch table
+                    allocatedMemory = allocatedMemory.next;
+                    // Inserisco un argument in ogni indirizzo di memoria
+                    for (int i = 0; i < nargs; i++) {
+                        memory[allocatedMemory.getIndex()] = pop();
+                        allocatedMemory = allocatedMemory.next;
+                    }
+                    // A questo punto dovrei aver usato tutta la memoria allocata
+                    assert allocatedMemory == null;
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;
