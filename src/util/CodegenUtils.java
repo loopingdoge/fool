@@ -57,7 +57,7 @@ public class CodegenUtils {
         // For every dispatch table
         for(Map.Entry<String, HashMap<String, String>> dt : dispatchTables.entrySet()) {
             // TODO: [DEVID] vedere se e' il caso di togliere dei newline qui sotto. Occupano una cella nel codice?
-            dtCodes += "\n" + "class_" + dt.getKey().toLowerCase() + ": \n";
+            dtCodes += "\n" + "class" + dt.getKey().toLowerCase() + ": \n";
             // For every method in the dispatch table
             for(Map.Entry<String, String> method : dispatchTables.get(dt.getKey()).entrySet()) {
                 dtCodes += method.getValue();
