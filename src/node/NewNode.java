@@ -6,7 +6,6 @@ import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
-import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.InstanceType;
 import type.Type;
@@ -20,8 +19,6 @@ public class NewNode extends Node {
     private String classID;
     private ClassType classType;
     private ArrayList<INode> args;
-    private SymbolTableEntry entry;
-    private int nestinglevel;
 
     public NewNode(FOOLParser.NewExpContext ctx, String classID, ArrayList<INode> args) {
         super(ctx);
@@ -30,13 +27,8 @@ public class NewNode extends Node {
     }
 
     @Override
-    public String codeGeneration() {
-        return "New node not implemented yet";
-    }
-
-    @Override
     public ArrayList<INode> getChilds() {
-        ArrayList<INode> res = new ArrayList<INode>();
+        ArrayList<INode> res = new ArrayList<>();
 
         res.addAll(args);
 
@@ -61,8 +53,7 @@ public class NewNode extends Node {
         }
 
         try {
-            this.entry = env.getLatestEntryOf(this.classID);
-            this.nestinglevel = env.getNestingLevel();
+            env.getLatestEntryOf(this.classID);
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
         }
@@ -81,6 +72,17 @@ public class NewNode extends Node {
             }
         }
         return new InstanceType(classType);
+    }
+
+    @Override
+    public String codeGeneration() {
+        StringBuilder argsCode = new StringBuilder();
+        for (INode arg : args) {
+            argsCode.append(arg.codeGeneration());
+        }
+        return argsCode
+                + "push " + args.size() + "\n"
+                + "new\n";
     }
 
     @Override
