@@ -24,19 +24,19 @@ public class ClassNode extends Node {
     private String classID;
     private String superClassID;
     private ArrayList<ParameterNode> vardeclist;
-    private ArrayList<FunNode> fundeclist;
+    private ArrayList<MethodNode> metdeclist; // TODO: refactor fundec -> methoddec
 
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, FunType> methods = new HashMap<>();
 
     private ClassType type;
 
-    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> vardeclist, ArrayList<FunNode> fundeclist) {
+    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> vardeclist, ArrayList<MethodNode> metdeclist) {
         super(ctx);
         this.classID = classID;
         this.superClassID = superClassID;
         this.vardeclist = vardeclist;
-        this.fundeclist = fundeclist;
+        this.metdeclist = metdeclist;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ClassNode extends Node {
             fieldsList.add(new Field(var.getId(), var.getType()));
             fields.put(var.getId(), var.getType());
         }
-        for (FunNode fun : fundeclist) {
+        for (MethodNode fun : metdeclist) {
             ArrayList<Type> paramsType = new ArrayList<>();
             for (ParameterNode param : fun.getParams()) {
                 paramsType.add(param.getType());
@@ -81,7 +81,7 @@ public class ClassNode extends Node {
             res.addAll(var.checkSemantics(env));
         }
         env.pushHashMap();
-        for (FunNode fun : fundeclist) {
+        for (MethodNode fun : metdeclist) {
             res.addAll(fun.checkSemantics(env));
         }
         env.popHashMap().popHashMap();
@@ -149,7 +149,7 @@ public class ClassNode extends Node {
             vardec.type();
         }
 
-        for (FunNode fundec : fundeclist) {
+        for (MethodNode fundec : metdeclist) {
             fundec.type();
         }
 
@@ -168,8 +168,8 @@ public class ClassNode extends Node {
         if (superClassID != "") dispatchTable = new HashMap<String, String>(CodegenUtils.getDispatchTable(superClassID));
 
         // aggiungo i metodi nuovi / sovrascrivo quelli sovrascritti
-        if(fundeclist.size() > 0)
-            for (FunNode method : fundeclist)
+        if(metdeclist.size() > 0)
+            for (MethodNode method : metdeclist)
                 dispatchTable.put(method.getId(), method.codeGeneration());
 
         if(dispatchTable.entrySet().size() > 0) CodegenUtils.addDispatchTable(classID, dispatchTable);
@@ -181,7 +181,7 @@ public class ClassNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> res = new ArrayList<INode>();
         res.addAll(vardeclist);
-        res.addAll(fundeclist);
+        res.addAll(metdeclist);
         return res;
     }
 

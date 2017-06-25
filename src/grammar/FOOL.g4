@@ -18,7 +18,7 @@ prog
     ;
 
 classdec
-    : CLASS ID ( IMPLEMENTS ID )? (LPAR vardec ( COMMA vardec)* RPAR)?  (CLPAR (fun SEMIC)+ CRPAR)?
+    : CLASS ID ( IMPLEMENTS ID )? (LPAR vardec ( COMMA vardec)* RPAR)?  (CLPAR (met SEMIC)+ CRPAR)?
     ;
 
 let
@@ -35,6 +35,10 @@ varasm
 
 fun
     : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp
+    ;
+
+met
+    : fun
     ;
 
 dec

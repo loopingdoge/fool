@@ -84,7 +84,7 @@ public class CallNode extends Node {
 
         return "lfp\n" + //CL
                 parCode +
-                "lfp\n" + getAR + //setto AL risalendo la catena statica
+                "lfp\n" + getAR + //setto AR risalendo la catena statica
                 // ora recupero l'indirizzo a cui saltare e lo metto sullo stack
                 "push " + entry.getOffset() + "\n" + //metto offset sullo stack
                 "lfp\n" + getAR + //risalgo la catena statica

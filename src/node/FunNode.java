@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 public class FunNode extends Node {
 
-    private String id;
-    private Type type;
-    private ArrayList<ParameterNode> params = new ArrayList<>();
-    private ArrayList<INode> declarations;
-    private INode body;
+    protected String id;
+    protected Type type;
+    protected ArrayList<ParameterNode> params = new ArrayList<>();
+    protected ArrayList<INode> declarations;
+    protected INode body;
 
     public FunNode(ParserRuleContext ctx, String id, Type type, ArrayList<ParameterNode> params, ArrayList<INode> declarations, INode body) {
         super(ctx);

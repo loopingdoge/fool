@@ -7,6 +7,7 @@ import grammar.FOOLParser;
 import grammar.FOOLParser.*;
 import node.*;
 import type.Type;
+import util.Method;
 
 import java.util.ArrayList;
 
@@ -54,16 +55,18 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                     VardecContext varctx = dc.vardec().get(i);
                     vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type(), i + 1));
                 }
-                ArrayList<FunNode> funs = new ArrayList<FunNode>();
-                for (FunContext functx : dc.fun()) {
-                    funs.add((FunNode) visit(functx));
+                ArrayList<MethodNode> mets = new ArrayList<MethodNode>();
+                for (MetContext functx : dc.met()) {
+                    MethodNode method = (MethodNode) visit(functx);
+                    method.setClassID(dc.ID(0).getText()); // TODO: [DEVID] si riesce a prendere la classe in VisitMet?
+                    mets.add(method);
                 }
 
                 ClassNode classNode;
                 if (dc.ID(1) == null) {
-                    classNode = new ClassNode(dc, dc.ID(0).getText(), "", vars, funs);
+                    classNode = new ClassNode(dc, dc.ID(0).getText(), "", vars, mets);
                 } else {
-                    classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID().get(1).getText(), vars, funs);
+                    classNode = new ClassNode(dc, dc.ID(0).getText(), dc.ID().get(1).getText(), vars, mets);
                 }
                 classDeclarations.add(classNode);
             }
@@ -139,6 +142,40 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             INode body = visit(ctx.exp());
 
             return new FunNode(ctx, ctx.ID().getText(), visit(ctx.type()).type(), params, declarations, body);
+        } catch (TypeException e) {
+            return new ErrorNode(e);
+        }
+    }
+
+    @Override
+    public INode visitMet(FOOLParser.MetContext ctx) {
+        try {
+            // Get FunContext since Meth is just Fun (Walter White quote)
+            FunContext fctx = ctx.fun();
+            // initialize @res with the visits to the type and its ID
+            ArrayList<ParameterNode> params = new ArrayList<>();
+
+            // add argument declarations
+            // we are getting a shortcut here by constructing directly the ParameterNode
+            // this could be done differently by visiting instead the VardecContext
+            for (int i = 0; i < fctx.vardec().size(); i++) {
+                VardecContext vc = fctx.vardec().get(i);
+                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type(), i + 1));
+            }
+
+            // add body, create a list for the nested declarations
+            ArrayList<INode> declarations = new ArrayList<INode>();
+            // check whether there are actually nested decs
+            if (fctx.let() != null) {
+                // if there are visit each dec and add it to the @innerDec list
+                for (DecContext dc : fctx.let().dec())
+                    declarations.add(visit(dc));
+            }
+
+            // get the exp body
+            INode body = visit(fctx.exp());
+
+            return new MethodNode(fctx, fctx.ID().getText(), visit(fctx.type()).type(), params, declarations, body);
         } catch (TypeException e) {
             return new ErrorNode(e);
         }
