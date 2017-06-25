@@ -168,12 +168,11 @@ public class ClassNode extends Node {
         if (superClassID != "") dispatchTable = new HashMap<String, String>(CodegenUtils.getDispatchTable(superClassID));
 
         // aggiungo i metodi nuovi / sovrascrivo quelli sovrascritti
-        if(fundeclist != null)
+        if(fundeclist.size() > 0)
             for (FunNode method : fundeclist)
                 dispatchTable.put(method.getId(), method.codeGeneration());
 
-        // la aggiungo alla lista di dispatch tables
-        CodegenUtils.addDispatchTable(classID, dispatchTable);
+        if(dispatchTable.entrySet().size() > 0) CodegenUtils.addDispatchTable(classID, dispatchTable);
 
         return "";
     }

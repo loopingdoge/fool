@@ -24,6 +24,10 @@ public class CodegenUtils {
         return "function" + (functionsLabelCount++);
     }
 
+    public static String freshDispatchTableLabel(String classID) {
+        return "class" + classID;
+    }
+
     public static void insertFunctionsCode(String c) {
         functionsCode += "\n" + c; // aggiunge una linea vuota di separazione prima di funzione
     }
@@ -44,6 +48,7 @@ public class CodegenUtils {
         return classTable.get( classID );
     }
 
+    // TODO: gestione errori?
     public static void addDispatchTable(String classID, HashMap<String, String> dt) {
         dispatchTables.put(classID, dt);
     }
@@ -52,13 +57,17 @@ public class CodegenUtils {
         return dispatchTables.get(classID);
     }
 
+    public static String getDispatchTablePointer(String classID) {
+        return "push " + freshDispatchTableLabel(classID);
+    }
+
     public static String generateDispatchTablesCode() {
         String dtCodes = "";
-        // For every dispatch table
+        // For every class
         for(Map.Entry<String, HashMap<String, String>> dt : dispatchTables.entrySet()) {
-            // TODO: [DEVID] vedere se e' il caso di togliere dei newline qui sotto. Occupano una cella nel codice?
-            dtCodes += "\n" + "class" + dt.getKey().toLowerCase() + ": \n";
-            // For every method in the dispatch table
+            // Creates a DT label
+            dtCodes += freshDispatchTableLabel(dt.getKey()) + ":\n";
+            // For every method in the DT
             for(Map.Entry<String, String> method : dispatchTables.get(dt.getKey()).entrySet()) {
                 dtCodes += method.getValue();
             }
