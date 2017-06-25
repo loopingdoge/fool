@@ -14,7 +14,7 @@ class HeapMemory {
         freelist[size - 1] = new HeapMemoryCell(size - 1, null);
 
         // Tutti gli altri puntano al successivo
-        for (int i = size - 2; i >= 0; i++) {
+        for (int i = size - 2; i >= 0; i--) {
             freelist[i] = new HeapMemoryCell(i, freelist[i + 1]);
         }
 
