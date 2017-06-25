@@ -1,13 +1,23 @@
 package vm;
 
-public class HeapMemoryCell {
+class HeapMemoryCell {
 
-    public int value;
-    public HeapMemoryCell next;
+    /**
+     * La prossima cella di memoria libera
+     */
+    HeapMemoryCell next;
+    /**
+     * L'indice di memoria corrispondente a questa cella
+     */
+    private int index;
 
-    public HeapMemoryCell(int value, HeapMemoryCell next) {
-        this.value = value;
+    HeapMemoryCell(int index, HeapMemoryCell next) {
+        this.index = index;
         this.next = next;
+    }
+
+    int getIndex() {
+        return this.index;
     }
 
 }
