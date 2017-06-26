@@ -1,10 +1,10 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import type.Type;
-import exception.TypeException;
 
 import java.util.ArrayList;
 
@@ -12,7 +12,7 @@ public class PrintNode extends Node {
 
     private INode val;
 
-    public PrintNode(FOOLParser.FunExpContext ctx, INode v) {
+    public PrintNode(FOOLParser.FuncallContext ctx, INode v) {
         super(ctx);
         val = v;
     }

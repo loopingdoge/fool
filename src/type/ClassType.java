@@ -1,5 +1,6 @@
 package type;
 
+import exception.UndeclaredMethodException;
 import util.Field;
 import util.Method;
 
@@ -60,6 +61,15 @@ public class ClassType implements Type {
             methodsMap.put(m.getId(), m.getType());
         }
         return methodsMap;
+    }
+
+    public int getOffsetOfMethod(String methodID) throws UndeclaredMethodException {
+        for (int i = 0; i < methods.size(); i++) {
+            if (methods.get(i).getId().equals(methodID)) {
+                return i + 1;   // + 1 perche' il primo metodo e' nella riga di code[dispatch_table_start] + 1
+            }
+        }
+        throw new UndeclaredMethodException(methodID);
     }
 
     public boolean containsID(String id) {

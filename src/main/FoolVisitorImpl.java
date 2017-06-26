@@ -323,6 +323,26 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitFunExp(FunExpContext ctx) {
+        return visit(ctx.funcall());
+    }
+
+    @Override
+    public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
+        ArrayList<INode> args = new ArrayList<>();
+        for (ExpContext exp : ctx.funcall().exp()) {
+            args.add(visit(exp));
+        }
+
+        String methodId = ctx.funcall().ID().getText();
+        String objectId = ctx.THIS() != null ?
+                ctx.THIS().getText()
+                :
+                ctx.ID().getText();
+        return new MethodCallNode(ctx, objectId, methodId, new ArgumentsNode(ctx, args));
+    }
+
+    @Override
+    public INode visitFuncall(FOOLParser.FuncallContext ctx) {
         //this corresponds to a function invocation
 
         //declare the result
@@ -337,29 +357,13 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         //especial check for stdlib func
         //this is WRONG, THIS SHOULD BE DONE IN A DIFFERENT WAY
         //JUST IMAGINE THERE ARE 800 stdlib functions...
-        if (ctx.ID().getText().equals("print")) {
+        if (ctx.ID().getText().equals("print")) { // TODO: [DEVID] si potrebbe modificare la grammatica per gestire la print per conto suo
             res = new PrintNode(ctx, args.get(0));
         } else {
             //instantiate the invocation
             res = new FunCallNode(ctx, ctx.ID().getText(), args);
         }
-
         return res;
-    }
-
-    @Override
-    public INode visitMethodExp(FOOLParser.MethodExpContext ctx) {
-        ArrayList<INode> args = new ArrayList<>();
-        for (ExpContext exp : ctx.exp()) {
-            args.add(visit(exp));
-        }
-
-        String methodId = ctx.ID(ctx.ID().size() - 1).getText();
-        String objectId = ctx.THIS() != null ?
-                ctx.THIS().getText()
-                :
-                ctx.ID(0).getText();
-        return new MethodCallNode(ctx, objectId, methodId, new ArgumentsNode(ctx, args));
     }
 
     @Override

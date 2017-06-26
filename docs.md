@@ -101,7 +101,7 @@ Si dispone di:
 
 ## Validazione di tipo
 - Scorrere `args` con un indice `i = 0`:
-  - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(method_type.params[i])`
+  - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(method_type.args[i])`
 
 ## Code generation
 - TODO

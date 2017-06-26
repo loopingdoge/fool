@@ -85,6 +85,7 @@ public class NewNode extends Node {
         }
         return argsCode
                 + "push " + args.size() + "\n"
+                + CodegenUtils.getDispatchTablePointer(classID) + "\n"
                 + "new\n";
     }
 
