@@ -139,7 +139,8 @@ public class ExecuteVM {
                     assert allocatedMemory == null;
                     System.out.println("Memory:");
                     for (int mem : memory)
-                        System.out.println(mem);
+                        System.out.print(mem + " ");
+                    System.out.println();
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;
