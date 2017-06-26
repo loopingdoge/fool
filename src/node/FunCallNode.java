@@ -14,12 +14,12 @@ import java.util.ArrayList;
 
 public class FunCallNode extends Node {
 
-    private String id;
-    private ArrayList<INode> params = new ArrayList<INode>();
-    private SymbolTableEntry entry;
-    private int callNestingLevel;
+    protected String id;
+    protected ArrayList<INode> params = new ArrayList<INode>();
+    protected SymbolTableEntry entry = null;
+    protected int callNestingLevel;
 
-    public FunCallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
+    public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
         super(ctx);
         this.id = id;
         this.params = params;
@@ -27,7 +27,7 @@ public class FunCallNode extends Node {
         this.callNestingLevel = nestingLevel;
     }
 
-    public FunCallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params) {
+    public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArrayList<INode> params) {
         super(ctx);
         this.id = id;
         this.params = params;
@@ -56,6 +56,8 @@ public class FunCallNode extends Node {
     @Override
     public Type type() throws TypeException {
         FunType t;
+
+        // TODO: [DEVID] questi controlli non dovrebbero essere in checksemantics?
         if (entry.getType().getID().equals(TypeID.FUN)) {
             t = (FunType) entry.getType();
         } else {
@@ -73,6 +75,7 @@ public class FunCallNode extends Node {
         return t.getReturnType();
     }
 
+    @Override
     public String codeGeneration() {
         StringBuilder parCode = new StringBuilder();
         for (int i = params.size() - 1; i >= 0; i--)
@@ -84,7 +87,7 @@ public class FunCallNode extends Node {
 
         return "lfp\n" + //CL
                 parCode +
-                "lfp\n" + getAR + //setto AR risalendo la catena statica
+                "lfp\n" + getAR + //setto AL risalendo la catena statica
                 // ora recupero l'indirizzo a cui saltare e lo metto sullo stack
                 "push " + entry.getOffset() + "\n" + //metto offset sullo stack
                 "lfp\n" + getAR + //risalgo la catena statica
@@ -97,7 +100,7 @@ public class FunCallNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 
-        if(params != null && params.size()>0)
+        if (params != null && params.size() > 0)
             childs.addAll(params);
 
         return childs;
@@ -105,7 +108,6 @@ public class FunCallNode extends Node {
 
     @Override
     public String toString() {
-        return id + "()";
+        return "Call -> " + id;
     }
-
-}  
+}
