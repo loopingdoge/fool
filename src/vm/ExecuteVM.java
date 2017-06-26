@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ExecuteVM {
 
     public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 10000;    // TODO: calculate this
+    public static final int MEMSIZE = 50;    // TODO: calculate this
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(2000);
+    private HeapMemory heap = new HeapMemory(10);
     private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
 
     public ExecuteVM(int[] code) {
@@ -34,6 +34,10 @@ public class ExecuteVM {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
             int address;
+            System.out.println(bytecode + " :");
+            for (int mem : memory)
+                System.out.print(mem + " ");
+            System.out.println();
             switch (bytecode) {
                 case SVMParser.PUSH:
                     push(code[ip++]);
@@ -124,26 +128,26 @@ public class ExecuteVM {
                     // Il numero di argomenti per il new e' sulla testa dello stack
                     int dispatchTableAddress = pop();
                     int nargs = pop();
+                    int[] args = new int[nargs];
+                    // Poppo gli argomenti
+                    for (int i = nargs - 1; i >= 0; i--) args[i] = pop();
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
                     HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
                     // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
                     heapMemoryInUse.add(allocatedMemory);
-                    // Metto sullo stack l'indirizzo della prima cella dell'oggetto che ho istanziato
-                    push(allocatedMemory.getIndex());
+                    int heapMemoryStart = allocatedMemory.getIndex();
                     // Inserisco l'indirizzo della dispatch table ed avanzo nella memoria ottenuta
                     memory[allocatedMemory.getIndex()] = dispatchTableAddress;
                     allocatedMemory = allocatedMemory.next;
                     // Inserisco un argument in ogni indirizzo di memoria
                     for (int i = 0; i < nargs; i++) {
-                        memory[allocatedMemory.getIndex()] = pop();
+                        memory[allocatedMemory.getIndex()] = args[i];
                         allocatedMemory = allocatedMemory.next;
                     }
+                    // Metto sullo stack l'indirizzo della prima cella dell'oggetto che ho istanziato
+                    push(heapMemoryStart);
                     // A questo punto dovrei aver usato tutta la memoria allocata
                     assert allocatedMemory == null;
-                    System.out.println("Memory:");
-                    for (int mem : memory)
-                        System.out.print(mem + " ");
-                    System.out.println();
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;
@@ -152,7 +156,9 @@ public class ExecuteVM {
     }
 
     private int pop() {
-        return memory[sp++];
+        int res = memory[sp];
+        memory[sp++] = 0;
+        return res;
     }
 
     private void push(int v) {
