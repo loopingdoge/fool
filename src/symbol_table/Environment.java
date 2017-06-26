@@ -49,6 +49,18 @@ public class Environment {
         return this;
     }
 
+    public Environment addEntry(String id, Type type, int offset, boolean isInsideClass) throws RedeclaredVarException {
+        SymbolTableEntry newEntry = new SymbolTableEntry(getNestingLevel(), type, offset, isInsideClass);
+        SymbolTableEntry oldEntry = this.symbolTable
+                .get(this.symbolTable.size() - 1)
+                .put(id, newEntry);
+        latestEntry = newEntry;
+        if (oldEntry != null) {
+            throw new RedeclaredVarException(id);
+        }
+        return this;
+    }
+
     public SymbolTableEntry getLatestEntryOf(String id) throws UndeclaredVarException {
         ListIterator<HashMap<String, SymbolTableEntry>> li = symbolTable.listIterator(symbolTable.size());
         while (li.hasPrevious()) {

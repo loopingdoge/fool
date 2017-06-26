@@ -10,6 +10,7 @@ import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
 import util.DispatchTableEntry;
@@ -25,7 +26,7 @@ public class ClassNode extends Node {
     private String classID;
     private String superClassID;
     private ArrayList<ParameterNode> vardeclist;
-    private ArrayList<MethodNode> metdeclist; // TODO: refactor fundec -> methoddec
+    private ArrayList<MethodNode> metdeclist;
 
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, FunType> methods = new HashMap<>();
@@ -73,14 +74,20 @@ public class ClassNode extends Node {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.addEntry(classID, this.type, 0);
             CodegenUtils.addClassEntry(classID, this.type);
-        } catch (RedeclaredVarException | RedeclaredClassException ex) {
-            res.add(new SemanticError(ex.getMessage()));
+        } catch (RedeclaredVarException | RedeclaredClassException e) {
+            res.add(new SemanticError(e.getMessage()));
         }
 
         env.pushHashMap();
         for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));
         }
+        try {
+            env.addEntry("this", new InstanceType(type), vardeclist.size() + 1 );
+        } catch (RedeclaredVarException e) {
+            e.printStackTrace();
+        }
+
         env.pushHashMap();
         for (MethodNode fun : metdeclist) {
             res.addAll(fun.checkSemantics(env));

@@ -21,13 +21,6 @@ public class MinusNode extends Node {
     }
 
     @Override
-    public String codeGeneration() {
-        return left.codeGeneration()
-                + right.codeGeneration()
-                + "sub\n";
-    }
-
-    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
@@ -45,6 +38,14 @@ public class MinusNode extends Node {
             throw new TypeException("- allows only int type", ctx);
         }
         return new IntType();
+    }
+
+
+    @Override
+    public String codeGeneration() {
+        return left.codeGeneration()
+                + right.codeGeneration()
+                + "sub\n";
     }
 
     @Override

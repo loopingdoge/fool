@@ -52,12 +52,12 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                 ArrayList<ParameterNode> vars = new ArrayList<ParameterNode>();
                 for (int i = 0; i < dc.vardec().size(); i++) {
                     VardecContext varctx = dc.vardec().get(i);
-                    vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type(), i + 1));
+                    vars.add(new ParameterNode(varctx, varctx.ID().getText(), visit(varctx.type()).type(), i + 1, true));
                 }
                 ArrayList<MethodNode> mets = new ArrayList<MethodNode>();
                 for (MetContext functx : dc.met()) {
                     MethodNode method = (MethodNode) visit(functx);
-                    method.setClassID(dc.ID(0).getText()); // TODO: [DEVID] si riesce a prendere la classe in VisitMet?
+                    method.setClassID(dc.ID(0).getText());
                     mets.add(method);
                 }
 

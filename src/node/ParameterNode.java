@@ -14,12 +14,22 @@ public class ParameterNode extends Node {
     private String id;
     private Type type;
     private int offset;
+    private boolean isAttribute;
 
     public ParameterNode(FOOLParser.VardecContext ctx, String id, Type type, int offset) {
         super(ctx);
         this.id = id;
         this.type = type;
         this.offset = offset;
+        this.isAttribute = false;
+    }
+
+    public ParameterNode(FOOLParser.VardecContext ctx, String id, Type type, int offset, boolean isAttribute) {
+        super(ctx);
+        this.id = id;
+        this.type = type;
+        this.offset = offset;
+        this.isAttribute = isAttribute;
     }
 
     public String getId() {
@@ -34,7 +44,7 @@ public class ParameterNode extends Node {
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> errors = new ArrayList<>();
         try {
-            env.addEntry(id, type, offset);
+            env.addEntry(id, type, offset, isAttribute);
         } catch (RedeclaredVarException e) {
             errors.add(new SemanticError(e.getMessage()));
         }
