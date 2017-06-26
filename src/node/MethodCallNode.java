@@ -115,7 +115,7 @@ public class MethodCallNode extends FunCallNode {
 
         return "lfp\n" + //CL
                 parCode +
-                "push " + objectOffset + "\n" +
+                "push " + objectOffset + "\n" + // TODO: probabilmente sbagliato
                 "lfp\n" + getAR +
                 "add\n" +
                 "lw\n" +
