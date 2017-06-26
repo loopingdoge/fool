@@ -14,15 +14,15 @@ import java.util.ArrayList;
 public class FunNode extends Node {
 
     protected String id;
-    protected Type type;
+    protected Type declaredReturnType;
     protected ArrayList<ParameterNode> params = new ArrayList<>();
     protected ArrayList<INode> declarations;
     protected INode body;
 
-    public FunNode(ParserRuleContext ctx, String id, Type type, ArrayList<ParameterNode> params, ArrayList<INode> declarations, INode body) {
+    public FunNode(ParserRuleContext ctx, String id, Type declaredReturnType, ArrayList<ParameterNode> params, ArrayList<INode> declarations, INode body) {
         super(ctx);
         this.id = id;
-        this.type = type;
+        this.declaredReturnType = declaredReturnType;
         this.params = params;
         this.declarations = declarations;
         this.body = body;
@@ -32,8 +32,8 @@ public class FunNode extends Node {
         return this.id;
     }
 
-    public Type getType() {
-        return this.type;
+    public Type getDeclaredReturnType() {
+        return this.declaredReturnType;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class FunNode extends Node {
             res.add(new SemanticError("Missing ID or Type in a function."));
         }
         try {
-            env.addEntry(this.id, new FunType(parTypes, type), env.offset--);
+            env.addEntry(this.id, new FunType(parTypes, declaredReturnType), env.offset--);
         } catch (RedeclaredVarException e) {
             res.add(new SemanticError("function " + id + " already declared"));
         }
@@ -93,15 +93,15 @@ public class FunNode extends Node {
                 dec.type();
             }
         }
-        if (!body.type().isSubTypeOf(type)) {  // TODO: [Albi] Controllare che basti exp()
-            throw new TypeException("Wrong return type for function: " + id, ctx);
+        if (!body.type().isSubTypeOf(declaredReturnType)) {
+            throw new TypeException("Wrong return declaredReturnType for function: " + id, ctx);
         }
-        // FATTO: [Albi] secondo me anche le funzioni hanno un tipo
         ArrayList<Type> paramsType = new ArrayList<>();
         for (ParameterNode param : params) {
             paramsType.add(param.getType());
         }
-        return new FunType(paramsType, type).getReturnType();
+
+        return new FunType(paramsType, declaredReturnType);
     }
 
     public String codeGeneration() {
@@ -158,7 +158,7 @@ public class FunNode extends Node {
 
     @Override
     public String toString() {
-        return "Fun -> " + id + ": " + type;
+        return declaredReturnType + " " + id + "()";
     }
 
 }  

@@ -35,14 +35,14 @@ public class VarNode extends Node {
         //create result list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
+        res.addAll(assignedExpression.checkSemantics(env));
+
         //env.offset = -2;
         try {
             env.addEntry(id, this.declaredType, env.offset--);
         } catch (RedeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
         }
-
-        res.addAll(assignedExpression.checkSemantics(env));
 
         return res;
     }
@@ -71,7 +71,7 @@ public class VarNode extends Node {
 
     @Override
     public String toString(){
-        return id + ": " + declaredType;
+        return "var " + id + ": " + declaredType + " =";
     }
 
 }  

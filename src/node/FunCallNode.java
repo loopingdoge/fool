@@ -1,13 +1,13 @@
 package node;
 
+import exception.TypeException;
+import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import exception.UndeclaredVarException;
 import type.FunType;
 import type.Type;
-import exception.TypeException;
 import type.TypeID;
 
 import java.util.ArrayList;
@@ -105,7 +105,7 @@ public class FunCallNode extends Node {
 
     @Override
     public String toString() {
-        return "Call -> " + id;
+        return id + "()";
     }
 
 }  

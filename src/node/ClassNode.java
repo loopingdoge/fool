@@ -56,8 +56,8 @@ public class ClassNode extends Node {
                 paramsType.add(param.getType());
             }
 
-            methodsList.add(new Method(fun.getId(), new FunType(paramsType, fun.getType())));
-            methods.put(fun.getId(), new FunType(paramsType, fun.getType()));
+            methodsList.add(new Method(fun.getId(), new FunType(paramsType, fun.getDeclaredReturnType())));
+            methods.put(fun.getId(), new FunType(paramsType, fun.getDeclaredReturnType()));
         }
 
         ClassType superclassType = null;

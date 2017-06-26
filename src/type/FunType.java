@@ -55,6 +55,6 @@ public class FunType implements Type {
                 .map(Object::toString)
                 .reduce("", (p1, p2) -> p1.length() != 0 ? p1 + ", " : p1 + p2);
         paramsString = "(" + paramsString + ")";
-        return "FunType " + paramsString + " -> " + returnType.toString();
+        return paramsString + " => " + returnType.toString();
     }
 }
