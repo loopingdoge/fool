@@ -18,7 +18,10 @@ import java.util.ArrayList;
 public class MethodCallNode extends FunCallNode {
 
     private String classId;
+    private int objectOffset;
+    private int objectNestingLevel;
     private int methodOffset;
+    private int nestinglevel;
 
     private String objectId;
     private String methodId;
@@ -41,13 +44,18 @@ public class MethodCallNode extends FunCallNode {
             ClassType classType = null;
             if (objectId.equals("this")) {
                 Type objectType = env.getLatestEntry().getType();
+                // TODO object offset e nestinglevel
                 if (objectType instanceof ClassType) {
                     classType = (ClassType) objectType;
                 } else {
                     res.add(new SemanticError("Can't call this outside a class"));
                 }
             } else {
-                Type objectType = env.getLatestEntryOf(objectId).getType();
+                SymbolTableEntry objectSEntry = env.getLatestEntryOf(objectId);
+                Type objectType = objectSEntry.getType();
+                this.objectOffset = objectSEntry.getOffset();
+                this.objectNestingLevel = objectSEntry.getNestinglevel();
+                this.nestinglevel = env.getNestingLevel();
                 // Controllo che il metodo sia stato chiamato su un oggetto
                 if (objectType instanceof InstanceType) {
                     classType = ((InstanceType) objectType).getClassType();
@@ -101,9 +109,16 @@ public class MethodCallNode extends FunCallNode {
         for (int i = params.size() - 1; i >= 0; i--)
             parCode.append(params.get(i).codeGeneration());
 
+        StringBuilder getAR = new StringBuilder();
+        for (int i = 0; i < nestinglevel - objectNestingLevel; i++)
+            getAR.append("lw\n");
+
         return "lfp\n" + //CL
                 parCode +
-                "push " + objectId + "\n" +     // TODO: objectId non e' giusto, ci va l'indirizzo di objectId
+                "push " + objectOffset + "\n" +
+                "lfp\n" + getAR +
+                "add\n" +
+                "lw\n" +
                 CodegenUtils.getDispatchTablePointer(this.classId) + "\n" +
                 "push " + methodOffset + "\n" +
                 "add" + "\n" +
