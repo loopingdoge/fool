@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class CodegenUtils {
 
+    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
-    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
     private static HashMap<String, HashMap<String, String>> dispatchTables = new HashMap<String, HashMap<String, String>>();
 
     public static String freshLabel() {
@@ -79,6 +79,7 @@ public class CodegenUtils {
         functionsLabelCount = 0;
         functionsCode = "";
         classTable = new HashMap<>();
+        dispatchTables = new HashMap<>();
     }
 
 }

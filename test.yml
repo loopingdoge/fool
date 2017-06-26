@@ -199,4 +199,4 @@ test18 - Let Inside Func Redefines Function Param:
                 print(n);
     in
         print(foo(3));
-- "9"
+- "multiple definitions of variable: n"

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ExecuteVM {
 
     public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 50;    // TODO: calculate this
+    public static final int MEMSIZE = 10000;    // TODO: calculate this
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(10);
+    private HeapMemory heap = new HeapMemory(100);
     private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
 
     public ExecuteVM(int[] code) {
@@ -38,8 +38,8 @@ public class ExecuteVM {
     }
 
     public ArrayList<String> cpu() {
-        System.out.println("start :");
-        printMemory();
+//        System.out.println("start :");
+//        printMemory();
         while (true) {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
@@ -155,11 +155,15 @@ public class ExecuteVM {
                     // A questo punto dovrei aver usato tutta la memoria allocata
                     assert allocatedMemory == null;
                     break;
+                case SVMParser.LC:
+                    int codeAddress = pop();
+                    push(code[codeAddress]);
+                    break;
                 case SVMParser.HALT:
                     return outputBuffer;
             }
-            System.out.println(bytecode + ": ");
-            printMemory();
+//            System.out.println(bytecode + ": ");
+//            printMemory();
         }
     }
 

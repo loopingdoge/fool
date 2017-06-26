@@ -81,6 +81,11 @@ public class TestRunner {
             // TODO: throw new parser exception
         }
 
+//        if (enableLogging) {
+//            System.out.println("Code generated! Assembling and running generated code:" );
+//            for (int i = 0; i < 100; i++) System.out.println(parserASM.code[i]);
+//        }
+
         return parserASM.code;
     }
 
