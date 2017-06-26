@@ -128,6 +128,7 @@ public class ExecuteVM {
                     HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
                     // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
                     heapMemoryInUse.add(allocatedMemory);
+                    // Metto sullo stack l'indirizzo della prima cella dell'oggetto che ho istanziato
                     push(allocatedMemory.getIndex());
                     // Inserisco l'indirizzo della dispatch table ed avanzo nella memoria ottenuta
                     memory[allocatedMemory.getIndex()] = dispatchTableAddress;

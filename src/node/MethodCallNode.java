@@ -1,16 +1,24 @@
 package node;
 
 import exception.TypeException;
+import exception.UndeclaredMethodException;
 import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import type.*;
+import type.ClassType;
+import type.FunType;
+import type.InstanceType;
+import type.Type;
+import util.CodegenUtils;
 
 import java.util.ArrayList;
 
 public class MethodCallNode extends FunCallNode {
+
+    private String classId;
+    private int methodOffset;
 
     private String objectId;
     private String methodId;
@@ -55,14 +63,14 @@ public class MethodCallNode extends FunCallNode {
                     : env.getLatestEntryOf(classType.getClassID());
 
             ClassType objectClass = (ClassType) classEntry.getType();
+            this.classId = objectClass.getClassID();
+            this.methodOffset = objectClass.getOffsetOfMethod(methodId);
             // Controllo che il metodo esista all'interno della classe
-            this.methodType = objectClass.getTypeOfMethod(methodId);
-
             if (this.methodType == null) {
                 res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + "method."));
             }
 
-        } catch (UndeclaredVarException e) {
+        } catch (UndeclaredVarException | UndeclaredMethodException e) {
             res.add(new SemanticError(e.getMessage()));
         }
 
@@ -94,8 +102,11 @@ public class MethodCallNode extends FunCallNode {
 
         return "lfp\n" + //CL
                 parCode +
-                "push " + objectId +
-                "lw\n" + //carico sullo stack il valore all'indirizzo ottenuto
+                "push " + objectId + "\n" +     // TODO: objectId non e' giusto, ci va l'indirizzo di objectId
+                CodegenUtils.getDispatchTablePointer(this.classId) + "\n" +
+                "push " + methodOffset + "\n" +
+                "add" + "\n" +
+                "lw\n" +
                 "js\n";
     }
 
