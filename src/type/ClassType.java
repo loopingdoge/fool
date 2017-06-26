@@ -100,7 +100,7 @@ public class ClassType implements Type {
             }
             // Procedo solo se la mia classe ha un supertipo
             if (superType != null) {
-                return this.getSuperclassID().equals(ct2.getSuperclassID()) || superType.isSubTypeOf(t2);
+                return this.getSuperclassID().equals(ct2.getClassID()) || superType.isSubTypeOf(t2);
             }
         }
         return false;

@@ -183,9 +183,8 @@ public class ClassNode extends Node {
             }
         }
 
-        if (dispatchTable.size() > 0) {
-            CodegenUtils.addDispatchTable(classID, dispatchTable);
-        }
+        //Aggiungo sempre la DT anche se è vuota, perchè può capitare di implementare una classe che non ha metodi!
+        CodegenUtils.addDispatchTable(classID, dispatchTable);
 
         return "";
     }
@@ -200,10 +199,7 @@ public class ClassNode extends Node {
 
     @Override
     public String toString() {
-        if (!superClassID.isEmpty())
-            return "class " + classID + " extends " + superClassID;
-        else
-            return "class " + classID;
+        return superClassID.isEmpty() ? "class " + classID : "class " + classID + " extends " + superClassID;
     }
 
 }

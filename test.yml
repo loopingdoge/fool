@@ -207,5 +207,19 @@ test19 - Superclass object with subtype instance:
     let
         A a = new B;
     in
-        1;
+        print(1);
 - "1"
+
+test20 - Method overriding in subclass:
+-   class A {
+        int f() 1;
+    }
+    class B implements A {
+        int f() 2;
+    };
+    let
+        A a = new A;
+        A b = new B;
+    in
+        print(a.f() + b.f());
+- "3"
