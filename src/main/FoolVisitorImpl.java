@@ -7,7 +7,6 @@ import grammar.FOOLParser;
 import grammar.FOOLParser.*;
 import node.*;
 import type.Type;
-import util.Method;
 
 import java.util.ArrayList;
 
@@ -221,7 +220,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         } else {
             //it is a binary expression, you should visit left and right
             if (ctx.operator.getType() == FOOLLexer.TIMES) {
-                return new MultNode(ctx, visit(ctx.left), visit(ctx.right));
+                return new TimesNode(ctx, visit(ctx.left), visit(ctx.right));
             } else {
                 return new DivNode(ctx, visit(ctx.left), visit(ctx.right));
             }
@@ -342,7 +341,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             res = new PrintNode(ctx, args.get(0));
         } else {
             //instantiate the invocation
-            res = new CallNode(ctx, ctx.ID().getText(), args);
+            res = new FunCallNode(ctx, ctx.ID().getText(), args);
         }
 
         return res;

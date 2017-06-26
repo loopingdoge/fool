@@ -4,7 +4,7 @@
 # - codice
 # - risultato (stringa)
 
-test1:
+test1 - Varasm:
 -   let
       int y = 5 ;
     in
@@ -12,14 +12,14 @@ test1:
 
 -   "5"
 
-test2:
+test2 - Sum:
 -   let
       int y = 5 + 2;
     in
       print( y );
 -   "7"
 
-test3:
+test3 - Nested Functions:
 -   let
         int x = 5;
         int f ()
@@ -34,7 +34,7 @@ test3:
         print(f());
 -   "5"
 
-test4:
+test4 - ITE Incombatible Types:
 -   let
         int y = 5 + 2 ;
         bool f (int n, int m)
@@ -46,7 +46,7 @@ test4:
         print(if f(y, 8) then {false} else {10});
 -   "Error: \"Incompatible types in then else branches\" at line 1, column 77."
 
-test5:
+test5 - ITE e Times:
 -   let
         int geee(int n)
             n + 1;
@@ -56,23 +56,23 @@ test5:
         print(foo(3));
 -   "9"
 
-test6:
+test6 - Scopes Error:
 -   let
         int foo(int n)
             let
-                int gee(int n) n+1;
+                int gee(int n) x;
             in
                 if (n==0) then { 1 } else { n * gee(n-1) };
     in
         print(gee(3));
 -   "Id gee not declared"
 
-test7:
+test7 - Simple Print:
 -   print(1);
 -   "1"
 
 # Test one method without args call
-test8:
+test8 - MethodCall with 0 Arguments:
 -   class Numero {
         int uno() 1;
     };
@@ -83,7 +83,7 @@ test8:
 -   "1"
 
 # Test two method without args calls
-test9:
+test9 - 2 MethodCall with 0 Arguments:
 -   class Numeri {
         int uno() 1;
         int due() 2;
@@ -95,7 +95,7 @@ test9:
 -   "3"
 
 # Test one method arguments
-test10:
+test10 - MethodCall with 1 Argument:
 -   class Numero {
         int id(int x) x;
     };
@@ -106,7 +106,7 @@ test10:
 -   "1"
 
 # Test two method's arguments
-test11:
+test11 - MethodCall with 2 Arguments:
 -   class Numero {
         int plus(int x, int y) x + y;
     };
@@ -117,7 +117,7 @@ test11:
 -   "8"
 
 # Test wrong method's argument
-test12:
+test12 - MethodCall with wrong Argument:
 -   class Numero {
         int plus(int x, int y) x + y;
     };
@@ -128,7 +128,7 @@ test12:
 -   "Error: \"Wrong type for 1-th parameter in the invocation of plus\" at line 1, column 86."
 
 # Test field
-test13:
+test13 - Class Attribute:
 -   class Numero(int x) {
         int getX() x;
     };
@@ -139,7 +139,7 @@ test13:
 -   "2"
 
 # Test wrong constructor
-test14:
+test14 - Wrong Type in Constructor Call:
 -   class Numero(int x) {
         int getX() x;
     };
@@ -149,7 +149,7 @@ test14:
         print(num.getX());
 -   "Error: \"Wrong type for 1-th parameter in the invocation of Numero constructor\" at line 1, column 56."
 
-test15:
+test15 - Name Hell:
 -   class X(int x) {
         int x() x;
     };
@@ -159,7 +159,7 @@ test15:
         print(x.x());
 -   "2"
 
-test16:
+test16 - Name Hell with Function Parameters:
 -   class X(int x) {
         int x(int x) x;
     };
@@ -168,3 +168,35 @@ test16:
     in
         print(x.x(1));
 -   "1"
+
+test17 - Dispatch Table:
+-   class Numero(int x) {
+        int getX() x;
+        int getY() x;
+    }
+    class NumeroI implements Numero(int x) {
+        int getY() x;
+    }
+    class NumeroV implements Numero(int x) {
+        int getX() x;
+        int getY() x;
+    }
+    class NumeroX implements NumeroV(int x) {
+        int getX() x;
+    };
+    let
+        Numero num = new Numero(2);
+    in
+        print(num.getX());
+-   "2"
+
+test18 - Let Inside Func Redefines Function Param:
+-   let
+        int foo(int n)
+            let
+                int n = n;
+            in
+                print(n);
+    in
+        print(foo(3));
+- "9"

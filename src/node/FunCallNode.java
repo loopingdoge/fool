@@ -12,14 +12,14 @@ import type.TypeID;
 
 import java.util.ArrayList;
 
-public class CallNode extends Node {
+public class FunCallNode extends Node {
 
     private String id;
     private ArrayList<INode> params = new ArrayList<INode>();
     private SymbolTableEntry entry;
     private int callNestingLevel;
 
-    public CallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
+    public FunCallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
         super(ctx);
         this.id = id;
         this.params = params;
@@ -27,7 +27,7 @@ public class CallNode extends Node {
         this.callNestingLevel = nestingLevel;
     }
 
-    public CallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params) {
+    public FunCallNode(FOOLParser.FunExpContext ctx, String id, ArrayList<INode> params) {
         super(ctx);
         this.id = id;
         this.params = params;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ExecuteVM {
 
     public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 10000;    // TODO: calculate this
+    public static final int MEMSIZE = 50;    // TODO: calculate this
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class ExecuteVM {
                     address = pop();
                     memory[address] = pop();
                     break;
-                case SVMParser.LOADW: //
+                case SVMParser.LOADW: // Prende l'indirizzo in cima allo stack e pusha il valore puntato sullo stack
                     push(memory[pop()]);
                     break;
                 case SVMParser.BRANCH:

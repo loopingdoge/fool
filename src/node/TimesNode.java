@@ -9,12 +9,12 @@ import exception.TypeException;
 
 import java.util.ArrayList;
 
-public class MultNode extends Node {
+public class TimesNode extends Node {
 
     private INode left;
     private INode right;
 
-    public MultNode(FOOLParser.TermContext ctx, INode l, INode r) {
+    public TimesNode(FOOLParser.TermContext ctx, INode l, INode r) {
         super(ctx);
         left = l;
         right = r;
