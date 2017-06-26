@@ -20,8 +20,8 @@ La classe `C` dispone di:
     - `type` : `FunType`
 
 ## Validazione semantica
-- Creare una entry nella symbol table
-- Fare un push sulla symbol table (incrementare il nesting level)
+- Creare una entry nella lista di symbol table
+- Fare un push della symbol table (incrementando il nesting level)
 - Per ogni attributo `f` in `fields`:
   - creare una entry nella symbol table per `f`
 - Per ogni metodo `m` in `methods`:

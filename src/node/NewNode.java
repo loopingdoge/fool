@@ -46,6 +46,9 @@ public class NewNode extends Node {
             res.add(new SemanticError( e.getMessage() ));
         }
 
+        if (classType.getFields().size() != args.size())
+            res.add(new SemanticError("Instantiation of new " + classID + " with the wrong number of parameters."));
+
         if (args.size() > 0) {
             //if there are children then check semantics for every child and save the results
             for (INode n : args)
