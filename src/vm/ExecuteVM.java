@@ -29,15 +29,21 @@ public class ExecuteVM {
         this.code = code;
     }
 
+    private void printMemory() {
+        for (int mem : memory)
+            System.out.print(mem + " ");
+        System.out.println();
+        System.out.println("sp: " + sp + "  fp: " + fp + "  ra: " + ra + "  rv: " + rv);
+        System.out.println();
+    }
+
     public ArrayList<String> cpu() {
+        System.out.println("start :");
+        printMemory();
         while (true) {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
             int address;
-            System.out.println(bytecode + " :");
-            for (int mem : memory)
-                System.out.print(mem + " ");
-            System.out.println();
             switch (bytecode) {
                 case SVMParser.PUSH:
                     push(code[ip++]);
@@ -152,6 +158,8 @@ public class ExecuteVM {
                 case SVMParser.HALT:
                     return outputBuffer;
             }
+            System.out.println(bytecode + ": ");
+            printMemory();
         }
     }
 
