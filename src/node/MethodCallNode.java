@@ -113,8 +113,7 @@ public class MethodCallNode extends FunCallNode {
         for (int i = 0; i < nestinglevel - objectNestingLevel; i++)
             getAR.append("lw\n");
 
-        return "lfp\n" + //CL
-                parCode +
+        return parCode +
                 "push " + objectOffset + "\n" + // TODO: probabilmente sbagliato
                 "lfp\n" + getAR +
                 "add\n" +
@@ -122,7 +121,6 @@ public class MethodCallNode extends FunCallNode {
                 CodegenUtils.getDispatchTablePointer(this.classId) + "\n" +
                 "push " + methodOffset + "\n" +
                 "add" + "\n" +
-                "lw\n" +
                 "js\n";
     }
 
