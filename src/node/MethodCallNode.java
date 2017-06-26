@@ -65,9 +65,10 @@ public class MethodCallNode extends FunCallNode {
             ClassType objectClass = (ClassType) classEntry.getType();
             this.classId = objectClass.getClassID();
             this.methodOffset = objectClass.getOffsetOfMethod(methodId);
+            this.methodType = objectClass.getTypeOfMethod(methodId);
             // Controllo che il metodo esista all'interno della classe
             if (this.methodType == null) {
-                res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + "method."));
+                res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + " method."));
             }
 
         } catch (UndeclaredVarException | UndeclaredMethodException e) {
