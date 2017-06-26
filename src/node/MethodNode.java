@@ -42,7 +42,6 @@ public class MethodNode extends FunNode {
                 "sra\n" + // pop del return address
                 "pop\n" + // pop di AL
                 popParl +
-                "pop\n" + // tolgo il puntatore all'oggetto dallo stack - [NUOVO] rispetto al codegen di FunNode TODO: controllare che funzioni con MethodCall
                 "sfp\n" + // setto $fp a valore del CL
                 "lrv\n" + // risultato della funzione sullo stack
                 "lra\n" + "js\n" // salta a $ra

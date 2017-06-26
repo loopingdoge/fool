@@ -91,7 +91,7 @@ test9 - 2 MethodCall with 0 Arguments:
     let
         Numeri num = new Numeri;
     in
-        num.uno() + num.due();
+        print(num.uno() + num.due());
 -   "3"
 
 # Test one method arguments
@@ -125,7 +125,7 @@ test12 - MethodCall with wrong Argument:
         Numero num = new Numero;
     in
         print(num.plus(false, 5));
--   "Error: \"Wrong type for 1-th parameter in the invocation of plus\" at line 1, column 86."
+-   "Error: \"Wrong type for 1-th parameter in the invocation of plus\" at line 1, column 90."
 
 # Test field
 test13 - Class Attribute:

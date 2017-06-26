@@ -113,7 +113,8 @@ public class MethodCallNode extends FunCallNode {
         for (int i = 0; i < nestinglevel - objectNestingLevel; i++)
             getAR.append("lw\n");
 
-        return parCode
+        return "lfp\n"
+                + parCode
                 + "push " + objectOffset + "\n"
                 + "lfp\n" + getAR
                 + "add\n"

@@ -38,8 +38,8 @@ public class ExecuteVM {
     }
 
     public ArrayList<String> cpu() {
-        System.out.println("start :");
-        printMemory();
+//        System.out.println("start :");
+//        printMemory();
         while (true) {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
@@ -164,8 +164,8 @@ public class ExecuteVM {
                 case SVMParser.HALT:
                     return outputBuffer;
             }
-            System.out.println(bytecode + ": ");
-            printMemory();
+//            System.out.println(bytecode + ": ");
+//            printMemory();
         }
     }
 
