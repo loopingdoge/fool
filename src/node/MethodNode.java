@@ -1,11 +1,6 @@
 package node;
 
-import exception.RedeclaredVarException;
-import exception.TypeException;
-import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
-import symbol_table.Environment;
-import type.FunType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -53,7 +48,7 @@ public class MethodNode extends FunNode {
                 "lra\n" + "js\n" // salta a $ra
         );
 
-        return "push " + funl + "\n";
+        return funl + "\n";
     }
 
 }

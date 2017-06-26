@@ -27,7 +27,7 @@ assembly:
 			                 code[i++] = Integer.parseInt($n.text);}
 	  | PUSH l=LABEL    {code[i++] = PUSH; //
 	    		             labelRef.put(i++,$l.text);} 		     
-	  | POP		    {code[i++] = POP;}	
+	  | POP		    {code[i++] = POP;}
 	  | ADD		    {code[i++] = ADD;}
 	  | SUB		    {code[i++] = SUB;}
 	  | MULT	    {code[i++] = MULT;}
@@ -55,6 +55,7 @@ assembly:
 	  | NEW             {code[i++] = NEW;}
 	  | LC              {code[i++] = LC;}
 	  | HALT            {code[i++] = HALT;}
+	  | l=LABEL         {labelRef.put(i, $l.text);}
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
 	            code[refAdd]=labelAdd.get(labelRef.get(refAdd));
