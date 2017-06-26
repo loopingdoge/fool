@@ -8,6 +8,8 @@ Dispone dei metodi:
 - `addClassEntry(String classID)`
 - `addMethodInClass(String classID, String methodLabel)`
 
+
+
 # Definizione di classe
 La classe `C` dispone di:
 - lista `fields` : `ArrayList<Field>`
@@ -70,7 +72,17 @@ Istanziazione di un oggetto `obj`, dispone di:
 - Scorrere `args` con un indice `i = 0`:
   - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(classtype.fields[i])`
 
+$$
+\frac{
+	\Gamma \vdash A : \text{Class } \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  St_1 <: T_1 \ldots St_n <: T_n
+}{
+	\Gamma \vdash \text{new } A(a_1 : St_1 , \ldots , a_n : St_n ) : \text{Instance}
+}
+[new]
+$$
+
 ## Code generation
+
 - Allocare una nuova area di memoria nello heap
 - Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
 - TODO
@@ -89,9 +101,13 @@ Istanziazione di un oggetto `obj`, dispone di:
 
 # Chiamata di metodo
 Si dispone di:
-- `objectID` : `String`
-- `methodID` : `String`
-- `args` : `ArrayList<Node>`
+
+| Nome            | Tipo              | Commento                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `object_id`     | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
+| `object_offset` | `int`             | L'offset dell'oggetto rispetto al `frame pointer` |
+| `methodID`      | `String`          | L'id del metodo chiamato                 |
+| `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
 
 ## Validazione semantica
 - Recuperare dalla symbol table l' `object_type` di `objectID`
@@ -104,6 +120,9 @@ Si dispone di:
   - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(method_type.args[i])`
 
 ## Code generation
+- Inserire il valore nel `frame pointer` sullo stack
+- Per ogni `a` in `args`:
+  - inserire sullo stack `codegen(a)`
 - TODO
 
 # Esempio
@@ -139,40 +158,49 @@ class WrongCalculator implements Calculator (
 
 ### Calculator
 
-| Offset  | Value          |
-| :------ | :------------- |
-| 1       | label of xPlus |
+| Offset | Value          |
+| :----- | :------------- |
+| 1      | label of xPlus |
 
 ### BetterCalculator
 
-| Offset  | Value              |
-| :------ | :----------------- |
-| 1       | label of  xPlus    |
-| 2       | label of  xPlusOne |
+| Offset | Value              |
+| :----- | :----------------- |
+| 1      | label of  xPlus    |
+| 2      | label of  xPlusOne |
 
 ### WrongCalculator
 
-| Offset  | Value                     |
-| :------ | :------------------------ |
-| 1       | label of overridden xPlus |
+| Offset | Value                     |
+| :----- | :------------------------ |
+| 1      | label of overridden xPlus |
 
 ## Heap layout
 
 ### Calculator
 
-| Row no.             | Value               |
-| :------------------ | :------------------ |
-| 1                   | value of x          |
+`Calculator c = new Calculator(1)`
+
+| Row no. | Value        |
+| :------ | :----------- |
+| 1       | `address(c)` |
+| 2       | 1            |
 
 ### BetterCalculator
 
-| Row no.             | Value               |
-| :------------------ | :------------------ |
-| 1                   | value of x          |
+`BetterCalculator bc = new BetterCalculator(2)`
+
+| Row no. | Value         |
+| :------ | :------------ |
+| 1       | `address(bc)` |
+| 2       | 2             |
 
 ### WrongCalculator
 
-| Row no.             | Value               |
-| :------------------ | :------------------ |
-| 1                   | value of x          |
-| 2                   | value of y          |
+`WrongCalculator wc = new WrongCalculator(7, 6)`
+
+| Row no. | Value         |
+| :------ | :------------ |
+| 1       | `address(wc)` |
+| 2       | 7             |
+| 3       | 6             |
