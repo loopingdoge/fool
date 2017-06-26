@@ -200,3 +200,12 @@ test18 - Let Inside Func Redefines Function Param:
     in
         print(foo(3));
 - "multiple definitions of variable: n"
+
+test19 - Superclass object with subtype instance:
+-   class A
+    class B implements A;
+    let
+        A a = new B;
+    in
+        1;
+- "1"
