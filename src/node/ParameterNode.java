@@ -56,18 +56,19 @@ public class ParameterNode extends Node {
         return null;
     }
 
+    @Override
     public String codeGeneration() {
         return "";
     }
 
     @Override
-    public String toString() {
-        return "param " + id + ": " + type;
+    public ArrayList<INode> getChilds() {
+        return new ArrayList<>();
     }
 
     @Override
-    public ArrayList<INode> getChilds() {
-        return new ArrayList<>();
+    public String toString() {
+        return "param " + id + ": " + type;
     }
 
 }

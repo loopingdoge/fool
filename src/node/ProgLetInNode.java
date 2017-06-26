@@ -14,10 +14,10 @@ public class ProgLetInNode extends Node {
     private LetNode let;
     private InNode in;
 
-    public ProgLetInNode(FOOLParser.LetInExpContext ctx, LetNode d, InNode e) {
+    public ProgLetInNode(FOOLParser.LetInExpContext ctx, LetNode let, InNode in) {
         super(ctx);
-        let = d;
-        in = e;
+        this.let = let;
+        this.in = in;
     }
 
     @Override
@@ -43,10 +43,12 @@ public class ProgLetInNode extends Node {
         return in.type();
     }
 
+    @Override
     public String codeGeneration() {
         return let.codeGeneration() + in.codeGeneration();
     }
 
+    @Override
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 

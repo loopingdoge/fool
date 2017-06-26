@@ -31,7 +31,7 @@ public class IdNode extends Node {
 
         try {
             this.entry = env.getLatestEntryOfNotFun(this.id);
-            if(this.entry.isInsideClass()) {
+            if(this.entry.isAttribute()) {
                 SymbolTableEntry thisPointer = env.getLatestEntryOfNotFun("this");
                 this.thisNestLevel = thisPointer.getNestinglevel();
                 this.thisOffset = thisPointer.getOffset();
@@ -54,7 +54,7 @@ public class IdNode extends Node {
 
     public String codeGeneration() {
         StringBuilder getAR = new StringBuilder();
-        if(this.entry.isInsideClass()) {
+        if(this.entry.isAttribute()) {
             for (int i = 0; i < nestinglevel - thisNestLevel; i++)
                 getAR.append("lw\n");
 

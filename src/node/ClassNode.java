@@ -41,6 +41,10 @@ public class ClassNode extends Node {
         this.metdeclist = metdeclist;
     }
 
+    public ArrayList<ParameterNode> getVardeclist() {
+        return this.vardeclist;
+    }
+
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
@@ -162,10 +166,6 @@ public class ClassNode extends Node {
         }
 
         return this.type;
-    }
-
-    public ArrayList<ParameterNode> getVardeclist() {
-        return this.vardeclist;
     }
 
     @Override

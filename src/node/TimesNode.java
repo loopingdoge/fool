@@ -14,10 +14,10 @@ public class TimesNode extends Node {
     private INode left;
     private INode right;
 
-    public TimesNode(FOOLParser.TermContext ctx, INode l, INode r) {
+    public TimesNode(FOOLParser.TermContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override

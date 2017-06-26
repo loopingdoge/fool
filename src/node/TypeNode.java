@@ -51,4 +51,5 @@ public class TypeNode extends Node {
     public String toString() {
         return type.toString();
     }
+
 }

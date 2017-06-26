@@ -16,6 +16,7 @@ public class MethodNode extends FunNode {
 
     public void setClassID( String classID ) { this.classID = classID; }
 
+    @Override
     public String codeGeneration() {
         StringBuilder declCode = new StringBuilder();
         if (declarations != null)

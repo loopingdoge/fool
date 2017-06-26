@@ -32,6 +32,10 @@ public class FunNode extends Node {
         return this.id;
     }
 
+    public ArrayList<ParameterNode> getParams() {
+        return params;
+    }
+
     public Type getDeclaredReturnType() {
         return this.declaredReturnType;
     }
@@ -80,10 +84,6 @@ public class FunNode extends Node {
 
 
         return res;
-    }
-
-    public ArrayList<ParameterNode> getParams() {
-        return params;
     }
 
     @Override

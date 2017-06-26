@@ -14,20 +14,21 @@ public class BoolNode extends Node {
     private boolean val;
     private boolean not;
 
-    public BoolNode(FOOLParser.BoolValContext ctx, boolean n, boolean no) {
+    public BoolNode(FOOLParser.BoolValContext ctx, boolean val, boolean not) {
         super(ctx);
-        val = n;
-        not = no;
-    }
-
-    @Override
-    public Type type() throws TypeException {
-        return new BoolType();
+        this.val = val;
+        this.not = not;
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         return new ArrayList<SemanticError>();
+    }
+
+
+    @Override
+    public Type type() throws TypeException {
+        return new BoolType();
     }
 
     @Override

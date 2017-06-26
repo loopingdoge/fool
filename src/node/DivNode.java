@@ -14,10 +14,10 @@ public class DivNode extends Node {
     private INode left;
     private INode right;
 
-    public DivNode(FOOLParser.TermContext ctx, INode l, INode r) {
+    public DivNode(FOOLParser.TermContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override
@@ -42,6 +42,13 @@ public class DivNode extends Node {
     }
 
     @Override
+    public String codeGeneration() {
+        return left.codeGeneration() +
+                right.codeGeneration() +
+                "div\n";
+    }
+
+    @Override
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 
@@ -49,13 +56,6 @@ public class DivNode extends Node {
         childs.add(right);
 
         return childs;
-    }
-
-    @Override
-    public String codeGeneration() {
-        return left.codeGeneration() +
-                right.codeGeneration() +
-                "div\n";
     }
 
     @Override

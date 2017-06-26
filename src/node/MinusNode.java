@@ -14,10 +14,10 @@ public class MinusNode extends Node {
     private INode left;
     private INode right;
 
-    public MinusNode(FOOLParser.ExpContext ctx, INode l, INode r) {
+    public MinusNode(FOOLParser.ExpContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override

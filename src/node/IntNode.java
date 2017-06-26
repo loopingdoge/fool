@@ -11,11 +11,11 @@ import java.util.ArrayList;
 
 public class IntNode extends Node {
 
-    private Integer val;
+    private int val;
 
-    public IntNode(FOOLParser.IntValContext ctx, Integer n) {
+    public IntNode(FOOLParser.IntValContext ctx, int val) {
         super(ctx);
-        val = n;
+        this.val = val;
     }
 
     @Override
@@ -29,12 +29,13 @@ public class IntNode extends Node {
     }
 
     @Override
-    public ArrayList<INode> getChilds() {
-        return new ArrayList<>();
-    }
-
     public String codeGeneration() {
         return "push " + val + "\n";
+    }
+
+    @Override
+    public ArrayList<INode> getChilds() {
+        return new ArrayList<>();
     }
 
     @Override

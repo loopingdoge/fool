@@ -23,6 +23,26 @@ public class ProgClassDecNode extends Node {
     }
 
     @Override
+    public ArrayList<SemanticError> checkSemantics(Environment env) {
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+
+        env.pushHashMap();
+
+        for (ClassNode classNode : classDeclarations) {
+            res.addAll(classNode.checkSemantics(env));
+        }
+
+        if (let != null)
+            res.addAll(let.checkSemantics(env));
+
+        res.addAll(in.checkSemantics(env));
+
+        env.popHashMap();
+
+        return res;
+    }
+
+    @Override
     public Type type() throws TypeException {
         for (ClassNode classdec : classDeclarations) {
             classdec.type();
@@ -35,7 +55,6 @@ public class ProgClassDecNode extends Node {
 
     @Override
     public String codeGeneration() {
-        // TODO: implement ( In teoria è gia finito così questo codgen
         String declaration = "";
         for (ClassNode cl : classDeclarations) {
             declaration += cl.codeGeneration();
@@ -57,26 +76,6 @@ public class ProgClassDecNode extends Node {
 
         childs.add(in);
         return childs;
-    }
-
-    @Override
-    public ArrayList<SemanticError> checkSemantics(Environment env) {
-        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
-
-        env.pushHashMap();
-
-        for (ClassNode classNode : classDeclarations) {
-            res.addAll(classNode.checkSemantics(env));
-        }
-
-        if (let != null)
-            res.addAll(let.checkSemantics(env));
-
-        res.addAll(in.checkSemantics(env));
-
-        env.popHashMap();
-
-        return res;
     }
 
     @Override

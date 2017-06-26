@@ -7,20 +7,20 @@ public class SymbolTableEntry {
     private int nestingLevel;
     private Type type;
     private int offset;
-    private boolean isInsideClass;
+    private boolean isAttribute;
 
     public SymbolTableEntry(int nestingLevel, Type type, int offset) {
         this.nestingLevel = nestingLevel;
         this.type = type;
         this.offset = offset;
-        this.isInsideClass = false;
+        this.isAttribute = false;
     }
 
-    public SymbolTableEntry(int nestingLevel, Type type, int offset, boolean isInsideClass) {
+    public SymbolTableEntry(int nestingLevel, Type type, int offset, boolean isAttribute) {
         this.nestingLevel = nestingLevel;
         this.type = type;
         this.offset = offset;
-        this.isInsideClass = isInsideClass;
+        this.isAttribute = isAttribute;
     }
 
     public void addType(Type t) {
@@ -40,7 +40,7 @@ public class SymbolTableEntry {
     }
 
     // Used only for class attributes
-    public boolean isInsideClass() { return isInsideClass; }
+    public boolean isAttribute() { return isAttribute; }
 
     public String toString(String s) { //
         return "SymbolTableEntry: nestlev " + Integer.toString(nestingLevel) + "\n" +

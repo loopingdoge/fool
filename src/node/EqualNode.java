@@ -15,10 +15,10 @@ public class EqualNode extends Node {
     private INode left;
     private INode right;
 
-    public EqualNode(FOOLParser.FactorContext ctx, INode l, INode r) {
+    public EqualNode(FOOLParser.FactorContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override

@@ -16,10 +16,10 @@ public class LessEqualNode extends Node {
     private INode left;
     private INode right;
 
-    public LessEqualNode(FOOLParser.FactorContext ctx, INode l, INode r) {
+    public LessEqualNode(FOOLParser.FactorContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override
