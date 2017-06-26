@@ -67,7 +67,10 @@ public class TestRunner {
         SVMLexer lexerASM = new SVMLexer(inputASM);
         CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
         SVMParser parserASM = new SVMParser(tokensASM);
-        parserASM.assembly();
+
+        try {
+            parserASM.assembly();
+        } catch(Exception e) { }
 
         if (lexerASM.lexicalErrors > 0) {
             System.err.println("Error: SVM lexer error");

@@ -63,7 +63,7 @@ public class IdNode extends Node {
 
     @Override
     public String toString() {
-        return "Id -> " + id;
+        return id + " : " + entry.getType();
     }
 
 }  

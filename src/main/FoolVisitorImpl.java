@@ -220,7 +220,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         } else {
             //it is a binary expression, you should visit left and right
             if (ctx.operator.getType() == FOOLLexer.TIMES) {
-                return new MultNode(ctx, visit(ctx.left), visit(ctx.right));
+                return new TimesNode(ctx, visit(ctx.left), visit(ctx.right));
             } else {
                 return new DivNode(ctx, visit(ctx.left), visit(ctx.right));
             }
