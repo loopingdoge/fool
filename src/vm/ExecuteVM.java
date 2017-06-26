@@ -122,6 +122,7 @@ public class ExecuteVM {
                     break;
                 case SVMParser.NEW:
                     // Il numero di argomenti per il new e' sulla testa dello stack
+                    int dispatchTableAddress = pop();
                     int nargs = pop();
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
                     HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
@@ -129,7 +130,7 @@ public class ExecuteVM {
                     heapMemoryInUse.add(allocatedMemory);
                     push(allocatedMemory.getIndex());
                     // Inserisco l'indirizzo della dispatch table ed avanzo nella memoria ottenuta
-                    memory[allocatedMemory.getIndex()] = 0; // TODO: al posto di zero ci va l'indirizzo di memoria della dispatch table
+                    memory[allocatedMemory.getIndex()] = dispatchTableAddress;
                     allocatedMemory = allocatedMemory.next;
                     // Inserisco un argument in ogni indirizzo di memoria
                     for (int i = 0; i < nargs; i++) {
