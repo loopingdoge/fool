@@ -12,6 +12,7 @@ import type.ClassType;
 import type.FunType;
 import type.Type;
 import util.CodegenUtils;
+import util.DispatchTableEntry;
 import util.Field;
 import util.Method;
 
@@ -162,17 +163,22 @@ public class ClassNode extends Node {
 
     @Override
     public String codeGeneration() {
+        // Creo una nuova dispatch table
+        ArrayList<DispatchTableEntry> dispatchTable = superClassID.equals("")
+                ? new ArrayList<>()
+                : CodegenUtils.getDispatchTable(superClassID);
 
-        // creo una nuova dispatch table
-        HashMap<String, String> dispatchTable = new HashMap<String, String>();
-        if (superClassID != "") dispatchTable = new HashMap<String, String>(CodegenUtils.getDispatchTable(superClassID));
+        if (metdeclist.size() > 0) {
+            for (MethodNode method : metdeclist) {
+                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
+                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+                }
+            }
+        }
 
-        // aggiungo i metodi nuovi / sovrascrivo quelli sovrascritti
-        if(metdeclist.size() > 0)
-            for (MethodNode method : metdeclist)
-                dispatchTable.put(method.getId(), method.codeGeneration());
-
-        if(dispatchTable.entrySet().size() > 0) CodegenUtils.addDispatchTable(classID, dispatchTable);
+        if (dispatchTable.size() > 0) {
+            CodegenUtils.addDispatchTable(classID, dispatchTable);
+        }
 
         return "";
     }

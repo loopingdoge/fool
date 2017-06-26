@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ExecuteVM {
 
     public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 10000;    // TODO: calculate this
+    public static final int MEMSIZE = 100;    // TODO: calculate this
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(100);
+    private HeapMemory heap = new HeapMemory(20);
     private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
 
     public ExecuteVM(int[] code) {
@@ -38,8 +38,8 @@ public class ExecuteVM {
     }
 
     public ArrayList<String> cpu() {
-//        System.out.println("start :");
-//        printMemory();
+        System.out.println("start :");
+        printMemory();
         while (true) {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
@@ -136,7 +136,9 @@ public class ExecuteVM {
                     int nargs = pop();
                     int[] args = new int[nargs];
                     // Poppo gli argomenti
-                    for (int i = nargs - 1; i >= 0; i--) args[i] = pop();
+                    for (int i = nargs - 1; i >= 0; i--) {
+                        args[i] = pop();
+                    }
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
                     HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
                     // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
@@ -162,8 +164,8 @@ public class ExecuteVM {
                 case SVMParser.HALT:
                     return outputBuffer;
             }
-//            System.out.println(bytecode + ": ");
-//            printMemory();
+            System.out.println(bytecode + ": ");
+            printMemory();
         }
     }
 

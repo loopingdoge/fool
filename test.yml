@@ -60,7 +60,7 @@ test6 - Scopes Error:
 -   let
         int foo(int n)
             let
-                int gee(int n) x;
+                int gee(int n) 1;
             in
                 if (n==0) then { 1 } else { n * gee(n-1) };
     in
