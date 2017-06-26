@@ -55,7 +55,7 @@ assembly:
 	  | NEW             {code[i++] = NEW;}
 	  | LC              {code[i++] = LC;}
 	  | HALT            {code[i++] = HALT;}
-	  | l=LABEL         {labelRef.put(i, $l.text);}
+	  | l=LABEL         {labelRef.put(i++, $l.text);}
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
 	            code[refAdd]=labelAdd.get(labelRef.get(refAdd));
