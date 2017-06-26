@@ -53,6 +53,7 @@ assembly:
 	  | STOREHP         {code[i++] = STOREHP;}                          //
 	  | PRINT           {code[i++] = PRINT;}
 	  | NEW             {code[i++] = NEW;}
+	  | LC              {code[i++] = LC;}
 	  | HALT            {code[i++] = HALT;}
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
@@ -88,6 +89,7 @@ STOREHP	        : 'shp' ;	// store top into heap pointer
 PRINT	        : 'print' ;	// print top of stack
 HALT	        : 'halt' ;	// stop execution
 NEW             : 'new' ;
+LC              : 'lc'  ;
 
 COL	            : ':' ;
 LABEL	        : ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;

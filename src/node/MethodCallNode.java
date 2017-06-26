@@ -121,6 +121,7 @@ public class MethodCallNode extends FunCallNode {
                 CodegenUtils.getDispatchTablePointer(this.classId) + "\n" +
                 "push " + methodOffset + "\n" +
                 "add" + "\n" +
+                "lc\n" +
                 "js\n";
     }
 
