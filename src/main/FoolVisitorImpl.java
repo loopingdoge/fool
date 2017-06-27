@@ -159,8 +159,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
             // this could be done differently by visiting instead the VardecContext
             for (int i = 0; i < fctx.vardec().size(); i++) {
                 VardecContext vc = fctx.vardec().get(i);
-                // +2 perche' a +1 c'e' this
-                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type(), i + 2));
+                params.add(new ParameterNode(vc, vc.ID().getText(), visit(vc.type()).type(), i + 1));
             }
 
             // add body, create a list for the nested declarations

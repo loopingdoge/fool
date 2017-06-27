@@ -281,5 +281,5 @@ test24 - Scope Hell inside Class:
     let
         Numero num = new Numero(5);
     in
-        print(num.getX() + num.getRedefinedX() + num.getParamX(10) + getXInsideFun());
--   "18"
+        print(num.getX() + num.getRedefinedX() + num.getParamX(10) + num.getXInsideFun());
+-   "23"
