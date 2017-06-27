@@ -170,31 +170,28 @@ public class ClassNode extends Node {
 
     @Override
     public String codeGeneration() {
-
         // Creo una nuova dispatch table
-        ArrayList<DispatchTableEntry> dispatchTable;
-        if (superClassID.equals("")) {
-            dispatchTable = new ArrayList<DispatchTableEntry>();
-            for (MethodNode method : metdeclist) {
-                dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+        ArrayList<DispatchTableEntry> dispatchTable = superClassID.equals("")
+                ? new ArrayList<>()
+                : CodegenUtils.getDispatchTable(superClassID);
+
+        HashMap<String, String> fatherMethods = new HashMap<>();
+        for (DispatchTableEntry d : dispatchTable) fatherMethods.put(d.getMethodID(), d.getMethodCode());
+        HashMap<String, String> childMethods = new HashMap<>();
+        for (MethodNode m : metdeclist) childMethods.put(m.getId(), m.codeGeneration());
+
+        for (int i = 0; i < dispatchTable.size(); i++) {
+            String currMethodID = dispatchTable.get(i).getMethodID();
+            String redefinedMethodCode = childMethods.get(currMethodID);
+            if (redefinedMethodCode != null) {
+                dispatchTable.set(i, new DispatchTableEntry(currMethodID, redefinedMethodCode));
             }
         }
-        else {
-            // Ottengo una copia dal padre
-            dispatchTable = CodegenUtils.getDispatchTable(superClassID);
-            boolean override = false;
-            for (MethodNode method : metdeclist) {
-                for (DispatchTableEntry dtEntry : dispatchTable) {
-                    if (dtEntry.getMethodID().equals(method.getId())) {
-                        dispatchTable.get(dispatchTable.indexOf(dtEntry)).setMethodCode(method.codeGeneration());  // change only our code
-                        override = true;
-                        break;
-                    }
-                }
-                if (!override) {
-                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-                }
-                override = false; // to check next method
+
+        for (MethodNode m : metdeclist) {
+            String currMethodID = m.getId();
+            if (fatherMethods.get(currMethodID) == null) {
+                dispatchTable.add(new DispatchTableEntry(currMethodID, childMethods.get(currMethodID)));
             }
         }
 
