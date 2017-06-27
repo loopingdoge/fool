@@ -257,3 +257,24 @@ test23 - Function returning an object:
     in
         print(num.getNum());
 -   "1"
+
+test24 - Scope Hell inside Class:
+-   class Numero (int x) {
+        int getX()
+            let
+                int y = 3;
+            in
+                x;
+        int getRedefinedX()
+            let
+                int x = 3;
+            in
+                x;
+        int getParamX(int x)
+            x;
+    };
+    let
+        Numero num = new Numero(5);
+    in
+        print(num.getX() + num.getRedefinedX() + num.getParamX(10));
+-   "18"
