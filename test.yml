@@ -235,7 +235,6 @@ test21 - Call method on object returned by method:
         print(num.uno().due());
 - "4"
 
-
 test22 - Method calling another method:
 -   class Numero (int x){
         int uno() x;

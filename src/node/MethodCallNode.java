@@ -115,12 +115,16 @@ public class MethodCallNode extends FunCallNode {
 
         return "lfp\n"
                 + parCode
-                + "push " + objectOffset + "\n"
-                + "lfp\n" + getAR
+                + "push " + objectOffset + "\n"         // pusho l'offset dell'oggetto nello scope di definizione
+                + "lfp\n" + getAR                       // risalgo la catena statica
                 + "add\n"
                 + "lw\n"
-                + CodegenUtils.getDispatchTablePointer(this.classId) + "\n"
-                + "push " + (methodOffset - 1) + "\n"
+                + "push " + objectOffset + "\n"         // pusho l'offset dell'oggett
+                + "lfp\n" + getAR                       // risalgo la catena statica
+                + "add\n"                               // sommo l'offset all'inidirizzo dello scope
+                + "lw\n"                                // carico l'indirizzo reale dell'oggetto sullo stack
+                + "lw\n"                                // carico il primo elemento puntato aka dispatch table
+                + "push " + (methodOffset - 1) + "\n"   // pusho l'offset del metodo
                 + "add" + "\n"
                 + "lc\n"
                 + "js\n";
