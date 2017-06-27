@@ -18,7 +18,7 @@ prog
     ;
 
 classdec
-    : CLASS ID ( IMPLEMENTS ID )? (LPAR vardec ( COMMA vardec)* RPAR)?  (CLPAR (met SEMIC)+ CRPAR)?
+    : CLASS ID ( IMPLEMENTS ID )? (LPAR (vardec ( COMMA vardec)*)? RPAR)?  (CLPAR (met SEMIC)+ CRPAR)?
     ;
 
 let
@@ -74,7 +74,7 @@ value
     | THIS                                                                          #thisExp
     | funcall                                                                       #funExp
     | (ID | THIS) DOT funcall                             	                        #methodExp
-    | NEW ID (LPAR exp (COMMA exp)* RPAR)?			                                #newExp
+    | NEW ID (LPAR ( exp (COMMA exp)* )? RPAR)?			                                #newExp
     ;
 
 funcall
