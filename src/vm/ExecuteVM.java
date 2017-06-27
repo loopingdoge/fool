@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ExecuteVM {
 
     public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 100;    // TODO: calculate this
+    public static final int MEMSIZE = 10000;    // TODO: calculate this
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
