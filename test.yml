@@ -246,3 +246,14 @@ test22 - Method calling another method:
     in
         print(num.due());
 - "2"
+
+test23 - Function returning an object:
+-   class Numero (int x) {
+        int getNum() x;
+    };
+    let
+        Numero uno() new Numero(1);
+        Numero num = uno();
+    in
+        print(num.getNum());
+-   "1"
