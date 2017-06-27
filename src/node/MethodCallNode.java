@@ -11,7 +11,6 @@ import type.ClassType;
 import type.FunType;
 import type.InstanceType;
 import type.Type;
-import util.CodegenUtils;
 
 import java.util.ArrayList;
 
@@ -38,13 +37,14 @@ public class MethodCallNode extends FunCallNode {
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<>();
-
+        this.nestinglevel = env.getNestingLevel();
         try {
 
             ClassType classType = null;
             if (objectId.equals("this")) {
-                Type objectType = env.getLatestEntry().getType();
-                // TODO object offset e nestinglevel
+                Type objectType = env.getLatestClassEntry().getType();
+                this.objectOffset = -1;             // TODO: Questo va calcolato ma non so come
+                this.objectNestingLevel = 1;
                 if (objectType instanceof ClassType) {
                     classType = (ClassType) objectType;
                 } else {
@@ -55,7 +55,6 @@ public class MethodCallNode extends FunCallNode {
                 Type objectType = objectSEntry.getType();
                 this.objectOffset = objectSEntry.getOffset();
                 this.objectNestingLevel = objectSEntry.getNestinglevel();
-                this.nestinglevel = env.getNestingLevel();
                 // Controllo che il metodo sia stato chiamato su un oggetto
                 if (objectType instanceof InstanceType) {
                     classType = ((InstanceType) objectType).getClassType();
@@ -67,7 +66,7 @@ public class MethodCallNode extends FunCallNode {
             // Se il metodo viene chiamato su this, vuol dire che stiamo facendo la semantic analysis
             // della classe, quindi prendo l'ultima entry aggiunta alla symbol table
             SymbolTableEntry classEntry = objectId.equals("this")
-                    ? env.getLatestEntry()
+                    ? env.getLatestClassEntry()
                     : env.getLatestEntryOf(classType.getClassID());
 
             ClassType objectClass = (ClassType) classEntry.getType();

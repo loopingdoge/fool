@@ -2,6 +2,7 @@ package symbol_table;
 
 import exception.RedeclaredVarException;
 import exception.UndeclaredVarException;
+import type.ClassType;
 import type.FunType;
 import type.Type;
 
@@ -13,7 +14,7 @@ public class Environment {
 
     public int offset = 0;
     private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();
-    private SymbolTableEntry latestEntry = null;
+    private SymbolTableEntry latestClassEntry = null;
 
     public Environment() {
 
@@ -42,7 +43,9 @@ public class Environment {
         SymbolTableEntry oldEntry = this.symbolTable
                 .get(this.symbolTable.size() - 1)
                 .put(id, newEntry);
-        latestEntry = newEntry;
+        if (type instanceof ClassType) {
+            latestClassEntry = newEntry;
+        }
         if (oldEntry != null) {
             throw new RedeclaredVarException(id);
         }
@@ -54,7 +57,9 @@ public class Environment {
         SymbolTableEntry oldEntry = this.symbolTable
                 .get(this.symbolTable.size() - 1)
                 .put(id, newEntry);
-        latestEntry = newEntry;
+        if (type instanceof ClassType) {
+            latestClassEntry = newEntry;
+        }
         if (oldEntry != null) {
             throw new RedeclaredVarException(id);
         }
@@ -83,11 +88,11 @@ public class Environment {
         throw new UndeclaredVarException(id);
     }
 
-    public SymbolTableEntry getLatestEntry() throws UndeclaredVarException {
-        if (latestEntry == null) {
+    public SymbolTableEntry getLatestClassEntry() throws UndeclaredVarException {
+        if (latestClassEntry == null) {
             throw new UndeclaredVarException("symbol table not initialized");
         } else {
-            return latestEntry;
+            return latestClassEntry;
         }
     }
 
