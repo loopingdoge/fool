@@ -33,25 +33,24 @@ public class NewNode extends Node {
 
         try {
             classType = CodegenUtils.getClassEntry(classID);
+
+            if (classType.getFields().size() != args.size())
+                res.add(new SemanticError("Instantiation of new " + classID + " with the wrong number of parameters."));
+
+            if (args.size() > 0) {
+                //if there are children then check semantics for every child and save the results
+                for (INode n : args)
+                    res.addAll(n.checkSemantics(env));
+            }
+
+            try {
+                env.getLatestEntryOf(this.classID);
+            } catch (UndeclaredVarException e) {
+                res.add(new SemanticError(e.getMessage()));
+            }
         } catch (UndeclaredClassException e) {
-            res.add(new SemanticError( e.getMessage() ));
-        }
-
-        if (classType.getFields().size() != args.size())
-            res.add(new SemanticError("Instantiation of new " + classID + " with the wrong number of parameters."));
-
-        if (args.size() > 0) {
-            //if there are children then check semantics for every child and save the results
-            for (INode n : args)
-                res.addAll(n.checkSemantics(env));
-        }
-
-        try {
-            env.getLatestEntryOf(this.classID);
-        } catch (UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
         }
-
         return res;
     }
 
@@ -91,7 +90,7 @@ public class NewNode extends Node {
 
     @Override
     public String toString() {
-        return "new " + classID ;
+        return "new " + classID;
     }
 
 }

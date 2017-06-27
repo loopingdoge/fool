@@ -295,3 +295,42 @@ test25 - Using this as expression:
     in
         print(num2.getX());
 - "8"
+
+test26 - Non-overwritted method call:
+-   class Animale(int Age, bool Alive){
+        int getAge() Age;
+        bool isAlive() Alive;
+    }
+
+    class Cane implements Animale(int Age, bool Alive){
+        int quantoViveAncora()
+            if(Alive) then {
+                if(Age <= 15) then {
+                    (15 - Age)
+                } else {
+                    1
+                }
+            } else {
+                0
+            };
+    }
+
+    class BullDog implements Cane(int Age, bool Alive){
+        int quantoViveAncora()
+            if(Alive) then {
+                if(Age <= 8) then {
+                    (8 - Age)
+                } else {
+                    1
+                }
+            } else {
+                0
+            };
+    };
+
+    let
+        Cane tom = new Cane( 7 , false );
+        Cane roger = new BullDog( 6 , true);
+    in
+        print(roger.getAge() + roger.quantoViveAncora());
+- "8"
