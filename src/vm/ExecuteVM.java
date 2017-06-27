@@ -22,7 +22,7 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(20);
+    private HeapMemory heap = new HeapMemory(200);
     private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
 
     public ExecuteVM(int[] code) {
@@ -38,8 +38,11 @@ public class ExecuteVM {
     }
 
     public ArrayList<String> cpu() {
-//        System.out.println("start :");
-//        printMemory();
+        boolean debug = false;
+        if (debug) {
+            System.out.println("start :");
+            printMemory();
+        }
         while (true) {
             int bytecode = code[ip++]; // fetch
             int v1, v2;
@@ -161,11 +164,16 @@ public class ExecuteVM {
                     int codeAddress = pop();
                     push(code[codeAddress]);
                     break;
+                case SVMParser.COPY:
+                    push(memory[sp]);
+                    break;
                 case SVMParser.HALT:
                     return outputBuffer;
             }
-//            System.out.println(bytecode + ": ");
-//            printMemory();
+            if (debug) {
+                System.out.println(bytecode + ": ");
+                printMemory();
+            }
         }
     }
 

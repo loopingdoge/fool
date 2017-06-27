@@ -56,6 +56,7 @@ assembly:
 	  | LC              {code[i++] = LC;}
 	  | HALT            {code[i++] = HALT;}
 	  | l=LABEL         {labelRef.put(i++, $l.text);}
+	  | COPY            {code[i++] = COPY;}
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
 	            code[refAdd]=labelAdd.get(labelRef.get(refAdd));
@@ -91,6 +92,7 @@ PRINT	        : 'print' ;	// print top of stack
 HALT	        : 'halt' ;	// stop execution
 NEW             : 'new' ;
 LC              : 'lc'  ;
+COPY            : 'copy' ;
 
 COL	            : ':' ;
 LABEL	        : ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
