@@ -239,7 +239,7 @@ test21 - Call method on object returned by method:
 test22 - Method calling another method:
 -   class Numero (int x){
         int uno() x;
-        int due() uno();
+        int due() this.uno();
     };
     let
         Numero num = new Numero(2);

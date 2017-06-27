@@ -43,8 +43,11 @@ public class MethodCallNode extends FunCallNode {
             ClassType classType = null;
             if (objectId.equals("this")) {
                 Type objectType = env.getLatestClassEntry().getType();
-                this.objectOffset = -1;             // TODO: Questo va calcolato ma non so come
-                this.objectNestingLevel = 1;
+                // TODO: cosi' funziona sempre credo, pero' sarebbe meglio farlo meno hardcoded
+                // Se il metodo e' chiamato su this, l'offset rispetto a $fp e' sempre 0
+                this.objectOffset = 0;
+                // L'oggetto e' sempre al livello dei parametri di metodo, ovvero 3
+                this.objectNestingLevel = 3;
                 if (objectType instanceof ClassType) {
                     classType = (ClassType) objectType;
                 } else {
@@ -109,24 +112,23 @@ public class MethodCallNode extends FunCallNode {
             parCode.append(params.get(i).codeGeneration());
 
         StringBuilder getAR = new StringBuilder();
+
         for (int i = 0; i < nestinglevel - objectNestingLevel; i++)
             getAR.append("lw\n");
 
-        return "lfp\n"
-                + parCode
-                + "push " + objectOffset + "\n"         // pusho l'offset dell'oggetto nello scope di definizione
-                + "lfp\n" + getAR                       // risalgo la catena statica
-                + "add\n"
-                + "lw\n"
-                + "push " + objectOffset + "\n"         // pusho l'offset dell'oggett
-                + "lfp\n" + getAR                       // risalgo la catena statica
-                + "add\n"                               // sommo l'offset all'inidirizzo dello scope
-                + "lw\n"                                // carico l'indirizzo reale dell'oggetto sullo stack
-                + "lw\n"                                // carico il primo elemento puntato aka dispatch table
-                + "push " + (methodOffset - 1) + "\n"   // pusho l'offset del metodo
-                + "add" + "\n"
-                + "lc\n"
-                + "js\n";
+        return "lfp\n"                                  // carico il frame pointer (perche'?)
+                + parCode                               // carico i parametri
+                + "push " + objectOffset + "\n"         // carico l'offset dell'oggetto nello scope di definizione
+                + "lfp\n"                               // carico il frame pointer
+                + getAR                                 // faccio gli lw necessari fino a trovarmi sullo stack l'indirizzo in memoria del frame dove e' definito l'oggetto
+                + "add\n"                               // faccio $fp + offset per ottenere l'indirizzo in memoria dell'oggetto
+                + "lw\n"                                // carico il valore dell'oggetto sullo stack
+                + "copy\n"                              // copio il valore sopra (l'indirizzo di memoria nel quale si trova l'indirizzo della dispatch table)
+                + "lw\n"                                // carico l'indirizzo della dispatch table sullo stack
+                + "push " + (methodOffset - 1) + "\n"   // carico l'offset del metodo rispetto all'inizio della dispatch table
+                + "add" + "\n"                          // carico sullo stack dispatch_table_start + offset
+                + "lc\n"                                // trovo l'indirizzo del metodo
+                + "js\n";                               // salto all'istruzione dove e' definito il metodo e salvo $ra
     }
 
     @Override
