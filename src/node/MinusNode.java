@@ -14,17 +14,10 @@ public class MinusNode extends Node {
     private INode left;
     private INode right;
 
-    public MinusNode(FOOLParser.ExpContext ctx, INode l, INode r) {
+    public MinusNode(FOOLParser.ExpContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
-    }
-
-    @Override
-    public String codeGeneration() {
-        return left.codeGeneration()
-                + right.codeGeneration()
-                + "sub\n";
+        this.left = left;
+        this.right = right;
     }
 
     @Override
@@ -45,6 +38,14 @@ public class MinusNode extends Node {
             throw new TypeException("- allows only int type", ctx);
         }
         return new IntType();
+    }
+
+
+    @Override
+    public String codeGeneration() {
+        return left.codeGeneration()
+                + right.codeGeneration()
+                + "sub\n";
     }
 
     @Override

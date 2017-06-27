@@ -16,6 +16,8 @@ public class IdNode extends Node {
     private String id;
     private SymbolTableEntry entry;
     private int nestinglevel;
+    private int thisNestLevel;
+    private int thisOffset;
 
     public IdNode(ParserRuleContext ctx, String id) {
         super(ctx);
@@ -29,6 +31,11 @@ public class IdNode extends Node {
 
         try {
             this.entry = env.getLatestEntryOfNotFun(this.id);
+            if(this.entry.isAttribute()) {
+                SymbolTableEntry thisPointer = env.getLatestEntryOfNotFun("this");
+                this.thisNestLevel = thisPointer.getNestinglevel();
+                this.thisOffset = thisPointer.getOffset();
+            }
             this.nestinglevel = env.getNestingLevel();
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
@@ -47,13 +54,26 @@ public class IdNode extends Node {
 
     public String codeGeneration() {
         StringBuilder getAR = new StringBuilder();
-        for (int i = 0; i < nestinglevel - entry.getNestinglevel(); i++)
-            getAR.append("lw\n");
-        return "push " + entry.getOffset() + "\n" + //metto offset sullo stack
-                "lfp\n" + getAR + //risalgo la catena statica
-                "add\n" +
-                "lw\n"; //carico sullo stack il valore all'indirizzo ottenuto
+        if(this.entry.isAttribute()) {
+            for (int i = 0; i < nestinglevel - thisNestLevel; i++)
+                getAR.append("lw\n");
 
+            return "push " + entry.getOffset() + "\n" + //metto offset sullo stack
+                    "push " + thisOffset + "\n" +
+                    "lfp\n" + getAR + //risalgo la catena statica
+                    "add\n" +
+                    "lw\n" +
+                    "add\n" +
+                    "lw\n"; //carico sullo stack il valore all'indirizzo ottenuto
+        } else {
+            for (int i = 0; i < nestinglevel - entry.getNestinglevel(); i++)
+                getAR.append("lw\n");
+
+            return "push " + entry.getOffset() + "\n" + //metto offset sullo stack
+                    "lfp\n" + getAR + //risalgo la catena statica
+                    "add\n" +
+                    "lw\n"; //carico sullo stack il valore all'indirizzo ottenuto
+        }
     }
 
     @Override

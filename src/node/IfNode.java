@@ -16,11 +16,11 @@ public class IfNode extends Node {
     private INode th;
     private INode el;
 
-    public IfNode(FOOLParser.IfExpContext ctx, INode c, INode t, INode e) {
+    public IfNode(FOOLParser.IfExpContext ctx, INode cond, INode th, INode el) {
         super(ctx);
-        cond = c;
-        th = t;
-        el = e;
+        this.cond = cond;
+        this.th = th;
+        this.el = el;
     }
 
     @Override

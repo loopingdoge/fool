@@ -12,9 +12,9 @@ public class ProgSingleExpNode extends Node {
 
     private INode exp;
 
-    public ProgSingleExpNode(FOOLParser.SingleExpContext ctx, INode e) {
+    public ProgSingleExpNode(FOOLParser.SingleExpContext ctx, INode exp) {
         super(ctx);
-        exp = e;
+        this.exp = exp;
     }
 
     @Override

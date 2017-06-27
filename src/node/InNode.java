@@ -14,10 +14,10 @@ public class InNode extends Node {
     private INode exp;
     private boolean isLetIn;
 
-    public InNode(FOOLParser.LetContext ctx, INode e, boolean f) {
+    public InNode(FOOLParser.LetContext ctx, INode exp, boolean f) {
         super(ctx);
-        exp = e;
-        isLetIn = f;
+        this.exp = exp;
+        this.isLetIn = f;
     }
 
     @Override

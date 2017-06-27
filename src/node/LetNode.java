@@ -13,9 +13,9 @@ public class LetNode extends Node {
 
     private ArrayList<INode> declist;
 
-    public LetNode(FOOLParser.LetContext ctx, ArrayList<INode> d) {
+    public LetNode(FOOLParser.LetContext ctx, ArrayList<INode> declist) {
         super(ctx);
-        declist = d;
+        this.declist = declist;
     }
 
     @Override

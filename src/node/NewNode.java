@@ -27,15 +27,6 @@ public class NewNode extends Node {
     }
 
     @Override
-    public ArrayList<INode> getChilds() {
-        ArrayList<INode> res = new ArrayList<>();
-
-        res.addAll(args);
-
-        return res;
-    }
-
-    @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
@@ -87,6 +78,15 @@ public class NewNode extends Node {
                 + "push " + args.size() + "\n"
                 + CodegenUtils.getDispatchTablePointer(classID) + "\n"
                 + "new\n";
+    }
+
+    @Override
+    public ArrayList<INode> getChilds() {
+        ArrayList<INode> res = new ArrayList<>();
+
+        res.addAll(args);
+
+        return res;
     }
 
     @Override

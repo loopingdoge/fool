@@ -15,10 +15,10 @@ public class AndNode extends Node {
     private INode left;
     private INode right;
 
-    public AndNode(FOOLParser.FactorContext ctx, INode l, INode r) {
+    public AndNode(FOOLParser.FactorContext ctx, INode left, INode right) {
         super(ctx);
-        left = l;
-        right = r;
+        this.left = left;
+        this.right = right;
     }
 
     @Override
@@ -44,6 +44,7 @@ public class AndNode extends Node {
         return new BoolType();
     }
 
+    @Override
     public String codeGeneration() {
         String l1 = CodegenUtils.freshLabel();
         String l2 = CodegenUtils.freshLabel();

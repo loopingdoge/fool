@@ -1,11 +1,6 @@
 package node;
 
-import exception.RedeclaredVarException;
-import exception.TypeException;
-import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
-import symbol_table.Environment;
-import type.FunType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -21,6 +16,7 @@ public class MethodNode extends FunNode {
 
     public void setClassID( String classID ) { this.classID = classID; }
 
+    @Override
     public String codeGeneration() {
         StringBuilder declCode = new StringBuilder();
         if (declarations != null)
@@ -47,13 +43,12 @@ public class MethodNode extends FunNode {
                 "sra\n" + // pop del return address
                 "pop\n" + // pop di AL
                 popParl +
-                "pop\n" + // tolgo il puntatore all'oggetto dallo stack - [NUOVO] rispetto al codegen di FunNode TODO: controllare che funzioni con MethodCall
                 "sfp\n" + // setto $fp a valore del CL
                 "lrv\n" + // risultato della funzione sullo stack
                 "lra\n" + "js\n" // salta a $ra
         );
 
-        return "push " + funl + "\n";
+        return funl + "\n";
     }
 
 }

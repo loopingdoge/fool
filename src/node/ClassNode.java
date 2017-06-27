@@ -10,8 +10,10 @@ import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
+import util.DispatchTableEntry;
 import util.Field;
 import util.Method;
 
@@ -24,7 +26,7 @@ public class ClassNode extends Node {
     private String classID;
     private String superClassID;
     private ArrayList<ParameterNode> vardeclist;
-    private ArrayList<MethodNode> metdeclist; // TODO: refactor fundec -> methoddec
+    private ArrayList<MethodNode> metdeclist;
 
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, FunType> methods = new HashMap<>();
@@ -37,6 +39,10 @@ public class ClassNode extends Node {
         this.superClassID = superClassID;
         this.vardeclist = vardeclist;
         this.metdeclist = metdeclist;
+    }
+
+    public ArrayList<ParameterNode> getVardeclist() {
+        return this.vardeclist;
     }
 
     @Override
@@ -72,14 +78,20 @@ public class ClassNode extends Node {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.addEntry(classID, this.type, 0);
             CodegenUtils.addClassEntry(classID, this.type);
-        } catch (RedeclaredVarException | RedeclaredClassException ex) {
-            res.add(new SemanticError(ex.getMessage()));
+        } catch (RedeclaredVarException | RedeclaredClassException e) {
+            res.add(new SemanticError(e.getMessage()));
         }
 
         env.pushHashMap();
         for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));
         }
+        try {
+            env.addEntry("this", new InstanceType(type), vardeclist.size() + 1 );
+        } catch (RedeclaredVarException e) {
+            e.printStackTrace();
+        }
+
         env.pushHashMap();
         for (MethodNode fun : metdeclist) {
             res.addAll(fun.checkSemantics(env));
@@ -156,23 +168,23 @@ public class ClassNode extends Node {
         return this.type;
     }
 
-    public ArrayList<ParameterNode> getVardeclist() {
-        return this.vardeclist;
-    }
-
     @Override
     public String codeGeneration() {
+        // Creo una nuova dispatch table
+        ArrayList<DispatchTableEntry> dispatchTable = superClassID.equals("")
+                ? new ArrayList<>()
+                : CodegenUtils.getDispatchTable(superClassID);
 
-        // creo una nuova dispatch table
-        HashMap<String, String> dispatchTable = new HashMap<String, String>();
-        if (superClassID != "") dispatchTable = new HashMap<String, String>(CodegenUtils.getDispatchTable(superClassID));
+        if (metdeclist.size() > 0) {
+            for (MethodNode method : metdeclist) {
+                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
+                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+                }
+            }
+        }
 
-        // aggiungo i metodi nuovi / sovrascrivo quelli sovrascritti
-        if(metdeclist.size() > 0)
-            for (MethodNode method : metdeclist)
-                dispatchTable.put(method.getId(), method.codeGeneration());
-
-        if(dispatchTable.entrySet().size() > 0) CodegenUtils.addDispatchTable(classID, dispatchTable);
+        //Aggiungo sempre la DT anche se è vuota, perchè può capitare di implementare una classe che non ha metodi!
+        CodegenUtils.addDispatchTable(classID, dispatchTable);
 
         return "";
     }
@@ -187,10 +199,7 @@ public class ClassNode extends Node {
 
     @Override
     public String toString() {
-        if (!superClassID.isEmpty())
-            return "class " + classID + " extends " + superClassID;
-        else
-            return "class " + classID;
+        return superClassID.isEmpty() ? "class " + classID : "class " + classID + " extends " + superClassID;
     }
 
 }

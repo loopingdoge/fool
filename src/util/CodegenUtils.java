@@ -4,6 +4,7 @@ import exception.RedeclaredClassException;
 import exception.UndeclaredClassException;
 import type.ClassType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public class CodegenUtils {
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
-    private static HashMap<String, HashMap<String, String>> dispatchTables = new HashMap<String, HashMap<String, String>>();
+    private static HashMap<String, ArrayList<DispatchTableEntry>> dispatchTables = new HashMap<>();
 
     public static String freshLabel() {
         return "label" + (label++);
@@ -48,11 +49,11 @@ public class CodegenUtils {
     }
 
     // TODO: gestione errori?
-    public static void addDispatchTable(String classID, HashMap<String, String> dt) {
+    public static void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt) {
         dispatchTables.put(classID, dt);
     }
 
-    public static HashMap<String, String> getDispatchTable(String classID) {
+    public static ArrayList<DispatchTableEntry> getDispatchTable(String classID) {
         return dispatchTables.get(classID);
     }
 
@@ -61,17 +62,17 @@ public class CodegenUtils {
     }
 
     public static String generateDispatchTablesCode() {
-        String dtCodes = "";
+        StringBuilder dtCodes = new StringBuilder();
         // For every class
-        for(Map.Entry<String, HashMap<String, String>> dt : dispatchTables.entrySet()) {
+        for (Map.Entry<String, ArrayList<DispatchTableEntry>> dt : dispatchTables.entrySet()) {
             // Creates a DT label
-            dtCodes += freshDispatchTableLabel(dt.getKey()) + ":\n";
-            // For every method in the DT
-            for(Map.Entry<String, String> method : dispatchTables.get(dt.getKey()).entrySet()) {
-                dtCodes += method.getValue();
+            dtCodes.append(freshDispatchTableLabel(dt.getKey())).append(":\n");
+            // For every entry in the DT
+            for (DispatchTableEntry entry : dispatchTables.get(dt.getKey())) {
+                dtCodes.append(entry.getMethodCode());
             }
         }
-        return dtCodes;
+        return dtCodes.toString();
     }
 
     public static void reset() {

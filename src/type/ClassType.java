@@ -72,32 +72,6 @@ public class ClassType implements Type {
         throw new UndeclaredMethodException(methodID);
     }
 
-    public boolean containsID(String id) {
-        return Math.min(
-                fields.stream()
-                        .filter(field -> field.getId().equals(id))
-                        .collect(Collectors.toList())
-                        .size()
-                ,
-                methods.stream()
-                        .filter(method -> method.getId().equals(id))
-                        .collect(Collectors.toList())
-                        .size()
-        ) > 0;
-    }
-
-    public Type getTypeOfField(String id) {
-        Field field = this.fields
-                .stream()
-                .filter(f -> f.getId().equals(id))
-                .reduce(null, (prev, curr) -> curr);
-        if (field != null) {
-            return field.getType();
-        } else {
-            return new VoidType();
-        }
-    }
-
     public Type getTypeOfMethod(String id) {
         Method method = this.methods
                 .stream()
@@ -126,7 +100,7 @@ public class ClassType implements Type {
             }
             // Procedo solo se la mia classe ha un supertipo
             if (superType != null) {
-                return this.getSuperclassID().equals(ct2.getSuperclassID()) || superType.isSubTypeOf(t2);
+                return this.getSuperclassID().equals(ct2.getClassID()) || superType.isSubTypeOf(t2);
             }
         }
         return false;
