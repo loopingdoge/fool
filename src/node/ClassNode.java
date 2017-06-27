@@ -170,18 +170,52 @@ public class ClassNode extends Node {
 
     @Override
     public String codeGeneration() {
-        // Creo una nuova dispatch table
-        ArrayList<DispatchTableEntry> dispatchTable = superClassID.equals("")
-                ? new ArrayList<>()
-                : CodegenUtils.getDispatchTable(superClassID);
 
-        if (metdeclist.size() > 0) {
+        // Creo una nuova dispatch table
+        ArrayList<DispatchTableEntry> dispatchTable;
+        if (superClassID.equals("")) {
+            dispatchTable = new ArrayList<DispatchTableEntry>();
             for (MethodNode method : metdeclist) {
-                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
-                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-                }
+                dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
             }
         }
+        else {
+            // Ottengo una copia dal padre
+            dispatchTable = CodegenUtils.getDispatchTable(superClassID);
+            boolean override = false;
+            for (MethodNode method : metdeclist) {
+                for (DispatchTableEntry dtEntry : dispatchTable) {
+                    if (dtEntry.getMethodID().equals(method.getId())) {
+                        dispatchTable.get(dispatchTable.indexOf(dtEntry)).setMethodCode(method.codeGeneration());  // change only our code
+                        override = true;
+                        break;
+                    }
+                }
+                if (!override) {
+                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+                }
+                override = false; // to check next method
+            }
+        }
+
+//        if (metdeclist.size() > 0) {
+//            for (MethodNode method : metdeclist) {
+//                for (DispatchTableEntry dtEntry: dispatchTable) {
+//                    if (dtEntry.getMethodID().equals(method.getId())) {
+//                        dtEntry.setMethodCode(method.codeGeneration());
+//                    } else {
+//                        dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+//                    }
+//                }
+
+//                dispatchTable.removeIf(dtEntry -> dtEntry.getMethodID().equals(method.getId()));
+//                dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+
+//                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
+//                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
+//                }
+//            }
+//        }
 
         //Aggiungo sempre la DT anche se è vuota, perchè può capitare di implementare una classe che non ha metodi!
         CodegenUtils.addDispatchTable(classID, dispatchTable);
