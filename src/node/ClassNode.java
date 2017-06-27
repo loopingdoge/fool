@@ -41,15 +41,6 @@ public class ClassNode extends Node {
         this.metdeclist = metdeclist;
     }
 
-    private static DispatchTableEntry asd(DispatchTableEntry dtEntry, HashMap<String, String> childMap) {
-        String methodId = dtEntry.getMethodID();
-        String code = childMap.get(dtEntry.getMethodID());
-        if (code != null)
-            return new DispatchTableEntry(methodId, code);
-        else
-            return dtEntry;
-    }
-
     public ArrayList<ParameterNode> getVardeclist() {
         return this.vardeclist;
     }

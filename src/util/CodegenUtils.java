@@ -2,6 +2,7 @@ package util;
 
 import exception.RedeclaredClassException;
 import exception.UndeclaredClassException;
+import symbol_table.SymbolTableEntry;
 import type.ClassType;
 
 import java.util.ArrayList;
@@ -53,8 +54,15 @@ public class CodegenUtils {
         dispatchTables.put(classID, dt);
     }
 
+    // Viene ritornata una copia della dispatch table (così non si modifica, per riferimento, la dt del padre)
     public static ArrayList<DispatchTableEntry> getDispatchTable(String classID) {
-        return (ArrayList<DispatchTableEntry>) dispatchTables.get(classID).clone();
+        ArrayList<DispatchTableEntry> copy = new ArrayList<DispatchTableEntry>();
+        ArrayList<DispatchTableEntry> original = dispatchTables.get(classID);
+        for (DispatchTableEntry originalDtEntry : original) {
+            DispatchTableEntry copiedDtEntry = new DispatchTableEntry(originalDtEntry.getMethodID(), originalDtEntry.getMethodCode());
+            copy.add(copiedDtEntry);
+        }
+        return copy;
     }
 
     public static String getDispatchTablePointer(String classID) {

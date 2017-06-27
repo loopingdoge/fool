@@ -89,11 +89,15 @@ public class TestRunner {
 
     private static String executeVM(int[] code) {
         ExecuteVM vm = new ExecuteVM(code);
-        ArrayList<String> output = vm.cpu();
-        if (output.size() > 0)
-            return output.get(output.size() - 1);
-        else
-            return "No output";
+        String message =  "No output";
+        try {
+            ArrayList<String> output = vm.cpu();
+            if (output.size() > 0)
+                message = output.get(output.size() - 1);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return message;
     }
 
     public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging) {
