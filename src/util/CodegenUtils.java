@@ -54,7 +54,7 @@ public class CodegenUtils {
     }
 
     public static ArrayList<DispatchTableEntry> getDispatchTable(String classID) {
-        return dispatchTables.get(classID);
+        return (ArrayList<DispatchTableEntry>) dispatchTables.get(classID).clone();
     }
 
     public static String getDispatchTablePointer(String classID) {

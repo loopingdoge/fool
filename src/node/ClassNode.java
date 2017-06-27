@@ -41,6 +41,15 @@ public class ClassNode extends Node {
         this.metdeclist = metdeclist;
     }
 
+    private static DispatchTableEntry asd(DispatchTableEntry dtEntry, HashMap<String, String> childMap) {
+        String methodId = dtEntry.getMethodID();
+        String code = childMap.get(dtEntry.getMethodID());
+        if (code != null)
+            return new DispatchTableEntry(methodId, code);
+        else
+            return dtEntry;
+    }
+
     public ArrayList<ParameterNode> getVardeclist() {
         return this.vardeclist;
     }
@@ -175,11 +184,23 @@ public class ClassNode extends Node {
                 ? new ArrayList<>()
                 : CodegenUtils.getDispatchTable(superClassID);
 
-        if (metdeclist.size() > 0) {
-            for (MethodNode method : metdeclist) {
-                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
-                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-                }
+        HashMap<String, String> fatherMethods = new HashMap<>();
+        for (DispatchTableEntry d : dispatchTable) fatherMethods.put(d.getMethodID(), d.getMethodCode());
+        HashMap<String, String> childMethods = new HashMap<>();
+        for (MethodNode m : metdeclist) childMethods.put(m.getId(), m.codeGeneration());
+
+        for (int i = 0; i < dispatchTable.size(); i++) {
+            String currMethodID = dispatchTable.get(i).getMethodID();
+            String redefinedMethodCode = childMethods.get(currMethodID);
+            if (redefinedMethodCode != null) {
+                dispatchTable.set(i, new DispatchTableEntry(currMethodID, redefinedMethodCode));
+            }
+        }
+
+        for (MethodNode m : metdeclist) {
+            String currMethodID = m.getId();
+            if (fatherMethods.get(currMethodID) == null) {
+                dispatchTable.add(new DispatchTableEntry(currMethodID, childMethods.get(currMethodID)));
             }
         }
 
