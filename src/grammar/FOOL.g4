@@ -74,7 +74,7 @@ value
     | THIS                                                                          #thisExp
     | funcall                                                                       #funExp
     | (ID | THIS) DOT funcall                             	                        #methodExp
-    | NEW ID (LPAR ( exp (COMMA exp)* )? RPAR)?			                                #newExp
+    | NEW ID (LPAR ( exp (COMMA exp)* )? RPAR)?			                            #newExp
     ;
 
 funcall
