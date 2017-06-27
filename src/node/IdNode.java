@@ -55,9 +55,11 @@ public class IdNode extends Node {
     public String codeGeneration() {
         StringBuilder getAR = new StringBuilder();
         if(this.entry.isAttribute()) {
+            for (int i = 0; i < nestinglevel - thisNestLevel; i++)
+                getAR.append("lw\n");
             return  "push " + entry.getOffset() + "\n" + //metto offset sullo stack
                     "push " + thisOffset + "\n" +
-                    "lfp\n" +
+                    "lfp\n" + getAR +
                     "add\n" +
                     "lw\n" +
                     "add\n" +
