@@ -33,19 +33,21 @@ public class MethodNode extends FunNode {
             popParl.append("pop\n");
 
         String funl = CodegenUtils.freshFunLabel();
-        CodegenUtils.insertFunctionsCode(funl + ":\n" +
-                "cfp\n" + //setta $fp a $sp
-                "lra\n" + //inserimento return address
-                declCode + //inserimento dichiarazioni locali
-                body.codeGeneration() +
-                "srv\n" + //pop del return value
-                popDecl +
-                "sra\n" + // pop del return address
-                "pop\n" + // pop di AL
-                popParl +
-                "sfp\n" + // setto $fp a valore del CL
-                "lrv\n" + // risultato della funzione sullo stack
-                "lra\n" + "js\n" // salta a $ra
+        CodegenUtils.insertFunctionsCode(funl
+                + ":\n"
+                + "cfp\n"                   //setta $fp a $sp
+                + "lra\n"                   //inserimento return address
+                + declCode                  //inserimento dichiarazioni locali
+                + body.codeGeneration()
+                + "srv\n"                   //pop del return value
+                + popDecl
+                + "sra\n"                   // pop del return address
+                + "pop\n"                   // pop di AL
+                + popParl
+                + "sfp\n"                   // setto $fp a valore del CL
+                + "lrv\n"                   // risultato della funzione sullo stack
+                + "lra\n"
+                +"js\n"                      // salta a $ra
         );
 
         return funl + "\n";

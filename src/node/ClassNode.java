@@ -198,25 +198,6 @@ public class ClassNode extends Node {
             }
         }
 
-//        if (metdeclist.size() > 0) {
-//            for (MethodNode method : metdeclist) {
-//                for (DispatchTableEntry dtEntry: dispatchTable) {
-//                    if (dtEntry.getMethodID().equals(method.getId())) {
-//                        dtEntry.setMethodCode(method.codeGeneration());
-//                    } else {
-//                        dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-//                    }
-//                }
-
-//                dispatchTable.removeIf(dtEntry -> dtEntry.getMethodID().equals(method.getId()));
-//                dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-
-//                if (dispatchTable.stream().noneMatch(entry -> entry.getMethodID().equals(method.getId()))) {
-//                    dispatchTable.add(new DispatchTableEntry(method.getId(), method.codeGeneration()));
-//                }
-//            }
-//        }
-
         //Aggiungo sempre la DT anche se è vuota, perchè può capitare di implementare una classe che non ha metodi!
         CodegenUtils.addDispatchTable(classID, dispatchTable);
 

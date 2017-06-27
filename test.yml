@@ -231,8 +231,9 @@ test21 - Call method on object returned by method:
     };
     let
         Numero num = new Numero(2);
+        Numero num2 = num.uno();
     in
-        print(num.uno().due());
+        print(num2.due());
 - "4"
 
 test22 - Method calling another method:
