@@ -21,9 +21,8 @@ public class ThisNode extends Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
-
+        // TODO controllare se e' usato in una classe/metodo
         try {
             this.entry = env.getLatestEntryOf("this");
         } catch (UndeclaredVarException e) {
@@ -40,8 +39,10 @@ public class ThisNode extends Node {
 
     @Override
     public String codeGeneration() {
-        // TODO codegeneration
-        return "";
+        return "push " + entry.getOffset() + "\n"
+                + "lfp\n"
+                + "add\n"
+                + "lw\n";
     }
 
     @Override

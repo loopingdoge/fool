@@ -283,3 +283,15 @@ test24 - Scope Hell inside Class:
     in
         print(num.getX() + num.getRedefinedX() + num.getParamX(10) + num.getXInsideFun());
 -   "23"
+
+test25 - Using this as expression:
+-   class Numero (int x) {
+        Numero getThis() this;
+        int getX() x;
+    };
+    let
+        Numero num = new Numero(8);
+        Numero num2 = num.getThis();
+    in
+        print(num2.getX());
+- "8"
