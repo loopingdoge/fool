@@ -23,6 +23,13 @@ import java.util.ArrayList;
 
 public class TestRunner {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED    = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+
+
     private static INode lexicalAndSyntacticAnalysis(CharStream input) throws LexerException {
         FOOLLexer lexer = new FOOLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -143,13 +150,13 @@ public class TestRunner {
         }
 
         StringBuilder output = new StringBuilder();
+        output.append( "-Expected: " ).append(expectedResult).append("\n")
+                        .append( "-Got: "  ).append(actualResult).append("\n");
         if (actualResult.trim().equals(expectedResult.trim())) {
-            output.append("Test PASSED!" + "\n");
+            output.append( ANSI_GREEN + "Test PASSED!");
         } else {
-            output.append("Test FAILED!" + "\n");
+            output.append( ANSI_RED + "Test FAILED!");
         }
-        output.append("Expected: ").append(expectedResult).append("\n")
-                .append("Got: ").append(actualResult).append("\n");
 
         return output.toString();
     }

@@ -30,14 +30,16 @@ public class TestComplete {
                 String code = String.valueOf(test.get(0));
                 String result = String.valueOf(test.get(1));
 
-                System.out.println("Executing: " + testID);
+                System.out.println( TestRunner.ANSI_BLUE + "Executing: " + testID + TestRunner.ANSI_RESET);
                 CharStream input = CharStreams.fromString(code);
                 String output = TestRunner.test(testID, input, result, false);
-                System.out.println(output);
-                if(output.startsWith("Test PASSED")) passed++;
-            }
 
-            System.out.println("TESTING COMPLETED. TESTS PASSED " + passed + "/" + tests.keySet().size());
+                if(output.endsWith( "Test PASSED!" )) passed++;
+
+                System.out.println(output + TestRunner.ANSI_RESET + "\n");
+            }
+            String color = (passed == tests.keySet().size() ) ? TestRunner.ANSI_GREEN : TestRunner.ANSI_RED;
+            System.out.println(TestRunner.ANSI_GREEN + "TESTING COMPLETED. TESTS PASSED " +  color + passed + TestRunner.ANSI_GREEN + "/" + tests.keySet().size() + TestRunner.ANSI_RESET);
         } catch (Exception e) {
             e.printStackTrace();
         }
