@@ -223,3 +223,26 @@ test20 - Method overriding in subclass:
     in
         print(a.f() + b.f());
 - "3"
+
+test21 - Call method on object returned by method:
+-   class Numero (int x) {
+        Numero uno() new Numero(4);
+        int due() x;
+    };
+    let
+        Numero num = new Numero(2);
+    in
+        print(num.uno().due());
+- "4"
+
+
+test22 - Method calling another method:
+-   class Numero (int x){
+        int uno() x;
+        int due() uno();
+    };
+    let
+        Numero num = new Numero(2);
+    in
+        print(num.due());
+- "2"

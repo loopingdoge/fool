@@ -35,7 +35,7 @@ class HeapMemory {
 
         // La testa della lista diventa il primo elemento dopo l'ultimo restituito (alla fine del ciclo)
         HeapMemoryCell lastItem = head;
-        for (int i = 0; i < size; i++) {
+        for (int i = 1; i < size; i++) {
             lastItem = lastItem.next;
         }
         head = lastItem.next;
