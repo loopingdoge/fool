@@ -1,6 +1,12 @@
 package node;
 
+import exception.RedeclaredVarException;
+import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
+import symbol_table.Environment;
+import type.ClassType;
+import type.FunType;
+import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -15,6 +21,58 @@ public class MethodNode extends FunNode {
     }
 
     public void setClassID( String classID ) { this.classID = classID; }
+
+    @Override
+    public ArrayList<SemanticError> checkSemantics(Environment env) {
+        //create result list
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        ArrayList<Type> parTypes = new ArrayList<Type>();
+
+        for (ParameterNode param : params) {
+            parTypes.add(param.getType());
+        }
+
+        //env.offset = -2;
+
+        //TODO: Deve per forza avere un parametro di ritorno definito insieme alla funzione? Nel dubbio ho fatto il controllo, controllare che il parametro di ritorno, se dichiarato ID(classe) esista.
+        if (this.id.equals("<missing ID>")) {
+            res.add(new SemanticError("Missing ID or Type in a function."));
+        }
+        try {
+            env.addEntry(this.id, new FunType(parTypes, declaredReturnType), env.offset--);
+        } catch (RedeclaredVarException e) {
+            res.add(new SemanticError("function " + id + " already declared"));
+        }
+        env.pushHashMap();
+
+        try {
+            env.addEntry("this", new InstanceType(new ClassType(classID)), 1 );
+        } catch (RedeclaredVarException e) {
+            e.printStackTrace();
+        }
+
+        //check args
+        for (ParameterNode param : params) {
+            res.addAll(param.checkSemantics(env));
+        }
+
+        //check semantics in the dec list
+        if (declarations.size() > 0) {
+            env.offset = -2;
+            //if there are children then check semantics for every child and save the results
+            for (INode n : declarations)
+                res.addAll(n.checkSemantics(env));
+        }
+
+        //check body
+        res.addAll(body.checkSemantics(env));
+
+        //close scope
+        env.popHashMap();
+
+
+        return res;
+    }
 
     @Override
     public String codeGeneration() {

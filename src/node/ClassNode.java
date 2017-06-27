@@ -86,11 +86,6 @@ public class ClassNode extends Node {
         for (ParameterNode var : vardeclist) {
             res.addAll(var.checkSemantics(env));
         }
-        try {
-            env.addEntry("this", new InstanceType(type), vardeclist.size() + 1 );
-        } catch (RedeclaredVarException e) {
-            e.printStackTrace();
-        }
 
         env.pushHashMap();
         for (MethodNode fun : metdeclist) {

@@ -55,7 +55,7 @@ public class IdNode extends Node {
     public String codeGeneration() {
         StringBuilder getAR = new StringBuilder();
         if(this.entry.isAttribute()) {
-            return "push " + entry.getOffset() + "\n" + //metto offset sullo stack
+            return  "push " + entry.getOffset() + "\n" + //metto offset sullo stack
                     "push " + thisOffset + "\n" +
                     "lfp\n" +
                     "add\n" +

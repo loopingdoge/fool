@@ -272,9 +272,14 @@ test24 - Scope Hell inside Class:
                 x;
         int getParamX(int x)
             x;
+        int getXInsideFun()
+            let
+                int f() x;
+            in
+                f();
     };
     let
         Numero num = new Numero(5);
     in
-        print(num.getX() + num.getRedefinedX() + num.getParamX(10));
+        print(num.getX() + num.getRedefinedX() + num.getParamX(10) + getXInsideFun());
 -   "18"
