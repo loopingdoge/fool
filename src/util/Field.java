@@ -12,7 +12,7 @@ public class Field {
         this.type = type;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 

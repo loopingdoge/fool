@@ -32,7 +32,7 @@ public class ParameterNode extends Node {
         this.isAttribute = isAttribute;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 

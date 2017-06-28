@@ -25,41 +25,44 @@ public class ClassNode extends Node {
 
     private String classID;
     private String superClassID;
-    private ArrayList<ParameterNode> vardeclist;
-    private ArrayList<MethodNode> metdeclist;
+    private ArrayList<ParameterNode> attrDecList;
+    private ArrayList<MethodNode> metDecList;
 
     private HashMap<String, Type> fields = new HashMap<>();
     private HashMap<String, FunType> methods = new HashMap<>();
 
     private ClassType type;
 
-    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> vardeclist, ArrayList<MethodNode> metdeclist) {
+    public ClassNode(ParserRuleContext ctx, String classID, String superClassID, ArrayList<ParameterNode> attrDecList, ArrayList<MethodNode> metDecList) {
         super(ctx);
         this.classID = classID;
         this.superClassID = superClassID;
-        this.vardeclist = vardeclist;
-        this.metdeclist = metdeclist;
+        this.attrDecList = attrDecList;
+        this.metDecList = metDecList;
     }
 
     public ArrayList<ParameterNode> getVardeclist() {
-        return this.vardeclist;
+        return this.attrDecList;
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
         ArrayList<SemanticError> res = new ArrayList<>();
+
+        // Usati per creare la entry della classe nella symbol table
         ArrayList<Field> fieldsList = new ArrayList<>();
         ArrayList<Method> methodsList = new ArrayList<>();
 
-        for (ParameterNode var : this.vardeclist) {
-            fieldsList.add(new Field(var.getId(), var.getType()));
-            fields.put(var.getId(), var.getType());
+        for (ParameterNode var : this.attrDecList) {
+            fieldsList.add(new Field(var.getID(), var.getType()));
+            fields.put(var.getID(), var.getType());
         }
-        for (MethodNode fun : metdeclist) {
+
+        for (MethodNode fun : metDecList) { // Per ogni metodo
             ArrayList<Type> paramsType = new ArrayList<>();
-            for (ParameterNode param : fun.getParams()) {
-                if (param.getType() instanceof InstanceType) {
+            for (ParameterNode param : fun.getParams()) { // Controllo i parametri
+                if (param.getType() instanceof InstanceType) { // Se si tratta di oggetti
                     InstanceType paramType = (InstanceType) param.getType();
                     String declaredClass = paramType.getClassType().getClassID();
                     try {
@@ -68,7 +71,7 @@ public class ClassNode extends Node {
                     } catch (UndeclaredVarException e) {
                         res.add(new SemanticError("Class '" + declaredClass + "' does not exist"));
                     }
-                } else {
+                } else { // Se si tratta di valori base
                     paramsType.add(param.getType());
                 }
             }
@@ -77,6 +80,7 @@ public class ClassNode extends Node {
             methods.put(fun.getId(), new FunType(paramsType, fun.getDeclaredReturnType()));
         }
 
+
         ClassType superclassType = null;
         try {
             superclassType = (ClassType) env.getLatestEntryOf(superClassID).getType();
@@ -84,7 +88,7 @@ public class ClassNode extends Node {
             superclassType = null;
         }
 
-        // Creo una entry nella symbol table
+        // Creo una entry per la classe nella Symbol Table
         try {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.addEntry(classID, this.type, 0);
@@ -93,17 +97,18 @@ public class ClassNode extends Node {
             res.add(new SemanticError(e.getMessage()));
         }
 
-        env.pushHashMap();
-        for (ParameterNode var : vardeclist) {
+        env.pushHashMap(); // Aggiungo i parametri ad una nuova Symbol Table
+        for (ParameterNode var : attrDecList) {
             res.addAll(var.checkSemantics(env));
         }
 
-        env.pushHashMap();
-        for (MethodNode fun : metdeclist) {
+        env.pushHashMap(); // Aggiungo i metodi ad una nuova Symbol Table
+        for (MethodNode fun : metDecList) {
             res.addAll(fun.checkSemantics(env));
         }
         env.popHashMap().popHashMap();
 
+        // Se estende una classe
         if (!superClassID.isEmpty()) {
             try {
                 if (!(env.getTypeOf(superClassID) instanceof ClassType))
@@ -113,12 +118,17 @@ public class ClassNode extends Node {
             }
 
             // TODO: accordarsi sul funzionamento dell'eredetarietà (spostare controlli in ClassType?)
+
             try {
                 ClassType superClass = (ClassType) env.getLatestEntryOf(superClassID).getType();
 
-                if (vardeclist.size() >= superClass.getFields().size()) {
-                    for (int i = 0; i < superClass.getFields().size(); i++) {
-                        if (!(superClass.getFields().get(i).getId().equals(vardeclist.get(i).getId()) && superClass.getFields().get(i).getType().getID().equals(vardeclist.get(i).getType().getID()))) {
+                // Se ho almeno tanti attributi quanti ne ha la classe padre
+                if (attrDecList.size() >= superClass.getFields().size()) {
+                    for (int i = 0; i < superClass.getFields().size(); i++) { // per ogni attributo del padre
+                        if (!(
+                                superClass.getFields().get(i).getID().equals(attrDecList.get(i).getID()) // se hanno lo stesso nome
+                                && superClass.getFields().get(i).getType().getID().equals(attrDecList.get(i).getType().getID()) // e lo stesso tipo
+                            )) {
                             res.add(new SemanticError("Subclass " + this.classID + " missing some superclass " + superClass.getClassID() + " parameters."));
                         }
                     }
@@ -130,6 +140,7 @@ public class ClassNode extends Node {
             }
 
             try {
+                // TODO: questo pezzo qui non fa praticamente la stessa cosa di quello sopra?
                 SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
                 ClassType superClassType = (ClassType) superClassEntry.getType();
 
@@ -138,7 +149,7 @@ public class ClassNode extends Node {
                     if (superClassFields.containsKey(localField)) {
 
                         if (!this.fields.get(localField).isSubTypeOf(superClassFields.get(localField))) {
-                            res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type."));
+                            res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type"));
                         }
                     }
                 }
@@ -147,13 +158,13 @@ public class ClassNode extends Node {
                 for (String localMethod : methods.keySet()) {
                     if (superClassMethods.containsKey(localMethod)) {
                         if (!methods.get(localMethod).isSubTypeOf(superClassMethods.get(localMethod))) {
-                            res.add(new SemanticError("Method '" + localMethod + "' of class '" + classID + "' overrided with incompatible type."));
+                            res.add(new SemanticError("Method '" + localMethod + "' of class '" + classID + "' overrided with incompatible type"));
                         }
                     }
                 }
 
             } catch (UndeclaredVarException ex) {
-                res.add(new SemanticError("Super class " + superClassID + " not defined. " + ex.getMessage()));
+                res.add(new SemanticError("Super class " + superClassID + " not defined " + ex.getMessage()));
             }
         }
 
@@ -163,11 +174,11 @@ public class ClassNode extends Node {
     @Override
     public Type type() throws TypeException {
 
-        for (ParameterNode vardec : vardeclist){
+        for (ParameterNode vardec : attrDecList){
             vardec.type();
         }
 
-        for (MethodNode fundec : metdeclist) {
+        for (MethodNode fundec : metDecList) {
             fundec.type();
         }
 
@@ -184,7 +195,7 @@ public class ClassNode extends Node {
         HashMap<String, String> fatherMethods = new HashMap<>();
         for (DispatchTableEntry d : dispatchTable) fatherMethods.put(d.getMethodID(), d.getMethodCode());
         HashMap<String, String> childMethods = new HashMap<>();
-        for (MethodNode m : metdeclist) childMethods.put(m.getId(), m.codeGeneration());
+        for (MethodNode m : metDecList) childMethods.put(m.getId(), m.codeGeneration());
 
         for (int i = 0; i < dispatchTable.size(); i++) {
             String currMethodID = dispatchTable.get(i).getMethodID();
@@ -194,7 +205,7 @@ public class ClassNode extends Node {
             }
         }
 
-        for (MethodNode m : metdeclist) {
+        for (MethodNode m : metDecList) {
             String currMethodID = m.getId();
             if (fatherMethods.get(currMethodID) == null) {
                 dispatchTable.add(new DispatchTableEntry(currMethodID, childMethods.get(currMethodID)));
@@ -210,8 +221,8 @@ public class ClassNode extends Node {
     @Override
     public ArrayList<INode> getChilds() {
         ArrayList<INode> res = new ArrayList<INode>();
-        res.addAll(vardeclist);
-        res.addAll(metdeclist);
+        res.addAll(attrDecList);
+        res.addAll(metDecList);
         return res;
     }
 

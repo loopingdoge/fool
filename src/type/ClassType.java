@@ -45,7 +45,7 @@ public class ClassType implements Type {
     public HashMap<String, Type> getFieldsMap() {
         HashMap<String, Type> fieldsMap = new HashMap<>();
         for (Field f : fields) {
-            fieldsMap.put(f.getId(), f.getType());
+            fieldsMap.put(f.getID(), f.getType());
         }
         return fieldsMap;
     }
@@ -54,8 +54,17 @@ public class ClassType implements Type {
         return methods;
     }
 
+    /*
+        Returns an HashMap of all methods defined in this class or any subclass
+     */
     public HashMap<String, FunType> getMethodsMap() {
         HashMap<String, FunType> methodsMap = new HashMap<>();
+        if(superType != null) {
+            HashMap<String, FunType> sMethodsMap = superType.getMethodsMap();
+            for (String m : sMethodsMap.keySet()) {
+                methodsMap.put(m, sMethodsMap.get(m));
+            }
+        }
         for (Method m : methods) {
             methodsMap.put(m.getId(), m.getType());
         }

@@ -355,7 +355,7 @@ test27 - Overring methods with incompatible types:
         C c = new C();
     in
         print(c.f(false));
--   "Semantic error"
+-   "Method 'f' of class 'C' overrided with incompatible type"
 
 test28 - Overriding methods with compatible class subtypes:
 -   class A
