@@ -26,6 +26,12 @@ public class NewNode extends Node {
         this.args = args;
     }
 
+    public String getClassID() {
+        return this.classID;
+    }
+
+    ;
+
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
