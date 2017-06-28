@@ -10,7 +10,6 @@ import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
-import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
 import util.DispatchTableEntry;
@@ -136,7 +135,7 @@ public class ClassNode extends Node {
                 for (String localMethod : methods.keySet()) {
                     if (superClassMethods.containsKey(localMethod)) {
                         if (!methods.get(localMethod).isSubTypeOf(superClassMethods.get(localMethod))) {
-                            res.add(new SemanticError("Method '" + localMethod + "'  overrided from super class with different type."));
+                            res.add(new SemanticError("Method '" + localMethod + "' of class '" + classID + "' overrided with incompatible type."));
                         }
                     }
                 }

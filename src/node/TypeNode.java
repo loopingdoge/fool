@@ -1,6 +1,7 @@
 package node;
 
 import exception.TypeException;
+import exception.UndeclaredVarException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
@@ -10,10 +11,12 @@ import java.util.ArrayList;
 
 public class TypeNode extends Node {
 
+    String declaredType;
     Type type;
 
     public TypeNode(FOOLParser.TypeContext ctx, String type) {
         super(ctx);
+        declaredType = type;
         switch (type) {
             case "int":
                 this.type = new IntType();
@@ -22,14 +25,20 @@ public class TypeNode extends Node {
                 this.type = new BoolType();
                 break;
             default:
-                this.type = new InstanceType(new ClassType(type));
+                this.type = new InstanceType(new ClassType(type));  // TODO ?
                 break;
         }
     }
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        return new ArrayList<SemanticError>();
+        ArrayList<SemanticError> res = new ArrayList<>();
+        try {
+            this.type = env.getLatestEntryOf(declaredType).getType();
+        } catch (UndeclaredVarException e) {
+            res.add(new SemanticError("Class '" + declaredType + "' does not exist"));
+        }
+        return res;
     }
 
     @Override

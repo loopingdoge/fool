@@ -93,8 +93,9 @@ public class FunNode extends Node {
                 dec.type();
             }
         }
-        if (!body.type().isSubTypeOf(declaredReturnType)) {
-            throw new TypeException("Wrong return declaredReturnType for function: " + id, ctx);
+        Type bodyType = body.type();
+        if (!bodyType.isSubTypeOf(declaredReturnType)) {
+            throw new TypeException("Incompatible return type in function " + id + " got '" + bodyType + "', must return '" + declaredReturnType + "'", ctx);
         }
         ArrayList<Type> paramsType = new ArrayList<>();
         for (ParameterNode param : params) {
