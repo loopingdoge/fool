@@ -454,3 +454,16 @@ test35 - Subtyping in method call:
     in
         print(c.get(a) + c.get(b));
 -   "10"
+
+test36 - Subtyping in new call:
+-   class A
+    class B implements A
+    class D (A a) {
+        int f() 777;
+    };
+    let
+        B b = new B();
+        D d = new D(b);
+    in
+        print(d.f());
+-   "777"
