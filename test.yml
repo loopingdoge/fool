@@ -71,7 +71,6 @@ test7 - Simple Print:
 -   print(1);
 -   "1"
 
-# Test one method without args call
 test8 - MethodCall with 0 Arguments:
 -   class Numero {
         int uno() 1;
@@ -82,7 +81,6 @@ test8 - MethodCall with 0 Arguments:
         print(num.uno());
 -   "1"
 
-# Test two method without args calls
 test9 - 2 MethodCall with 0 Arguments:
 -   class Numeri {
         int uno() 1;
@@ -94,7 +92,6 @@ test9 - 2 MethodCall with 0 Arguments:
         print(num.uno() + num.due());
 -   "3"
 
-# Test one method arguments
 test10 - MethodCall with 1 Argument:
 -   class Numero {
         int id(int x) x;
@@ -105,7 +102,6 @@ test10 - MethodCall with 1 Argument:
         print(num.id(1));
 -   "1"
 
-# Test two method's arguments
 test11 - MethodCall with 2 Arguments:
 -   class Numero {
         int plus(int x, int y) x + y;
@@ -116,7 +112,6 @@ test11 - MethodCall with 2 Arguments:
         print(num.plus(3, 5));
 -   "8"
 
-# Test wrong method's argument
 test12 - MethodCall with wrong Argument:
 -   class Numero {
         int plus(int x, int y) x + y;
@@ -127,7 +122,6 @@ test12 - MethodCall with wrong Argument:
         print(num.plus(false, 5));
 -   "Error: \"Wrong type for 1-th parameter in the invocation of plus\" at line 1, column 90."
 
-# Test field
 test13 - Class Attribute:
 -   class Numero(int x) {
         int getX() x;
@@ -138,7 +132,6 @@ test13 - Class Attribute:
         print(num.getX());
 -   "2"
 
-# Test wrong constructor
 test14 - Wrong Type in Constructor Call:
 -   class Numero(int x) {
         int getX() x;
@@ -199,7 +192,7 @@ test18 - Let Inside Func Redefines Function Param:
                 print(n);
     in
         print(foo(3));
-- "multiple definitions of variable: n"
+-   "multiple definitions of variable: n"
 
 test19 - Superclass object with subtype instance:
 -   class A
@@ -208,7 +201,7 @@ test19 - Superclass object with subtype instance:
         A a = new B;
     in
         print(1);
-- "1"
+-   "1"
 
 test20 - Method overriding in subclass:
 -   class A {
@@ -222,7 +215,7 @@ test20 - Method overriding in subclass:
         A b = new B;
     in
         print(a.f() + b.f());
-- "3"
+-   "3"
 
 test21 - Call method on object returned by method:
 -   class Numero (int x) {
@@ -234,7 +227,7 @@ test21 - Call method on object returned by method:
         Numero num2 = num.uno();
     in
         print(num2.due());
-- "4"
+-   "4"
 
 test22 - Method calling another method:
 -   class Numero (int x){
@@ -245,7 +238,7 @@ test22 - Method calling another method:
         Numero num = new Numero(2);
     in
         print(num.due());
-- "2"
+-   "2"
 
 test23 - Function returning an object:
 -   class Numero (int x) {
@@ -294,7 +287,7 @@ test25 - Using this as expression:
         Numero num2 = num.getThis();
     in
         print(num2.getX());
-- "8"
+-   "8"
 
 test26 - Using this outside a class:
 -   class Numero () {};
@@ -302,9 +295,9 @@ test26 - Using this outside a class:
         Numero getThis() this;
     in
         print(getThis());
-- "undeclared variable this"
+-   "undeclared variable this"
 
-test26 - Non-overwritted method call:
+test27 - Non-overwritted method call:
 -   class Animale(int Age, bool Alive){
         int getAge() Age;
         bool isAlive() Alive;
@@ -341,9 +334,9 @@ test26 - Non-overwritted method call:
         Cane roger = new BullDog( 6 , true);
     in
         print(roger.getAge() + roger.quantoViveAncora());
-- "8"
+-   "8"
 
-test27 - Overring methods with incompatible types:
+test28 - Overring methods with incompatible types:
 -   class A {
         int f(int x) x;
     }
@@ -357,7 +350,7 @@ test27 - Overring methods with incompatible types:
         print(c.f(false));
 -   "Method 'f' of class 'C' overrided with incompatible type"
 
-test28 - Overriding methods with compatible class subtypes:
+test29 - Overriding methods with compatible class subtypes:
 -   class A
     class B implements A
     class C {
@@ -372,3 +365,24 @@ test28 - Overriding methods with compatible class subtypes:
     in
         print(d.g(a));
 -   "2"
+
+test30 - Overriding of attribute with incompatyble type:
+-   class A (int x)
+    class B implements A (bool x);
+    let
+        int a = 1;
+    in
+        a;
+-   "Field 'x' of class 'B' overrided from super class with different type"
+
+
+test31 - Overriding of attribute with :
+-   class A
+    class B implements A
+    class C(A a)
+    class D(B a);
+    let
+        int a = 1;
+    in
+        a;
+-   "No output"
