@@ -63,15 +63,31 @@ public class ClassType implements Type {
     }
 
     public int getOffsetOfMethod(String methodID) throws UndeclaredMethodException {
-        for (int i = 0; i < methods.size(); i++) {
-            if (methods.get(i).getId().equals(methodID)) {
-                return i + 1;   // + 1 perche' il primo metodo e' nella riga di code[dispatch_table_start] + 1
+        HashMap<String, Integer> methodsMap = methodsMapFromSuper();
+        Integer offset = methodsMap.get(methodID);
+        if (offset != null) {
+            return offset + 1;
+        } else {
+            throw new UndeclaredMethodException(methodID);
+        }
+    }
+
+    public HashMap<String, Integer> methodsMapFromSuper() {
+        if (superType == null) {
+            HashMap<String, Integer> methodsMap = new HashMap<>();
+            for (Method method : methods) {
+                methodsMap.put(method.getId(), methodsMap.size());
             }
+            return methodsMap;
+        } else {
+            HashMap<String, Integer> superMethodsMap = superType.methodsMapFromSuper();
+            for (Method method : methods) {
+                if (!superMethodsMap.containsKey(method.getId())) {
+                    superMethodsMap.put(method.getId(), superMethodsMap.size());
+                }
+            }
+            return superMethodsMap;
         }
-        if (superType != null) {
-            return superType.getOffsetOfMethod(methodID);
-        }
-        throw new UndeclaredMethodException(methodID);
     }
 
     public Type getTypeOfMethod(String id) {
