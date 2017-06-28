@@ -62,4 +62,8 @@ class HeapMemory {
         head = firstCell;
     }
 
+    int getNextFreeAddress() {
+        return head.getIndex();
+    }
+
 }
