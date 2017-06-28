@@ -429,7 +429,7 @@ test33 - Garbage collector:
         print(alloc(777) + alloc(1));
 -   "778"
 
-test34 - Function call with subtype of parameter:
+test34 - Subtyping in function call:
 -   class A
     class B implements A;
     let
@@ -439,7 +439,7 @@ test34 - Function call with subtype of parameter:
         print(f(b));
 -   "4"
 
-test35 - Method call with subtype of parameter:
+test35 - Subtyping in method call:
 -   class A (int x) {
         int getX() x;
     }

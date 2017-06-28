@@ -28,7 +28,7 @@ La classe `C` dispone di:
   - creare una entry nella symbol table per `f`
 - Per ogni metodo `m` in `methods`:
   - creare una entry nella symbol table per `m`
-- Se `C` estende un'altra classe `Super`:
+- zSe `C` estende un'altra classe `Super`:
   - recuperare dalla symbol table il classtype `supertype` di `Super`
   - scorrere `supertype.fields` con un indice `i = 0`
     - verificare che `supertype.fields[i].id` sia uguale a `fields[i].id`
