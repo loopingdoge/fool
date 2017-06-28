@@ -10,6 +10,7 @@ import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
 import util.DispatchTableEntry;
@@ -58,7 +59,18 @@ public class ClassNode extends Node {
         for (MethodNode fun : metdeclist) {
             ArrayList<Type> paramsType = new ArrayList<>();
             for (ParameterNode param : fun.getParams()) {
-                paramsType.add(param.getType());
+                if (param.getType() instanceof InstanceType) {
+                    InstanceType paramType = (InstanceType) param.getType();
+                    String declaredClass = paramType.getClassType().getClassID();
+                    try {
+                        ClassType paramClassType = (ClassType) env.getLatestEntryOf(declaredClass).getType();
+                        paramsType.add(new InstanceType(paramClassType));
+                    } catch (UndeclaredVarException e) {
+                        res.add(new SemanticError("Class '" + declaredClass + "' does not exist"));
+                    }
+                } else {
+                    paramsType.add(param.getType());
+                }
             }
 
             methodsList.add(new Method(fun.getId(), new FunType(paramsType, fun.getDeclaredReturnType())));
