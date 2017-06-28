@@ -429,7 +429,7 @@ test33 - Garbage collector:
         print(alloc(777) + alloc(1));
 -   "778"
 
-test34 - Funcall with Subtype of parametere:
+test34 - Function call with subtype of parameter:
 -   class A
     class B implements A;
     let
@@ -438,3 +438,19 @@ test34 - Funcall with Subtype of parametere:
     in
         print(f(b));
 -   "4"
+
+test35 - Method call with subtype of parameter:
+-   class A (int x) {
+        int getX() x;
+    }
+    class B implements A (int x)
+    class C {
+        int get(A x) x.getX();
+    };
+    let
+        A a = new A(3);
+        B b = new B(7);
+        C c = new C();
+    in
+        print(c.get(a) + c.get(b));
+-   "10"
