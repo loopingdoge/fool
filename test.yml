@@ -296,6 +296,14 @@ test25 - Using this as expression:
         print(num2.getX());
 - "8"
 
+test26 - Using this outside a class:
+-   class Numero () {};
+    let
+        Numero getThis() this;
+    in
+        print(getThis());
+- "undeclared variable this"
+
 test26 - Non-overwritted method call:
 -   class Animale(int Age, bool Alive){
         int getAge() Age;
