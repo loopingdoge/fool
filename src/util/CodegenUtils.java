@@ -49,7 +49,6 @@ public class CodegenUtils {
         return classTable.get( classID );
     }
 
-    // TODO: gestione errori?
     public static void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt) {
         dispatchTables.put(classID, dt);
     }

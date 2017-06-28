@@ -34,10 +34,6 @@ public class ClassType implements Type {
         return superType.getClassID();
     }
 
-    public ClassType getSuperClassType() {
-        return superType;
-    }
-
     public ArrayList<Field> getFields() {
         return fields;
     }
@@ -60,10 +56,9 @@ public class ClassType implements Type {
     public HashMap<String, FunType> getMethodsMap() {
         HashMap<String, FunType> methodsMap = new HashMap<>();
         if(superType != null) {
-            HashMap<String, FunType> sMethodsMap = superType.getMethodsMap();
-            for (String m : sMethodsMap.keySet()) {
-                methodsMap.put(m, sMethodsMap.get(m));
-            }
+            HashMap<String, FunType> superMethodsMap = superType.getMethodsMap();
+            for (String m : superMethodsMap.keySet())
+                methodsMap.put(m, superMethodsMap.get(m));
         }
         for (Method m : methods) {
             methodsMap.put(m.getId(), m.getType());

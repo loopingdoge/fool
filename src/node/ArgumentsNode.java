@@ -28,11 +28,11 @@ public class ArgumentsNode extends Node {
 
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
-        ArrayList<SemanticError> errors = new ArrayList<>();
+        ArrayList<SemanticError> res = new ArrayList<>();
         for (INode arg : arguments) {
-            errors.addAll(arg.checkSemantics(env));
+            res.addAll(arg.checkSemantics(env));
         }
-        return errors;
+        return res;
     }
 
     @Override

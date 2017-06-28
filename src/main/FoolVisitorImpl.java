@@ -182,13 +182,7 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
     @Override
     public INode visitType(TypeContext ctx) {
-//        if (ctx.getText().equals("int"))
-//            return new IntNode(ctx, 0);
-//        else if (ctx.getText().equals("bool"))
-//            return new BoolNode(ctx, true, false);
         return new TypeNode(ctx, ctx.getText());
-        // TODO: Controllare anche arrow ed instance types
-        //this will never happen thanks to the parser
     }
 
     @Override
@@ -352,15 +346,8 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         for (ExpContext exp : ctx.exp())
             args.add(visit(exp));
 
-        //especial check for stdlib func
-        //this is WRONG, THIS SHOULD BE DONE IN A DIFFERENT WAY
-        //JUST IMAGINE THERE ARE 800 stdlib functions...
-        if (ctx.ID().getText().equals("print")) { // TODO: [DEVID] si potrebbe modificare la grammatica per gestire la print per conto suo
-            res = new PrintNode(ctx, args.get(0));
-        } else {
-            //instantiate the invocation
-            res = new FunCallNode(ctx, ctx.ID().getText(), args);
-        }
+        res = new FunCallNode(ctx, ctx.ID().getText(), args);
+
         return res;
     }
 
@@ -378,6 +365,19 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         }
 
         res = new NewNode(ctx, id, declarations);
+
+        return res;
+    }
+
+    @Override
+    public INode visitPrint(FOOLParser.PrintContext ctx) {
+        //declare the result
+        INode res;
+
+        //get the invocation arguments
+        ArrayList<INode> args = new ArrayList<INode>();
+
+        res = new PrintNode(ctx, visit(ctx.exp()));
 
         return res;
     }

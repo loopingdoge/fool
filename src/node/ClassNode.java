@@ -117,42 +117,29 @@ public class ClassNode extends Node {
                 res.add(new SemanticError("Super class " + superClassID + " not defined"));
             }
 
-            // TODO: accordarsi sul funzionamento dell'eredetarietà (spostare controlli in ClassType?)
-
             try {
-                ClassType superClass = (ClassType) env.getLatestEntryOf(superClassID).getType();
+                ClassType superClassType = (ClassType) env.getLatestEntryOf(superClassID).getType();
 
                 // Se ho almeno tanti attributi quanti ne ha la classe padre
-                if (attrDecList.size() >= superClass.getFields().size()) {
-                    for (int i = 0; i < superClass.getFields().size(); i++) { // per ogni attributo del padre
-                        if (!(
-                                superClass.getFields().get(i).getID().equals(attrDecList.get(i).getID()) // se hanno lo stesso nome
-                                && superClass.getFields().get(i).getType().getID().equals(attrDecList.get(i).getType().getID()) // e lo stesso tipo
-                            )) {
-                            res.add(new SemanticError("Subclass " + this.classID + " missing some superclass " + superClass.getClassID() + " parameters."));
+                if (attrDecList.size() >= superClassType.getFields().size()) {
+                    for (int i = 0; i < superClassType.getFields().size(); i++) { // per ogni attributo del padre
+                        ParameterNode localField = attrDecList.get(i);
+                        Field superField = superClassType.getFields().get(i);
+                        if (!superField.getID().equals(localField.getID()) // se non hanno lo stesso nome
+                            || !localField.getType().isSubTypeOf(superField.getType()) ) {  // o non hanno lo stesso tipo
+                            res.add(new SemanticError("Field '" + localField.getID() + "' of class '"+ classID+"' overrided from super class with different type"));
                         }
                     }
                 } else {
                     res.add(new SemanticError("Subclass has not the superclass parameters."));
                 }
             } catch (UndeclaredVarException e) {
-                res.add(new SemanticError("Super class " + superClassID + " not found in ST."));
+                res.add(new SemanticError("Super class " + superClassID + " not defined " + e.getMessage()));
             }
 
             try {
-                // TODO: questo pezzo qui non fa praticamente la stessa cosa di quello sopra?
                 SymbolTableEntry superClassEntry = env.getLatestEntryOf(superClassID);
                 ClassType superClassType = (ClassType) superClassEntry.getType();
-
-                HashMap<String, Type> superClassFields = superClassType.getFieldsMap();
-                for (String localField : this.fields.keySet()) {
-                    if (superClassFields.containsKey(localField)) {
-
-                        if (!this.fields.get(localField).isSubTypeOf(superClassFields.get(localField))) {
-                            res.add(new SemanticError("Field '" + localField + "'  overrided from super class with different type"));
-                        }
-                    }
-                }
 
                 HashMap<String, FunType> superClassMethods = superClassType.getMethodsMap();
                 for (String localMethod : methods.keySet()) {
@@ -163,8 +150,8 @@ public class ClassNode extends Node {
                     }
                 }
 
-            } catch (UndeclaredVarException ex) {
-                res.add(new SemanticError("Super class " + superClassID + " not defined " + ex.getMessage()));
+            } catch (UndeclaredVarException e) {
+                res.add(new SemanticError("Super class " + superClassID + " not defined " + e.getMessage()));
             }
         }
 

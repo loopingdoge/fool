@@ -12,7 +12,7 @@ public class PrintNode extends Node {
 
     private INode val;
 
-    public PrintNode(FOOLParser.FuncallContext ctx, INode val) {
+    public PrintNode(FOOLParser.PrintContext ctx, INode val) {
         super(ctx);
         this.val = val;
     }
