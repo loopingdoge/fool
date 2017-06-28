@@ -111,7 +111,6 @@ ELSE   : 'else' ;
 LET    : 'let' ;
 IN     : 'in' ;
 VAR    : 'var' ;
-FUN    : 'fun' ;
 PRINT  : 'print';
 INT    : 'int' ;
 BOOL   : 'bool' ;

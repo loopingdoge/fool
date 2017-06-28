@@ -1,12 +1,17 @@
 package vm;
 
+import exception.VMOutOfMemoryException;
 import grammar.SVMParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ExecuteVM {
 
-    public static final int MEMSIZE = 10000;    // TODO: calculate this
+    public static final int CODESIZE = 10000;   // TODO: calculate this
+    public static final int MEMSIZE = 100;    // TODO: calculate this
+    public static final int MEMORY_START_ADDRESS = 777;
 
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
@@ -14,18 +19,50 @@ public class ExecuteVM {
     private int[] memory = new int[MEMSIZE];
 
     private int ip = 0;
-    private int sp = MEMSIZE;
+    private int sp = MEMORY_START_ADDRESS + MEMSIZE;
 
     private int hp = 0;
-    private int fp = MEMSIZE;
+    private int fp = MEMORY_START_ADDRESS + MEMSIZE;
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(20);
-    private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
+    private HeapMemory heap = new HeapMemory(MEMSIZE);
+    private HashSet<HeapMemoryCell> heapMemoryInUse = new HashSet<>();
 
     public ExecuteVM(int[] code) {
         this.code = code;
+    }
+
+    private int accessMemory(int address) {
+        return memory[address - MEMORY_START_ADDRESS];
+    }
+
+    private int setMemory(int address, int value) {
+        return memory[address - MEMORY_START_ADDRESS] = value;
+    }
+
+    // Mark and sweep
+    private void garbageCollection() {
+        // address => isUsed
+        HashMap<Integer, Boolean> table = new HashMap<>();
+        // Inizializzo a false tutti gli oggetti
+        for (HeapMemoryCell m : heapMemoryInUse) {
+            table.put(m.getIndex(), false);
+        }
+        // Se viene trovato sullo stack l'indirizzo di un oggetto, setto la table a true
+        for (int i = 99; i >= sp; i--) {
+            if (table.containsKey(accessMemory(i))) {
+                table.put(accessMemory(i), true);
+            }
+        }
+        heapMemoryInUse.forEach(m -> {
+            if (!table.get(m.getIndex())) heap.deallocate(m);
+            while (m != null) {
+                setMemory(m.getIndex(), 0);
+                m = m.next;
+            }
+        });
+        heapMemoryInUse.removeIf(m -> !table.get(m.getIndex()));
     }
 
     private void printMemory() {
@@ -75,10 +112,10 @@ public class ExecuteVM {
                     break;
                 case SVMParser.STOREW: //
                     address = pop();
-                    memory[address] = pop();
+                    setMemory(address, pop());
                     break;
                 case SVMParser.LOADW: // Prende l'indirizzo in cima allo stack e pusha il valore puntato sullo stack
-                    push(memory[pop()]);
+                    push(accessMemory(pop()));
                     break;
                 case SVMParser.BRANCH:
                     address = code[ip];
@@ -129,8 +166,8 @@ public class ExecuteVM {
                     push(hp);
                     break;
                 case SVMParser.PRINT:
-                    System.out.println((sp < MEMSIZE) ? memory[sp] : "Empty stack!");
-                    outputBuffer.add((sp < MEMSIZE) ? Integer.toString(memory[sp]) : "Empty stack!");
+                    System.out.println((sp < MEMORY_START_ADDRESS + MEMSIZE) ? accessMemory(sp) : "Empty stack!");
+                    outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
                     break;
                 case SVMParser.NEW:
                     // Il numero di argomenti per il new e' sulla testa dello stack
@@ -142,16 +179,27 @@ public class ExecuteVM {
                         args[i] = pop();
                     }
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
-                    HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
+                    HeapMemoryCell allocatedMemory = null;
+                    try {
+                        allocatedMemory = heap.allocate(nargs + 1);
+                    } catch (VMOutOfMemoryException e) {
+                        garbageCollection();
+                        try {
+                            allocatedMemory = heap.allocate(nargs + 1);
+                        } catch (VMOutOfMemoryException e1) {
+                            outputBuffer.add("VM out of memory");
+                            return outputBuffer;
+                        }
+                    }
                     // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
                     heapMemoryInUse.add(allocatedMemory);
                     int heapMemoryStart = allocatedMemory.getIndex();
                     // Inserisco l'indirizzo della dispatch table ed avanzo nella memoria ottenuta
-                    memory[allocatedMemory.getIndex()] = dispatchTableAddress;
+                    setMemory(allocatedMemory.getIndex(), dispatchTableAddress);
                     allocatedMemory = allocatedMemory.next;
                     // Inserisco un argument in ogni indirizzo di memoria
                     for (int i = 0; i < nargs; i++) {
-                        memory[allocatedMemory.getIndex()] = args[i];
+                        setMemory(allocatedMemory.getIndex(), args[i]);
                         allocatedMemory = allocatedMemory.next;
                     }
                     // Metto sullo stack l'indirizzo della prima cella dell'oggetto che ho istanziato
@@ -165,7 +213,7 @@ public class ExecuteVM {
                     push(code[codeAddress]);
                     break;
                 case SVMParser.COPY:
-                    push(memory[sp]);
+                    push(accessMemory(sp));
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;
@@ -178,13 +226,13 @@ public class ExecuteVM {
     }
 
     private int pop() {
-        int res = memory[sp];
-        memory[sp++] = 0;
+        int res = accessMemory(sp);
+        setMemory(sp++, 0);
         return res;
     }
 
     private void push(int v) {
-        memory[--sp] = v;
+        setMemory(--sp, v);
     }
 
 }
