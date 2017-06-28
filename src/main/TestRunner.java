@@ -67,7 +67,7 @@ public class TestRunner {
         out.close();
 
         if (enableLogging) {
-            System.out.println("Code generated! Assembling and running generated code: \n" + code);
+            System.out.println("SVM code generated! Assembling and running generated code: \n" + code);
         }
 
         CharStream inputASM = CharStreams.fromFileName(testID + ".asm");
@@ -91,7 +91,7 @@ public class TestRunner {
 //            for (int i = 0; i < 100; i++) System.out.println(parserASM.code[i]);
 //        }
 
-        return parserASM.code;
+        return parserASM.getBytecode();
     }
 
     private static String executeVM(int[] code) {
@@ -133,7 +133,7 @@ public class TestRunner {
             int[] code = codeGeneration(ast, testID, enableLogging);
 
             if (enableLogging) {
-                System.out.println("Starting VM...");
+                System.out.println("Starting VM (bytecode dimension " + code.length +")");
             }
 
             actualResult = executeVM(code);

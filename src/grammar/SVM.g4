@@ -10,63 +10,74 @@ grammar SVM;
 }
 
 @parser::members {
-      
-    public int[] code = new int[ExecuteVM.CODESIZE];    
-    private int i = 0;
+
+    private ArrayList<Integer> code = new ArrayList<Integer>();
     private HashMap<String,Integer> labelAdd = new HashMap<String,Integer>();
     private HashMap<Integer,String> labelRef = new HashMap<Integer,String>();
-        
+
+    public int[] getBytecode() {
+        int[] bytecode = new int[this.code.size()];
+        for (int ii = 0; ii < this.code.size(); ii++) {
+            bytecode[ii] = this.code.get(ii);
+        }
+        return bytecode;
+    }
 }
 
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
-  
 assembly: 
-    ( PUSH n=NUMBER   {code[i++] = PUSH; 
-			                 code[i++] = Integer.parseInt($n.text);}
-	  | PUSH l=LABEL    {code[i++] = PUSH; //
-	    		             labelRef.put(i++,$l.text);} 		     
-	  | POP		    {code[i++] = POP;}
-	  | ADD		    {code[i++] = ADD;}
-	  | SUB		    {code[i++] = SUB;}
-	  | MULT	    {code[i++] = MULT;}
-	  | DIV		    {code[i++] = DIV;}
-	  | STOREW	  {code[i++] = STOREW;}                                 //
-	  | LOADW           {code[i++] = LOADW;}                            //
-	  | l=LABEL COL     {labelAdd.put($l.text,i);}
-	  | BRANCH l=LABEL  {code[i++] = BRANCH;
-                       labelRef.put(i++,$l.text);}
-	  | BRANCHEQ l=LABEL {code[i++] = BRANCHEQ;                         //
-                        labelRef.put(i++,$l.text);}
-	  | BRANCHLESSEQ l=LABEL {code[i++] = BRANCHLESSEQ;
-                          labelRef.put(i++,$l.text);}
-	  | JS              {code[i++] = JS;}		                        //
-	  | LOADRA          {code[i++] = LOADRA;}                           //
-	  | STORERA         {code[i++] = STORERA;}                          //
-	  | LOADRV          {code[i++] = LOADRV;}                           //
-	  | STORERV         {code[i++] = STORERV;}                          //
-	  | LOADFP          {code[i++] = LOADFP;}                           //
-	  | STOREFP         {code[i++] = STOREFP;}                          //
-	  | COPYFP          {code[i++] = COPYFP;}                           //
-	  | LOADHP          {code[i++] = LOADHP;}                           //
-	  | STOREHP         {code[i++] = STOREHP;}                          //
-	  | PRINT           {code[i++] = PRINT;}
-	  | NEW             {code[i++] = NEW;}
-	  | LC              {code[i++] = LC;}
-	  | HALT            {code[i++] = HALT;}
-	  | l=LABEL         {labelRef.put(i++, $l.text);}
-	  | COPY            {code[i++] = COPY;}
+    ( PUSH n=NUMBER                 {   code.add(PUSH);
+			                            code.add(Integer.parseInt($n.text));     }
+
+	  | PUSH l=LABEL                {   code.add(PUSH);
+	    		                        labelRef.put(code.size(), $l.text);
+	    		                        code.add(0);                             }
+
+	  | POP		                    {   code.add(POP);  }
+	  | ADD		                    {   code.add(ADD);  }
+	  | SUB		                    {   code.add(SUB);    }
+	  | MULT	                    {   code.add(MULT);   }
+	  | DIV		                    {   code.add(DIV);  }
+	  | STOREW	                    {   code.add(STOREW);   }
+	  | LOADW                       {   code.add(LOADW);    }
+	  | l=LABEL COL                 {   labelAdd.put($l.text, code.size());   }
+	  | BRANCH l=LABEL              {   code.add(BRANCH);
+                                        labelRef.put(code.size(), $l.text);
+                                        code.add(0);                          }
+	  | BRANCHEQ l=LABEL            {   code.add(BRANCHEQ);
+                                        labelRef.put(code.size(), $l.text);
+                                        code.add(0);                          }
+	  | BRANCHLESSEQ l=LABEL        {   code.add(BRANCHLESSEQ);
+                                        labelRef.put(code.size(), $l.text);
+                                        code.add(0);                          }
+	  | JS                          {   code.add(JS);    }
+	  | LOADRA                      {   code.add(LOADRA);   }
+	  | STORERA                     {   code.add(STORERA);  }
+	  | LOADRV                      {   code.add(LOADRV);   }
+	  | STORERV                     {   code.add(STORERV);  }
+	  | LOADFP                      {   code.add(LOADFP);   }
+	  | STOREFP                     {   code.add(STOREFP);  }
+	  | COPYFP                      {   code.add(COPYFP);   }
+	  | LOADHP                      {   code.add(LOADHP);   }
+	  | STOREHP                     {   code.add(STOREHP);  }
+	  | PRINT                       {   code.add(PRINT);    }
+	  | NEW                         {   code.add(NEW);      }
+	  | LC                          {   code.add(LC);       }
+	  | HALT                        {   code.add(HALT);     }
+	  | l=LABEL                     {   labelRef.put(code.size(), $l.text);
+	                                    code.add(0);        }
+	  | COPY                        {   code.add(COPY);     }
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
-	            code[refAdd]=labelAdd.get(labelRef.get(refAdd));
+	            code.set(refAdd, labelAdd.get(labelRef.get(refAdd)));
 	        }
 	   } ;
  	 
 /*------------------------------------------------------------------
  * LEXER RULES
  *------------------------------------------------------------------*/
- 
 PUSH            : 'push' ; 	// pushes constant in the stack
 POP	            : 'pop' ; 	// pops from stack
 ADD	            : 'add' ;  	// add two values from the stack
@@ -100,5 +111,5 @@ NUMBER	        : '0' | ('-')?(('1'..'9')('0'..'9')*) ;
 
 WHITESP         : ( '\t' | ' ' | '\r' | '\n' )+   -> channel(HIDDEN);
 
-ERR   	        : . { System.err.println("Invalid char: "+ getText()); lexicalErrors++;  } -> channel(HIDDEN);
+ERR   	        : . { System.err.println("Invalid char: " + getText()); lexicalErrors++;  } -> channel(HIDDEN);
 
