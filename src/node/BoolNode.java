@@ -33,7 +33,11 @@ public class BoolNode extends Node {
 
     @Override
     public String codeGeneration() {
-        return "push " + ((val && not) ? 1 : 0) + "\n";
+        if (not) {
+            return "push " + (!val ? 1 : 0) + "\n";
+        } else {
+            return "push " + (val ? 1 : 0) + "\n";
+        }
     }
 
     @Override
