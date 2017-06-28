@@ -386,3 +386,25 @@ test31 - Overriding of attribute with :
     in
         a;
 -   "No output"
+
+test32 - Garbage collector:
+-   class A (int x);
+    let
+        int alloc(int y)
+            let
+                A a = new A(1);
+                A b = new A(2);
+                A c = new A(3);
+                A d = new A(4);
+                A e = new A(4);
+                A a1 = new A(1);
+                A b1 = new A(2);
+                A c1 = new A(3);
+                A d1 = new A(4);
+                A e1 = new A(4);
+            in
+                y;
+    in
+        print(alloc(777));
+-   "777"
+
