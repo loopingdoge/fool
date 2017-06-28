@@ -2,10 +2,14 @@ package node;
 
 import exception.RedeclaredVarException;
 import exception.TypeException;
+import exception.UndeclaredClassException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
+import type.ClassType;
+import type.InstanceType;
 import type.Type;
+import util.CodegenUtils;
 
 import java.util.ArrayList;
 
@@ -36,6 +40,17 @@ public class VarNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         res.addAll(assignedExpression.checkSemantics(env));
+
+        //Se sto istanziando un nuovo oggetto, aggiorno bene le informazioni di ClassType :=D
+        if (assignedExpression instanceof NewNode) {
+            NewNode newIstance = (NewNode) assignedExpression;
+            try {
+                ClassType CT = CodegenUtils.getClassEntry(newIstance.getClassID());
+                this.declaredType = new InstanceType(CT);
+            } catch (UndeclaredClassException e) {
+                res.add(new SemanticError(e.getMessage()));
+            }
+        }
 
         //env.offset = -2;
         try {
