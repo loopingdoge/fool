@@ -1,15 +1,18 @@
 package vm;
 
+import exception.VMOutOfMemoryException;
+
 class HeapMemory {
 
     /**
      * La prima cella di memoria libera
      */
     private HeapMemoryCell head;
+    private int size;
 
     HeapMemory(int size) {
         HeapMemoryCell[] freelist = new HeapMemoryCell[size];
-
+        this.size = size;
         // L'ultimo elemento della lista punta a null
         freelist[size - 1] = new HeapMemoryCell(size - 1, null);
 
@@ -27,8 +30,10 @@ class HeapMemory {
      * @param size La dimensione della memoria da allocare
      * @return Una lista di celle di memoria
      */
-    HeapMemoryCell allocate(int size) {
+    HeapMemoryCell allocate(int size) throws VMOutOfMemoryException {
         assert size > 0;
+
+        if (this.size < size) throw new VMOutOfMemoryException();
 
         // Il primo elemento da restituire e' la testa della lista
         HeapMemoryCell res = head;
@@ -42,6 +47,7 @@ class HeapMemory {
 
         // L'ultimo elemento restituito deve puntare a null
         lastItem.next = null;
+        this.size -= size;
         return res;
     }
 
@@ -50,20 +56,27 @@ class HeapMemory {
      * @param firstCell La lista di celle di memoria
      */
     void deallocate(HeapMemoryCell firstCell) {
+        int recoveredSize = 1;
         HeapMemoryCell curr = firstCell;
 
         // L'ultimo elemento della lista restituita va fatto puntare a head
         while (curr.next != null) {
+            recoveredSize++;
             curr = curr.next;
         }
         curr.next = head;
 
         // La testa della freelist invece sara' il primo elemento della lista deallocata
         head = firstCell;
+        this.size += recoveredSize;
     }
 
     int getNextFreeAddress() {
-        return head.getIndex();
+        if (head != null) {
+            return head.getIndex();
+        } else {
+            return -1;
+        }
     }
 
 }

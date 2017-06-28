@@ -1,8 +1,11 @@
 package vm;
 
+import exception.VMOutOfMemoryException;
 import grammar.SVMParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ExecuteVM {
 
@@ -23,10 +26,30 @@ public class ExecuteVM {
     private int rv;
 
     private HeapMemory heap = new HeapMemory(20);
-    private ArrayList<HeapMemoryCell> heapMemoryInUse = new ArrayList<>();  // TODO: garbage collection
+    private HashSet<HeapMemoryCell> heapMemoryInUse = new HashSet<>();
 
     public ExecuteVM(int[] code) {
         this.code = code;
+    }
+
+    // Mark and sweep
+    private void garbageCollection() {
+        // address => isUsed
+        HashMap<Integer, Boolean> table = new HashMap<>();
+        // Inizializzo a false tutti gli oggetti
+        for (HeapMemoryCell m : heapMemoryInUse) {
+            table.put(m.getIndex(), false);
+        }
+        // Se viene trovato sullo stack l'indirizzo di un oggetto, setto la table a true
+        for (int i = 99; i > sp; i--) {
+            if (table.containsKey(memory[i])) {
+                table.put(memory[i], true);
+            }
+        }
+        heapMemoryInUse.forEach(m -> {
+            if (!table.get(m.getIndex())) heap.deallocate(m);
+        });
+        heapMemoryInUse.removeIf(m -> !table.get(m.getIndex()));
     }
 
     private void printMemory() {
@@ -143,7 +166,18 @@ public class ExecuteVM {
                         args[i] = pop();
                     }
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
-                    HeapMemoryCell allocatedMemory = heap.allocate(nargs + 1);
+                    HeapMemoryCell allocatedMemory = null;
+                    try {
+                        allocatedMemory = heap.allocate(nargs + 1);
+                    } catch (VMOutOfMemoryException e) {
+                        garbageCollection();
+                        try {
+                            allocatedMemory = heap.allocate(nargs + 1);
+                        } catch (VMOutOfMemoryException e1) {
+                            outputBuffer.add("VM out of memory");
+                            return outputBuffer;
+                        }
+                    }
                     // Salvo il blocco di memoria ottenuto per controllarlo in garbage collection
                     heapMemoryInUse.add(allocatedMemory);
                     int heapMemoryStart = allocatedMemory.getIndex();
@@ -171,6 +205,7 @@ public class ExecuteVM {
                 case SVMParser.HALT:
                     return outputBuffer;
             }
+            garbageCollection();
             if (debug) {
                 System.out.println(bytecode + ": ");
                 printMemory();
