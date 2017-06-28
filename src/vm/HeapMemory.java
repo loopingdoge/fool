@@ -14,11 +14,11 @@ class HeapMemory {
         HeapMemoryCell[] freelist = new HeapMemoryCell[size];
         this.size = size;
         // L'ultimo elemento della lista punta a null
-        freelist[size - 1] = new HeapMemoryCell(size - 1, null);
+        freelist[size - 1] = new HeapMemoryCell(ExecuteVM.MEMORY_START_ADDRESS + size - 1, null);
 
         // Tutti gli altri puntano al successivo
         for (int i = size - 2; i >= 0; i--) {
-            freelist[i] = new HeapMemoryCell(i, freelist[i + 1]);
+            freelist[i] = new HeapMemoryCell(ExecuteVM.MEMORY_START_ADDRESS + i, freelist[i + 1]);
         }
 
         // Il primo elemento e' la testa della lista
