@@ -28,6 +28,7 @@ public class TestRunner {
     public static final String ANSI_RED    = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_BLUE = "\u001B[34m";
+    private static int MEMSIZE;
 
 
     private static INode lexicalAndSyntacticAnalysis(CharStream input) throws LexerException {
@@ -60,14 +61,14 @@ public class TestRunner {
     private static int[] codeGeneration(INode ast, String testID, boolean enableLogging) throws IOException {
         String code = ast.codeGeneration();
         code += CodegenUtils.generateDispatchTablesCode();
-
+        computeMemoryCapacity(code);
 
         BufferedWriter out = new BufferedWriter(new FileWriter(testID + ".asm"));
         out.write(code);
         out.close();
 
         if (enableLogging) {
-            System.out.println("SVM code generated! Assembling and running generated code: \n" + code);
+            System.out.println("SVM code generated (" + code.split("\n").length + " lines). Assembling and running generated code: \n" + code);
         }
 
         CharStream inputASM = CharStreams.fromFileName(testID + ".asm");
@@ -94,8 +95,52 @@ public class TestRunner {
         return parserASM.getBytecode();
     }
 
+//    version with memory counter incrementing by push()
+    private static void computeMemoryCapacity(String SVMcode) {
+        String[] instructions = SVMcode.split("\n");
+        MEMSIZE = 0;
+        for (int i = 0; i < instructions.length; i++) {
+            String instruction = instructions[i].split(" ")[0];
+            // System.out.println("Instruction " + i + " is " + instruction);
+            switch (instruction) {
+                case "print":
+                case "halt":
+                case "cfp":
+                case "bleq":
+                case "beq":
+                case "b":
+                case "sw":
+                case "pop":
+                case "js":
+                case "sra":
+                case "srv":
+                case "sfp":
+                case "shp":   // no increment
+                    break;
+                case "new":
+                case "lc":
+                case "copy":
+                case "lra":
+                case "lhp":
+                case "lrv":
+                case "lfp":
+                case "lw":
+                case "div":
+                case "sub":
+                case "mult":
+                case "add":
+                case "push":   // 1 increment
+                    MEMSIZE++;
+                    break;
+                default:   // reached for labels and blank lines
+                    // System.out.println("ERROR! Unknown SVM instruction '" + instruction +"' found in computing VM memory.");
+                    break;
+            }
+        }
+    }
+
     private static String executeVM(int[] code) {
-        ExecuteVM vm = new ExecuteVM(code);
+        ExecuteVM vm = new ExecuteVM(code, MEMSIZE);
         String message =  "No output";
         try {
             ArrayList<String> output = vm.cpu();
@@ -133,7 +178,7 @@ public class TestRunner {
             int[] code = codeGeneration(ast, testID, enableLogging);
 
             if (enableLogging) {
-                System.out.println("Starting VM (bytecode dimension " + code.length +")");
+                System.out.println("Starting VM (allocated dimensions: bytecode " + code.length +", memory " + MEMSIZE + ")");
             }
 
             actualResult = executeVM(code);

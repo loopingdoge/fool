@@ -9,28 +9,31 @@ import java.util.HashSet;
 
 public class ExecuteVM {
 
-    public static final int CODESIZE = 10000;   // TODO: calculate this
-    public static final int MEMSIZE = 100;    // TODO: calculate this
-    public static final int MEMORY_START_ADDRESS = 777;
-
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
-    private int[] code;
-    private int[] memory = new int[MEMSIZE];
+    public static final int MEMORY_START_ADDRESS = 777;
+    private int MEMSIZE;
+    private int[] memory;
 
-    private int ip = 0;
-    private int sp = MEMORY_START_ADDRESS + MEMSIZE;
+    private int[] code;
 
     private int hp = 0;
-    private int fp = MEMORY_START_ADDRESS + MEMSIZE;
+    private int ip = 0;
+    private int sp;
+    private int fp;
     private int ra;
     private int rv;
 
-    private HeapMemory heap = new HeapMemory(MEMSIZE);
+    private HeapMemory heap;
     private HashSet<HeapMemoryCell> heapMemoryInUse = new HashSet<>();
 
-    public ExecuteVM(int[] code) {
+    public ExecuteVM(int[] code, int memsize) {
         this.code = code;
+        this.MEMSIZE = memsize;
+        this.memory = new int[MEMSIZE];
+        this.heap = new HeapMemory(MEMSIZE);
+        this.sp = MEMORY_START_ADDRESS + memsize;
+        this.fp = MEMORY_START_ADDRESS + memsize;
     }
 
     private int accessMemory(int address) {
@@ -110,7 +113,7 @@ public class ExecuteVM {
                     v2 = pop();
                     push(v2 - v1);
                     break;
-                case SVMParser.STOREW: //
+                case SVMParser.STOREW:
                     address = pop();
                     setMemory(address, pop());
                     break;
@@ -121,7 +124,7 @@ public class ExecuteVM {
                     address = code[ip];
                     ip = address;
                     break;
-                case SVMParser.BRANCHEQ: //
+                case SVMParser.BRANCHEQ:
                     address = code[ip++];
                     v1 = pop();
                     v2 = pop();
@@ -133,36 +136,36 @@ public class ExecuteVM {
                     v2 = pop();
                     if (v2 <= v1) ip = address;
                     break;
-                case SVMParser.JS: //
+                case SVMParser.JS:
                     address = pop();
                     ra = ip;
                     ip = address;
                     break;
-                case SVMParser.STORERA: //
+                case SVMParser.STORERA:
                     ra = pop();
                     break;
                 case SVMParser.LOADRA: //
                     push(ra);
                     break;
-                case SVMParser.STORERV: //
+                case SVMParser.STORERV:
                     rv = pop();
                     break;
-                case SVMParser.LOADRV: //
+                case SVMParser.LOADRV:
                     push(rv);
                     break;
-                case SVMParser.LOADFP: //
+                case SVMParser.LOADFP:
                     push(fp);
                     break;
-                case SVMParser.STOREFP: //
+                case SVMParser.STOREFP:
                     fp = pop();
                     break;
-                case SVMParser.COPYFP: //
+                case SVMParser.COPYFP:
                     fp = sp;
                     break;
-                case SVMParser.STOREHP: //
+                case SVMParser.STOREHP:
                     hp = pop();
                     break;
-                case SVMParser.LOADHP: //
+                case SVMParser.LOADHP:
                     push(hp);
                     break;
                 case SVMParser.PRINT:
