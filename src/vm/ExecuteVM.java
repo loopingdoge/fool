@@ -38,7 +38,7 @@ public class ExecuteVM {
     }
 
     public ArrayList<String> cpu() {
-        boolean debug = true;
+        boolean debug = false;
         if (debug) {
             System.out.println("start :");
             printMemory();

@@ -34,10 +34,6 @@ public class ClassType implements Type {
         return superType.getClassID();
     }
 
-    public ClassType getSuperClassType() {
-        return superType;
-    }
-
     public ArrayList<Field> getFields() {
         return fields;
     }

@@ -75,6 +75,7 @@ value
     | funcall                                                                       #funExp
     | (ID | THIS) DOT funcall                             	                        #methodExp
     | NEW ID (LPAR ( exp (COMMA exp)* )? RPAR)?			                            #newExp
+    | PRINT ( exp )                                                                 #print
     ;
 
 funcall
@@ -111,6 +112,7 @@ LET    : 'let' ;
 IN     : 'in' ;
 VAR    : 'var' ;
 FUN    : 'fun' ;
+PRINT  : 'print';
 INT    : 'int' ;
 BOOL   : 'bool' ;
 CLASS  : 'class' ;
