@@ -6,7 +6,6 @@ import util.Method;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 public class ClassType implements Type {
 
@@ -69,6 +68,9 @@ public class ClassType implements Type {
                 return i + 1;   // + 1 perche' il primo metodo e' nella riga di code[dispatch_table_start] + 1
             }
         }
+        if (superType != null) {
+            return superType.getOffsetOfMethod(methodID);
+        }
         throw new UndeclaredMethodException(methodID);
     }
 
@@ -79,6 +81,8 @@ public class ClassType implements Type {
                 .reduce(null, (prev, curr) -> curr);
         if (method != null) {
             return method.getType();
+        } else if (superType != null) {
+            return superType.getTypeOfMethod(id);
         } else {
             return new VoidType();
         }
