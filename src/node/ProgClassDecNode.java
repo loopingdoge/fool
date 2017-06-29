@@ -5,8 +5,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import type.Type;
 import exception.TypeException;
-import type.VoidType;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ArrayList;
 
 public class ProgClassDecNode extends Node {
@@ -27,6 +28,19 @@ public class ProgClassDecNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         env.pushHashMap();
+
+        Collections.sort(classDeclarations, new Comparator<ClassNode>() {
+            @Override
+            public int compare(ClassNode c1, ClassNode c2) {
+                // -1: less than, 1: greater than, 0: equal, all inversed for descending
+                int ret = 0;
+                if(c1.getSuperClassID().equals(c2.getClassID()))// Se c1 estende c2
+                    ret = 1;
+                else if(c2.getSuperClassID().equals(c1.getClassID())) // Se c2 estende c1
+                    ret = -1;
+                return ret;
+            }
+        });
 
         for (ClassNode classNode : classDeclarations) {
             res.addAll(classNode.checkSemantics(env));

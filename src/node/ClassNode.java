@@ -45,6 +45,10 @@ public class ClassNode extends Node {
         return this.attrDecList;
     }
 
+    public String getClassID() { return classID; };
+
+    public String getSuperClassID() { return superClassID; };
+
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
 
