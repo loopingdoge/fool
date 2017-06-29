@@ -1,9 +1,6 @@
 package node;
 
-import exception.RedeclaredClassException;
-import exception.RedeclaredVarException;
-import exception.TypeException;
-import exception.UndeclaredVarException;
+import exception.*;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
@@ -41,8 +38,28 @@ public class ClassNode extends Node {
         this.metDecList = metDecList;
     }
 
+    public String getClassID() {
+        return classID;
+    }
+
+    public String getSuperClassID() {
+        return superClassID;
+    }
+
+    public HashMap<String, Type> getFields() {
+        return fields;
+    }
+
+    public HashMap<String, FunType> getMethods() {
+        return methods;
+    }
+
     public ArrayList<ParameterNode> getVardeclist() {
         return this.attrDecList;
+    }
+
+    public ArrayList<MethodNode> getMetDecList() {
+        return metDecList;
     }
 
     @Override
@@ -91,9 +108,10 @@ public class ClassNode extends Node {
         // Creo una entry per la classe nella Symbol Table
         try {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
-            env.addEntry(classID, this.type, 0);
+            env.setEntryType(classID, this.type, 0);
+            // env.addEntry(classID, this.type, 0);
             CodegenUtils.addClassEntry(classID, this.type);
-        } catch (RedeclaredVarException | RedeclaredClassException e) {
+        } catch (RedeclaredClassException | UndeclaredClassException e) {
             res.add(new SemanticError(e.getMessage()));
         }
 

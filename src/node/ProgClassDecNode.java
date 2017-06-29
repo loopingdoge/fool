@@ -1,13 +1,20 @@
 package node;
 
+import exception.RedeclaredVarException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
+import type.ClassType;
+import type.FunType;
 import type.Type;
 import exception.TypeException;
 import type.VoidType;
+import util.Field;
+import util.Method;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.ListIterator;
 
 public class ProgClassDecNode extends Node {
 
@@ -27,6 +34,29 @@ public class ProgClassDecNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         env.pushHashMap();
+
+        // preliminary class inserting in symbol table for order independent references
+
+        for (ClassNode classNode : classDeclarations) {
+            try {
+                ArrayList<Field> fields = new ArrayList<Field>();
+                for (ParameterNode field : classNode.getVardeclist()) {
+                    fields.add(new Field(field.getID(), field.getType()));
+                }
+                ArrayList<Method> methods = new ArrayList<Method>();
+                for (MethodNode method : classNode.getMetDecList()) {
+                    ArrayList<Type> paramsType = new ArrayList<>();
+                    for (ParameterNode parameter : method.getParams()) {
+                        paramsType.add(parameter.getType());
+                    }
+                    methods.add(new Method(method.getId(), new FunType(paramsType, method.getDeclaredReturnType())));
+                }
+                ClassType classType = new ClassType(classNode.getClassID(), new ClassType(classNode.getSuperClassID()), fields, methods);
+                env.addEntry(classNode.getClassID(), classType, 0);
+            } catch (RedeclaredVarException e) {
+                res.add(new SemanticError("Class '" + classNode.getClassID() + "' declared multiple times"));
+            }
+        }
 
         for (ClassNode classNode : classDeclarations) {
             res.addAll(classNode.checkSemantics(env));
@@ -56,7 +86,35 @@ public class ProgClassDecNode extends Node {
     @Override
     public String codeGeneration() {
         String declaration = "";
-        for (ClassNode cl : classDeclarations) {
+        ArrayList<ClassNode> orderClassDeclarations = new ArrayList<ClassNode>();
+        HashMap<String, ClassNode> classesAddedMap = new HashMap<String, ClassNode>();
+
+        // this two loops are for order class declaration in top-down order to generate correct code and dispatch tables
+        ListIterator iterator = classDeclarations.listIterator();
+        while(iterator.hasNext()){
+            ClassNode classDec = (ClassNode) iterator.next();
+            if (classDec.getSuperClassID() == null || classDec.getSuperClassID().isEmpty()){
+                orderClassDeclarations.add(classDec);
+                classesAddedMap.put(classDec.getClassID(), classDec);
+                iterator.remove();
+            }
+        }
+
+        while (classDeclarations.size() != 0) {
+            iterator = classDeclarations.listIterator();
+            while(iterator.hasNext()){
+                ClassNode childClassDec = (ClassNode) iterator.next();
+                String fatherClassName = childClassDec.getSuperClassID();
+                ClassNode fatherClassDec = classesAddedMap.get(fatherClassName);
+                if (fatherClassDec != null){
+                    orderClassDeclarations.add(childClassDec);
+                    classesAddedMap.put(childClassDec.getClassID(), childClassDec);
+                    iterator.remove();
+                }
+            }
+        }
+
+        for (ClassNode cl : orderClassDeclarations) {
             declaration += cl.codeGeneration();
         }
 
