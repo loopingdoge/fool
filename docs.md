@@ -1,15 +1,29 @@
 # FOOL - Functional Object Oriented Language
 
 ## 1. Definizione di classe
+
+### Attributi
+
 La classe `C` dispone di:
-- lista `fields` : `ArrayList<Field>`
-  - `Field`
-    - `id` : `String`
-    - `type` : `Type`
-- lista `methods` : `ArrayList<Method>`
-  - `Method`
-    - `id` : `String`
-    - `type` : `FunType`
+
+| Attributo            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `classID` | `String`         | id della classe |
+| `superClassID` | `String`         | id della eventuale superclasse |
+| `fields` | `ArrayList<Field>`         | Lista dei tipi dei campi |
+| `methods`     | `ArrayList<Method>`          | Lista dei tipi dei metodi |
+
+- Ogni `Field` è costituito da:
+| Attributo            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `id`     | `String`          | id dell'attributo |
+| `type` | `Type`         | tipo dell'attributo |
+
+- Ogni `Method` è costituito da:
+| Attributo            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `id`     | `String`          | id del metodo |
+| `type` | `FunType`         | tipo del metodo |
 
 ### Validazione semantica
 - Creare una entry nella lista di symbol table
@@ -49,13 +63,22 @@ La classe `C` dispone di:
   - inserire `new_m_label` + `codegen(new_m)` nel codice delle funzioni
   - aggiungere in `c_entry` un nuovo metodo `new_m.id` con label `new_m_label`
 
+------
 ## 2. Istanziazione di classe (oggetto)
-Istanziazione di un oggetto `obj`, dispone di:
-- `classID` : `String`
-- `args` : `ArgumentsNode`
+
+### Descrizione
+
+L'istanziazione di classe è definita in `NewNode` e si occupa di creare oggetti nello heap e restituirne l'indirizzo
+
+### Attributi
+
+| Attributo            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `classID`     | `String`          | id della classe |
+| `args` | `ArrayList<INode>`         | lista dei parametri |
 
 ### Validazione semantica
-- Recuperare il `classtype` corrispondente a `classID` dalla tabella dei simboli
+- Recuperare il `ClassType` corrispondente a `classID` dalla tabella dei simboli
 - Verificare che il numero di attributi passati al costruttore sia uguale a `classtype.fields.size()`
 
 ### Validazione di tipo
@@ -77,8 +100,20 @@ $$
 - Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
 - TODO
 
-## 3. Chiamata di attributo
-- TODO
+------
+## 3. Utilizzo di un attributo
+
+### Descrizione
+Gli attributi sono dei casi particolari di `IdNode` il cui valore non si trova in uno scope esterno ma in un oggetto nello heap 
+
+### Attributi
+| Nome            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `attrib_id`     | `String`          | L'id dell'attributo |
+| `entry`          | `SymbolTableEntry` | Entry della definizione dell'attributo nell Symbol Table |
+| `nesting_level`     | `Integer`          | Nesting level dell'utilizzo dell'attributo                 |
+| `object_offset` | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
+| `object_nesting_level`          | `Integer` | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
 - TODO
@@ -89,16 +124,24 @@ $$
 ### Code generation
 - TODO
 
+------
 ## 4. Chiamata di metodo
+
+### Descrizione
+
+La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una chiamata a funzione, deve mettere sullo stack un riferimento all'oggetto sul quale viene eseguita
 
 ### Attributi
 
-| Nome            | Tipo              | Commento                                 |
+| Nome            | Tipo              | Descrizione                                 |
 | --------------- | ----------------- | ---------------------------------------- |
+| `method_id`     | `String`          | L'id del metodo chiamato                 |
+| `method_offset`     | `Integer`          | Offset del metodo nella dispatch table                 |
+| `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
+| `nesting_level`     | `Integer`          | Nesting level della chiamata del metodo |
 | `object_id`     | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
 | `object_offset` | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
-| `method_id`     | `String`          | L'id del metodo chiamato                 |
-| `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
+| `object_nesting_level`          | `Integer` | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
 - Recupera dalla symbol table l' `object_type` di `object_id`
@@ -118,20 +161,22 @@ $$
 - Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
 - Setta `$ra` e salta all'esecuzione del codice del metodo
 
-# 5. Dispatch tables
+------
+## 5. Dispatch tables
 
-## Descrizione
+### Descrizione
 
-Le dispatch tables sono implementate in `CodegenUtils.java` come strutture dati popolate durante la valutazione semantica, dalle quali successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation
+Le dispatch tables sono implementate in `CodegenUtils` come strutture dati popolate durante la valutazione semantica, dalle quali successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation
 
-## Attributi
+### Attributi
 
 Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
 | Nome            | Tipo              | Descrizione                                 |
 | --------------- | ----------------- | ---------------------------------------- |
 | `method_id`     | `String`          | L'id del metodo chiamato                 |
 | `method_label`          | `String` | label corrispondente all'indirizzo del codice della funzione |
-## Metodi
+
+### Metodi
 
 Per gestire le strutture dati sono disponibili: 
 - `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
@@ -143,9 +188,9 @@ Restituisce una copia della dispatch table della classe `classID`, viene usato p
 - `String generateDispatchTablesCode()`
 Genera e restituisce il codice `SVM` delle dispatch tables
 
-# 6. Esempi
+## 6. Esempi
 
-- ## Esempio 1
+- ### Esempio 1
 
 ```fool
 class Calculator (
