@@ -46,7 +46,7 @@ public class MethodNode extends FunNode {
         env.pushHashMap();
 
         try {
-            env.addEntry("this", new InstanceType(new ClassType(classID)), 0 );
+            env.addEntry("this", new InstanceType(classID), 0 );
         } catch (RedeclaredVarException e) {
             e.printStackTrace();
         }

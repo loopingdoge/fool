@@ -1,3 +1,5 @@
+#FOOL - Functional Object Oriented Language
+
 # Dispatch table
 Contiene una hashmap:
 - table : `String => ArrayList<String>`
@@ -105,25 +107,27 @@ Si dispone di:
 | Nome            | Tipo              | Commento                                 |
 | --------------- | ----------------- | ---------------------------------------- |
 | `object_id`     | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
-| `object_offset` | `int`             | L'offset dell'oggetto rispetto al `frame pointer` |
-| `methodID`      | `String`          | L'id del metodo chiamato                 |
+| `object_offset` | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
+| `method_id`     | `String`          | L'id del metodo chiamato                 |
 | `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
 
 ## Validazione semantica
-- Recuperare dalla symbol table l' `object_type` di `objectID`
-- Verificare che `object_type` sia di tipo `InstanceType`
-- Verificare che il `classtype` di `object_type` contenga un metodo che abbia `methodID` come `id` ed ottenerne il tipo `method_type`
-- Verificare che il numero di `args` sia uguale al numero di parametri definito in `method_type`
+- Recupera dalla symbol table l' `object_type` di `object_id`
+- Verifica che `object_type` sia di tipo `InstanceType`
+- Verifica che il `class_type` di `object_type` contenga un metodo che abbia  `id` uguale a `method_id` e recupera `method_type`
+- Verifica che il numero di `args` sia uguale al numero di parametri definito in `method_type`
 
 ## Validazione di tipo
-- Scorrere `args` con un indice `i = 0`:
-  - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(method_type.args[i])`
+- Scorre `args` con un indice `i = 0` verificando per ogni argomento il tipo di `args[i]` sia sottotipo di `method_type.args[i]`
 
 ## Code generation
-- Inserire il valore nel `frame pointer` sullo stack
-- Per ogni `a` in `args`:
-  - inserire sullo stack `codegen(a)`
-- TODO
+- Carica il valore di `$fp` sullo stack
+- Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
+- Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare sullo stack l'indirizzo dell'activation record dove è definito l'oggetto
+- Somma i due valori precedenti ottenendo e caricando sullo stack l'`object_address`, l'indirizzo dell'oggetto nello heap
+- Carica sullo stack l'`object_address` e `method_offset` decrementato di `1` perché //TODO
+- Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo dove si trova il codice del metodo
+- Setta `$ra` e salta all'esecuzione del codice del metodo
 
 # Esempio
 

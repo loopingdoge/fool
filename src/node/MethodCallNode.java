@@ -16,21 +16,20 @@ import java.util.ArrayList;
 
 public class MethodCallNode extends FunCallNode {
 
-    private String classId;
     private int objectOffset;
     private int objectNestingLevel;
     private int methodOffset;
     private int nestinglevel;
 
-    private String objectId;
-    private String methodId;
+    private String objectID;
+    private String methodID;
     private ArgumentsNode args;
     private Type methodType;
 
-    public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectId, String methodId, ArgumentsNode args) {
-        super(ctx.funcall(), methodId, args.getChilds());
-        this.objectId = objectId;
-        this.methodId = methodId;
+    public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectID, String methodID, ArgumentsNode args) {
+        super(ctx.funcall(), methodID, args.getChilds());
+        this.objectID = objectID;
+        this.methodID = methodID;
         this.args = args;
     }
 
@@ -41,7 +40,8 @@ public class MethodCallNode extends FunCallNode {
         try {
 
             ClassType classType = null;
-            if (objectId.equals("this")) {
+            // Calcolo gli offset per recuperare l'oggetto
+            if (objectID.equals("this")) {
                 Type objectType = env.getLatestClassEntry().getType();
                 // TODO: cosi' funziona sempre credo, pero' sarebbe meglio farlo meno hardcoded
                 // Se il metodo e' chiamato su this, l'offset rispetto a $fp e' sempre 0
@@ -54,7 +54,7 @@ public class MethodCallNode extends FunCallNode {
                     res.add(new SemanticError("Can't call this outside a class"));
                 }
             } else {
-                SymbolTableEntry objectSEntry = env.getLatestEntryOf(objectId);
+                SymbolTableEntry objectSEntry = env.getLatestEntryOf(objectID);
                 Type objectType = objectSEntry.getType();
                 this.objectOffset = objectSEntry.getOffset();
                 this.objectNestingLevel = objectSEntry.getNestinglevel();
@@ -62,25 +62,29 @@ public class MethodCallNode extends FunCallNode {
                 if (objectType instanceof InstanceType) {
                     classType = ((InstanceType) objectType).getClassType();
                 } else {
-                    res.add(new SemanticError("Method " + methodId + " called on a non-object type"));
+                    res.add(new SemanticError("Method " + methodID + " called on a non-object type"));
                 }
             }
 
             // Se il metodo viene chiamato su this, vuol dire che stiamo facendo la semantic analysis
             // della classe, quindi prendo l'ultima entry aggiunta alla symbol table
-            SymbolTableEntry classEntry = objectId.equals("this")
+            SymbolTableEntry classEntry = objectID.equals("this")
                     ? env.getLatestClassEntry()
                     : env.getLatestEntryOf(classType.getClassID());
 
             ClassType objectClass = (ClassType) classEntry.getType();
-            this.classId = objectClass.getClassID();
-            this.methodOffset = objectClass.getOffsetOfMethod(methodId);
-            this.methodType = objectClass.getTypeOfMethod(methodId);
+            this.methodOffset = objectClass.getOffsetOfMethod(methodID);
+            this.methodType = objectClass.getTypeOfMethod(methodID);
             // Controllo che il metodo esista all'interno della classe
             if (this.methodType == null) {
-                res.add(new SemanticError("Object " + objectId + " doesn't have a " + methodId + " method."));
+                res.add(new SemanticError("Object " + objectID + " doesn't have a " + methodID + " method."));
             }
 
+            FunType t = (FunType) this.methodType;
+            ArrayList<Type> p = t.getParams();
+            if (!(p.size() == params.size())) {
+                res.add(new SemanticError("Wrong number of parameters in the invocation of " + id));
+            }
         } catch (UndeclaredVarException | UndeclaredMethodException e) {
             res.add(new SemanticError(e.getMessage()));
         }
@@ -93,15 +97,12 @@ public class MethodCallNode extends FunCallNode {
     @Override
     public Type type() throws TypeException {
         FunType t = (FunType) this.methodType;
-
         ArrayList<Type> p = t.getParams();
-        if (!(p.size() == params.size())) {
-            throw new TypeException("Wrong number of parameters in the invocation of " + id, ctx);
-        }
+
         for (int i = 0; i < params.size(); i++)
-            if (!params.get(i).type().isSubTypeOf(p.get(i))) {
+            if (!params.get(i).type().isSubTypeOf(p.get(i)))
                 throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + id, ctx);
-            }
+
         return t.getReturnType();
     }
 
@@ -133,7 +134,7 @@ public class MethodCallNode extends FunCallNode {
 
     @Override
     public String toString() {
-        return objectId + "." + methodId + "()";
+        return objectID + "." + methodID + "()";
     }
 
 }

@@ -123,7 +123,6 @@ public class ClassType implements Type {
                 return true;
             }
             // Procedo solo se la mia classe ha un supertipo
-            // TODO [DEV] non si sa perche' ma quando si provano subtyping nei parametri di metodi e funzioni B implements A arriva qui e supertype e' null
             if (superType != null) {
                 return this.getSuperclassID().equals(ct2.getClassID()) || superType.isSubTypeOf(t2);
             }

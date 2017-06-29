@@ -25,7 +25,7 @@ public class TypeNode extends Node {
                 this.type = new BoolType();
                 break;
             default:
-                this.type = new InstanceType(new ClassType(type));  // TODO ?
+                this.type = new InstanceType(type);
                 break;
         }
     }
