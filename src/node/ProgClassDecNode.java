@@ -34,9 +34,9 @@ public class ProgClassDecNode extends Node {
             public int compare(ClassNode c1, ClassNode c2) {
                 // -1: less than, 1: greater than, 0: equal, all inversed for descending
                 int ret = 0;
-                if(c1.getSuperClassID().equals(c2.getClassID()))// Se c1 estende c2
+                if(c1.extendsClass(c2))
                     ret = 1;
-                else if(c2.getSuperClassID().equals(c1.getClassID())) // Se c2 estende c1
+                else if(c2.extendsClass(c1))
                     ret = -1;
                 return ret;
             }
