@@ -14,12 +14,14 @@ La classe `C` dispone di:
 | `methods`     | `ArrayList<Method>`          | Lista dei tipi dei metodi |
 
 - Ogni `Field` è costituito da:
+
 | Attributo            | Tipo              | Descrizione                                 |
 | --------------- | ----------------- | ---------------------------------------- |
 | `id`     | `String`          | id dell'attributo |
 | `type` | `Type`         | tipo dell'attributo |
 
 - Ogni `Method` è costituito da:
+
 | Attributo            | Tipo              | Descrizione                                 |
 | --------------- | ----------------- | ---------------------------------------- |
 | `id`     | `String`          | id del metodo |
