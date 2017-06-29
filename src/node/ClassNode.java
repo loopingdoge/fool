@@ -180,7 +180,7 @@ public class ClassNode extends Node {
                 : CodegenUtils.getDispatchTable(superClassID);
 
         HashMap<String, String> fatherMethods = new HashMap<>();
-        for (DispatchTableEntry d : dispatchTable) fatherMethods.put(d.getMethodID(), d.getMethodCode());
+        for (DispatchTableEntry d : dispatchTable) fatherMethods.put(d.getMethodID(), d.getMethodLabel());
         HashMap<String, String> childMethods = new HashMap<>();
         for (MethodNode m : metDecList) childMethods.put(m.getId(), m.codeGeneration());
 

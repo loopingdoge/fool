@@ -1,18 +1,6 @@
-#FOOL - Functional Object Oriented Language
+# FOOL - Functional Object Oriented Language
 
-# Dispatch table
-Contiene una hashmap:
-- table : `String => ArrayList<String>`
-
-Associa gli `id` delle classi ad una lista di `label` di funzioni.
-
-Dispone dei metodi:
-- `addClassEntry(String classID)`
-- `addMethodInClass(String classID, String methodLabel)`
-
-
-
-# Definizione di classe
+## 1. Definizione di classe
 La classe `C` dispone di:
 - lista `fields` : `ArrayList<Field>`
   - `Field`
@@ -23,7 +11,7 @@ La classe `C` dispone di:
     - `id` : `String`
     - `type` : `FunType`
 
-## Validazione semantica
+### Validazione semantica
 - Creare una entry nella lista di symbol table
 - Fare un push della symbol table (incrementando il nesting level)
 - Per ogni attributo `f` in `fields`:
@@ -35,7 +23,7 @@ La classe `C` dispone di:
   - scorrere `supertype.fields` con un indice `i = 0`
     - verificare che `supertype.fields[i].id` sia uguale a `fields[i].id`
 
-## Validazione di tipo
+### Validazione di tipo
 - Per ogni `f` in `fields`:
   - eseguire il typecheck di `f`
 - Per ogni `m` in `methods`:
@@ -50,7 +38,7 @@ La classe `C` dispone di:
       - verificare che `m` sia sottotipo di `overridden_m`
 - Restituire `C.classtype`
 
-## Code generation
+### Code generation
 - Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
 - Se `C` estende un'altra classe `Super`:
   - creare una nuova entry `c_entry` nella dispatch table copiando quella di `Super`
@@ -61,16 +49,16 @@ La classe `C` dispone di:
   - inserire `new_m_label` + `codegen(new_m)` nel codice delle funzioni
   - aggiungere in `c_entry` un nuovo metodo `new_m.id` con label `new_m_label`
 
-# Istanziazione di classe (oggetto)
+## 2. Istanziazione di classe (oggetto)
 Istanziazione di un oggetto `obj`, dispone di:
 - `classID` : `String`
 - `args` : `ArgumentsNode`
 
-## Validazione semantica
+### Validazione semantica
 - Recuperare il `classtype` corrispondente a `classID` dalla tabella dei simboli
 - Verificare che il numero di attributi passati al costruttore sia uguale a `classtype.fields.size()`
 
-## Validazione di tipo
+### Validazione di tipo
 - Scorrere `args` con un indice `i = 0`:
   - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(classtype.fields[i])`
 
@@ -83,26 +71,27 @@ $$
 [new]
 $$
 
-## Code generation
+### Code generation
 
 - Allocare una nuova area di memoria nello heap
 - Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
 - TODO
 
-# Chiamata di attributo
+## 3. Chiamata di attributo
 - TODO
 
-## Validazione semantica
+### Validazione semantica
 - TODO
 
-## Validazione di tipo
+### Validazione di tipo
 - TODO
 
-## Code generation
+### Code generation
 - TODO
 
-# Chiamata di metodo
-Si dispone di:
+## 4. Chiamata di metodo
+
+### Attributi
 
 | Nome            | Tipo              | Commento                                 |
 | --------------- | ----------------- | ---------------------------------------- |
@@ -111,25 +100,52 @@ Si dispone di:
 | `method_id`     | `String`          | L'id del metodo chiamato                 |
 | `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
 
-## Validazione semantica
+### Validazione semantica
 - Recupera dalla symbol table l' `object_type` di `object_id`
 - Verifica che `object_type` sia di tipo `InstanceType`
 - Verifica che il `class_type` di `object_type` contenga un metodo che abbia  `id` uguale a `method_id` e recupera `method_type`
 - Verifica che il numero di `args` sia uguale al numero di parametri definito in `method_type`
 
-## Validazione di tipo
+### Validazione di tipo
 - Scorre `args` con un indice `i = 0` verificando per ogni argomento il tipo di `args[i]` sia sottotipo di `method_type.args[i]`
 
-## Code generation
+### Code generation
 - Carica il valore di `$fp` sullo stack
 - Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
-- Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare sullo stack l'indirizzo dell'activation record dove è definito l'oggetto
+- Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
 - Somma i due valori precedenti ottenendo e caricando sullo stack l'`object_address`, l'indirizzo dell'oggetto nello heap
 - Carica sullo stack l'`object_address` e `method_offset` decrementato di `1` perché //TODO
-- Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo dove si trova il codice del metodo
+- Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
 - Setta `$ra` e salta all'esecuzione del codice del metodo
 
-# Esempio
+# 5. Dispatch tables
+
+## Descrizione
+
+Le dispatch tables sono implementate in `CodegenUtils.java` come strutture dati popolate durante la valutazione semantica, dalle quali successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation
+
+## Attributi
+
+Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
+| Nome            | Tipo              | Descrizione                                 |
+| --------------- | ----------------- | ---------------------------------------- |
+| `method_id`     | `String`          | L'id del metodo chiamato                 |
+| `method_label`          | `String` | label corrispondente all'indirizzo del codice della funzione |
+## Metodi
+
+Per gestire le strutture dati sono disponibili: 
+- `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
+Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
+
+- `ArrayList<DispatchTableEntry> getDispatchTable(String classID)`
+Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
+
+- `String generateDispatchTablesCode()`
+Genera e restituisce il codice `SVM` delle dispatch tables
+
+# 6. Esempi
+
+- ## Esempio 1
 
 ```fool
 class Calculator (
@@ -158,30 +174,30 @@ class WrongCalculator implements Calculator (
 }
 ```
 
-## Dispatch table
+- ### Dispatch tables
 
-### Calculator
+#### Calculator
 
 | Offset | Value          |
 | :----- | :------------- |
 | 1      | label of xPlus |
 
-### BetterCalculator
+#### BetterCalculator
 
 | Offset | Value              |
 | :----- | :----------------- |
 | 1      | label of  xPlus    |
 | 2      | label of  xPlusOne |
 
-### WrongCalculator
+- #### WrongCalculator
 
 | Offset | Value                     |
 | :----- | :------------------------ |
 | 1      | label of overridden xPlus |
 
-## Heap layout
+- ### Heap layout
 
-### Calculator
+#### Calculator
 
 `Calculator c = new Calculator(1)`
 
@@ -190,7 +206,7 @@ class WrongCalculator implements Calculator (
 | 1       | `address(c)` |
 | 2       | 1            |
 
-### BetterCalculator
+#### BetterCalculator
 
 `BetterCalculator bc = new BetterCalculator(2)`
 
@@ -199,7 +215,7 @@ class WrongCalculator implements Calculator (
 | 1       | `address(bc)` |
 | 2       | 2             |
 
-### WrongCalculator
+#### WrongCalculator
 
 `WrongCalculator wc = new WrongCalculator(7, 6)`
 

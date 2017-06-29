@@ -3,23 +3,18 @@ package util;
 public class DispatchTableEntry {
 
     private String methodID;
-    private String methodCode;
+    private String methodLabel;
 
-    public void setMethodCode(String methodCode) {
-        this.methodCode = methodCode;
-    }
-
-    public DispatchTableEntry(String methodID, String methodCode) {
+    public DispatchTableEntry(String methodID, String methodLabel) {
         this.methodID = methodID;
-
-        this.methodCode = methodCode;
+        this.methodLabel = methodLabel;
     }
 
     public String getMethodID() {
         return methodID;
     }
 
-    public String getMethodCode() {
-        return methodCode;
+    public String getMethodLabel() {
+        return methodLabel;
     }
 }

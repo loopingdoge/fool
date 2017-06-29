@@ -2,7 +2,6 @@ package util;
 
 import exception.RedeclaredClassException;
 import exception.UndeclaredClassException;
-import symbol_table.SymbolTableEntry;
 import type.ClassType;
 
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class CodegenUtils {
         return functionsCode;
     }
 
-
     public static void addClassEntry( String classID, ClassType classT ) throws RedeclaredClassException {
         if( classTable.get( classID ) != null ) throw new RedeclaredClassException( classID );
         classTable.put( classID, classT );
@@ -58,7 +56,7 @@ public class CodegenUtils {
         ArrayList<DispatchTableEntry> copy = new ArrayList<DispatchTableEntry>();
         ArrayList<DispatchTableEntry> original = dispatchTables.get(classID);
         for (DispatchTableEntry originalDtEntry : original) {
-            DispatchTableEntry copiedDtEntry = new DispatchTableEntry(originalDtEntry.getMethodID(), originalDtEntry.getMethodCode());
+            DispatchTableEntry copiedDtEntry = new DispatchTableEntry(originalDtEntry.getMethodID(), originalDtEntry.getMethodLabel());
             copy.add(copiedDtEntry);
         }
         return copy;
@@ -76,7 +74,7 @@ public class CodegenUtils {
             dtCodes.append(freshDispatchTableLabel(dt.getKey())).append(":\n");
             // For every entry in the DT
             for (DispatchTableEntry entry : dispatchTables.get(dt.getKey())) {
-                dtCodes.append(entry.getMethodCode());
+                dtCodes.append(entry.getMethodLabel());
             }
         }
         return dtCodes.toString();
