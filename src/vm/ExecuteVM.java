@@ -9,10 +9,9 @@ import java.util.HashSet;
 
 public class ExecuteVM {
 
-    private ArrayList<String> outputBuffer = new ArrayList<>();
-
     public static final int MEMORY_START_ADDRESS = 777;
-    private int MEMSIZE;
+    private ArrayList<String> outputBuffer = new ArrayList<>();
+    private int memsize = 10000;
     private int[] memory;
 
     private int[] code;
@@ -27,11 +26,10 @@ public class ExecuteVM {
     private HeapMemory heap;
     private HashSet<HeapMemoryCell> heapMemoryInUse = new HashSet<>();
 
-    public ExecuteVM(int[] code, int memsize) {
+    public ExecuteVM(int[] code) {
         this.code = code;
-        this.MEMSIZE = memsize;
-        this.memory = new int[MEMSIZE];
-        this.heap = new HeapMemory(MEMSIZE);
+        this.memory = new int[memsize];
+        this.heap = new HeapMemory(memsize);
         this.sp = MEMORY_START_ADDRESS + memsize;
         this.fp = MEMORY_START_ADDRESS + memsize;
     }
@@ -40,8 +38,8 @@ public class ExecuteVM {
         return memory[address - MEMORY_START_ADDRESS];
     }
 
-    private int setMemory(int address, int value) {
-        return memory[address - MEMORY_START_ADDRESS] = value;
+    private void setMemory(int address, int value) {
+        memory[address - MEMORY_START_ADDRESS] = value;
     }
 
     // Mark and sweep
@@ -169,8 +167,8 @@ public class ExecuteVM {
                     push(hp);
                     break;
                 case SVMParser.PRINT:
-                    System.out.println((sp < MEMORY_START_ADDRESS + MEMSIZE) ? accessMemory(sp) : "Empty stack!");
-                    outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
+                    System.out.println((sp < MEMORY_START_ADDRESS + memsize) ? accessMemory(sp) : "Empty stack!");
+                    outputBuffer.add((sp < MEMORY_START_ADDRESS + memsize) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
                     break;
                 case SVMParser.NEW:
                     // Il numero di argomenti per il new e' sulla testa dello stack
