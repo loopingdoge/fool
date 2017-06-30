@@ -59,13 +59,21 @@ L'intero progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le lib
 
   contiene le classi che simulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap.
 
-Spiegare le modalità per importare e eseguire il progetto ... TODO
-
 Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
 
-
+Spiegare le modalità per importare e eseguire il progetto ... TODO
 
 ## 2. Analisi lessicale
+
+In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
+
+### 2.1 Grammatica FOOL
+
+minus, div, funcall, #classExp
+
+### 2.2 Grammatica SVM
+
+lc, div, sub, code.add()
 
 ## 3. Analisi sintattica
 
