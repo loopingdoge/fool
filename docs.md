@@ -19,9 +19,25 @@
 
 [TOC]
 
+## 1. Struttura del progetto
+
+## 2. Analisi lessicale
+
+## 3. Analisi sintattica
+
+## 4. Analisi semantica
+
+## 5. Type checking
+
+## 6. Code generation
+
+## 7. Stack Vector Machine
+
+## 8. Testing e conclusioni
 
 
-## 1. Definizione di classe
+
+
 
 ### Attributi
 
