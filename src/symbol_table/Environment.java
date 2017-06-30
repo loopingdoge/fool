@@ -1,6 +1,8 @@
 package symbol_table;
 
+import exception.RedeclaredClassException;
 import exception.RedeclaredVarException;
+import exception.UndeclaredClassException;
 import exception.UndeclaredVarException;
 import type.ClassType;
 import type.FunType;
@@ -48,6 +50,18 @@ public class Environment {
         }
         if (oldEntry != null) {
             throw new RedeclaredVarException(id);
+        }
+        return this;
+    }
+
+    public Environment setEntryType(String id, Type newtype, int offset) throws UndeclaredClassException {
+        SymbolTableEntry newEntry = new SymbolTableEntry(getNestingLevel(), newtype, offset);
+        SymbolTableEntry  oldEntry = this.symbolTable.get(this.symbolTable.size() - 1).replace(id, newEntry);
+        if (newtype instanceof ClassType) {
+            latestClassEntry = newEntry;
+        }
+        if (oldEntry == null) {
+            throw   new UndeclaredClassException(id);
         }
         return this;
     }
