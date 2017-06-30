@@ -1,31 +1,52 @@
 # FOOL - Functional Object Oriented Language
 
+#### Progetto del corso di Compilatori ed Interpreti AA 2016/2017
+
+##### Corso di Laurea Magistrale in Informatica, Università di Bologna
+
+##### <u>Componenti del gruppo</u> (in ordine alfabetico)
+
+- Battilana Pietro (matricola 799486)
+- Civolani Mirco (matricola )
+- Farinelli Devid (matricola )
+- Nicoletti Alberto (matricola )
+
+------
+
+
+
+## **Tabella dei contenuti**
+
+[TOC]
+
+
+
 ## 1. Definizione di classe
 
 ### Attributi
 
 La classe `C` dispone di:
 
-| Attributo            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `classID` | `String`         | id della classe |
-| `superClassID` | `String`         | id della eventuale superclasse |
-| `fields` | `ArrayList<Field>`         | Lista dei tipi dei campi |
-| `methods`     | `ArrayList<Method>`          | Lista dei tipi dei metodi |
+| Attributo      | Tipo                | Descrizione                    |
+| -------------- | ------------------- | ------------------------------ |
+| `classID`      | `String`            | id della classe                |
+| `superClassID` | `String`            | id della eventuale superclasse |
+| `fields`       | `ArrayList<Field>`  | Lista dei tipi dei campi       |
+| `methods`      | `ArrayList<Method>` | Lista dei tipi dei metodi      |
 
 - Ogni `Field` è costituito da:
 
-| Attributo            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `id`     | `String`          | id dell'attributo |
-| `type` | `Type`         | tipo dell'attributo |
+| Attributo | Tipo     | Descrizione         |
+| --------- | -------- | ------------------- |
+| `id`      | `String` | id dell'attributo   |
+| `type`    | `Type`   | tipo dell'attributo |
 
 - Ogni `Method` è costituito da:
 
-| Attributo            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `id`     | `String`          | id del metodo |
-| `type` | `FunType`         | tipo del metodo |
+| Attributo | Tipo      | Descrizione     |
+| --------- | --------- | --------------- |
+| `id`      | `String`  | id del metodo   |
+| `type`    | `FunType` | tipo del metodo |
 
 ### Validazione semantica
 - Creare una entry nella lista di symbol table
@@ -74,10 +95,10 @@ L'istanziazione di classe è definita in `NewNode` e si occupa di creare oggetti
 
 ### Attributi
 
-| Attributo            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `classID`     | `String`          | id della classe |
-| `args` | `ArrayList<INode>`         | lista dei parametri |
+| Attributo | Tipo               | Descrizione         |
+| --------- | ------------------ | ------------------- |
+| `classID` | `String`           | id della classe     |
+| `args`    | `ArrayList<INode>` | lista dei parametri |
 
 ### Validazione semantica
 - Recuperare il `ClassType` corrispondente a `classID` dalla tabella dei simboli
@@ -109,13 +130,13 @@ $$
 Gli attributi sono dei casi particolari di `IdNode` il cui valore non si trova in uno scope esterno ma in un oggetto nello heap 
 
 ### Attributi
-| Nome            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `attrib_id`     | `String`          | L'id dell'attributo |
-| `entry`          | `SymbolTableEntry` | Entry della definizione dell'attributo nell Symbol Table |
-| `nesting_level`     | `Integer`          | Nesting level dell'utilizzo dell'attributo                 |
-| `object_offset` | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
-| `object_nesting_level`          | `Integer` | Nesting level di definizione dell'oggetto |
+| Nome                   | Tipo               | Descrizione                              |
+| ---------------------- | ------------------ | ---------------------------------------- |
+| `attrib_id`            | `String`           | L'id dell'attributo                      |
+| `entry`                | `SymbolTableEntry` | Entry della definizione dell'attributo nell Symbol Table |
+| `nesting_level`        | `Integer`          | Nesting level dell'utilizzo dell'attributo |
+| `object_offset`        | `Integer`          | L'offset dell'oggetto rispetto al `frame pointer` |
+| `object_nesting_level` | `Integer`          | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
 - TODO
@@ -135,15 +156,15 @@ La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una 
 
 ### Attributi
 
-| Nome            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `method_id`     | `String`          | L'id del metodo chiamato                 |
-| `method_offset`     | `Integer`          | Offset del metodo nella dispatch table                 |
-| `args`          | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
-| `nesting_level`     | `Integer`          | Nesting level della chiamata del metodo |
-| `object_id`     | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
-| `object_offset` | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
-| `object_nesting_level`          | `Integer` | Nesting level di definizione dell'oggetto |
+| Nome                   | Tipo              | Descrizione                              |
+| ---------------------- | ----------------- | ---------------------------------------- |
+| `method_id`            | `String`          | L'id del metodo chiamato                 |
+| `method_offset`        | `Integer`         | Offset del metodo nella dispatch table   |
+| `args`                 | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
+| `nesting_level`        | `Integer`         | Nesting level della chiamata del metodo  |
+| `object_id`            | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
+| `object_offset`        | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
+| `object_nesting_level` | `Integer`         | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
 - Recupera dalla symbol table l' `object_type` di `object_id`
@@ -173,22 +194,22 @@ Le dispatch tables sono implementate in `CodegenUtils` come strutture dati popol
 ### Attributi
 
 Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
-| Nome            | Tipo              | Descrizione                                 |
-| --------------- | ----------------- | ---------------------------------------- |
-| `method_id`     | `String`          | L'id del metodo chiamato                 |
-| `method_label`          | `String` | label corrispondente all'indirizzo del codice della funzione |
+| Nome           | Tipo     | Descrizione                              |
+| -------------- | -------- | ---------------------------------------- |
+| `method_id`    | `String` | L'id del metodo chiamato                 |
+| `method_label` | `String` | label corrispondente all'indirizzo del codice della funzione |
 
 ### Metodi
 
 Per gestire le strutture dati sono disponibili: 
 - `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
-Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
+  Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
 
 - `ArrayList<DispatchTableEntry> getDispatchTable(String classID)`
-Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
+  Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
 
 - `String generateDispatchTablesCode()`
-Genera e restituisce il codice `SVM` delle dispatch tables
+  Genera e restituisce il codice `SVM` delle dispatch tables
 
 ## 6. Esempi
 
