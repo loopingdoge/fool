@@ -8,10 +8,6 @@ public class InstanceType implements Type {
         this.classT = classT;
     }
 
-    public InstanceType( String classID ) {
-        this.classT = new ClassType(classID);
-    }
-
     public ClassType getClassType() {
         return this.classT;
     }

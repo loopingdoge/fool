@@ -535,3 +535,31 @@ test42 - this with subtyping:
         print(b.get());
 -    "5"
 
+test43 - WTF is this class assignment?:
+-   class A
+    class N;
+    let
+        A a = new N;
+    in
+        print(4);
+-   "Error: \"incompatible value for variable a\" at line 1, column 27."
+
+test44 - Cast to supertype and method invocation:
+-   class A
+    class B {
+        int get() 2;
+    };
+    let
+        A a = new B;
+    in
+        print(a.get());
+-   "undeclared method: get"
+
+test45 - :
+-   class A
+    class B implements A;
+    let
+        A a = new B;
+    in
+        print(3);
+-   "3"
