@@ -65,11 +65,55 @@ Spiegare le modalità per importare e eseguire il progetto ... TODO
 
 ## 2. Analisi lessicale
 
-In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
+In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti delle grammatiche modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
 
 ### 2.1 Grammatica FOOL
 
-minus, div, funcall, #classExp
+Non è stato necessario modificare la produzione iniziale `prog` del linguaggio che può essere una semplice espressione oppure un espressione preceduta da dichiarazioni di variabili `let in` o di classi. Si è scelto di usare il non terminale `met`  per la definizione di metodi che per gestirli diversamente successivamente a livello semantico rispetto alla definizione di funzioni. Come è possibile vedere a riga 10, `met` è solo un wrapper per il non terminale `fun`. 
+
+```ANTLR
+prog
+    : exp SEMIC                 		    #singleExp
+    | let exp SEMIC                 	    #letInExp
+    | (classdec)+ SEMIC (let)? exp SEMIC	#classExp
+    ;
+
+classdec
+    : CLASS ID ( IMPLEMENTS ID )? (LPAR (vardec ( COMMA vardec)*)? RPAR)?  (CLPAR ((met SEMIC)+)? CRPAR)?;
+    
+met : fun;
+    
+fun : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp;
+```
+
+
+
+Si è deciso di unificare a livello sintattico la chiamata di funzione con la chiamata di metodo come fatto per la loro definizione. Il non terminale corrispondente è chiamato `funcall`. Una espressione `exp` si può ridurre ad un `value` le cui produzioni sono distinte attraverso le direttive che iniziano con '\#' in `funExp` per la chiamata di funzione ed in `methodExp` per la chiamata di metodi. Queste due direttive ci permettono di scrivere due procedure diverse (`visitFunExp` e `visitMethodExp`) per la visita dei relativi nodi nell'albero di sintassi astratta.
+
+```ANTLR
+value
+    :  ...
+    | funcall       							#funExp
+    | (ID | THIS) DOT funcall                   #methodExp 
+    |  ... ;
+
+funcall : ID ( LPAR (exp (COMMA exp)* )? RPAR ) ;
+```
+
+
+
+L'implementazioni degli operatori aggiuntivi a livello sintattico è stata fatta in modo molto semplice aggiungendo delle opzioni per la riduzione del non terminale `operator`.  
+
+```ANTLR
+exp :  ('-')? left=term (operator=(PLUS | MINUS) right=exp)? ;
+
+term : left=factor (operator=(TIMES | DIV) right=term)? ;
+
+factor : 
+left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? ;
+```
+
+
 
 ### 2.2 Grammatica SVM
 
