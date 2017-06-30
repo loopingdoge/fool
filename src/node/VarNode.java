@@ -26,10 +26,6 @@ public class VarNode extends Node {
         this.assignedExpression = assignedExpression;
     }
 
-    public Type getDeclaredType() {
-        return this.declaredType;
-    }
-
     public String getId() {
         return this.id;
     }
@@ -39,18 +35,18 @@ public class VarNode extends Node {
         //create result list
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
-        res.addAll(assignedExpression.checkSemantics(env));
-
         //Se sto istanziando un nuovo oggetto, aggiorno bene le informazioni di ClassType :=D
-        if (assignedExpression instanceof NewNode) {
-            NewNode newIstance = (NewNode) assignedExpression;
+        if (declaredType instanceof InstanceType) {
+            InstanceType decType = (InstanceType) declaredType;
             try {
-                ClassType CT = CodegenUtils.getClassEntry(newIstance.getClassID());
-                this.declaredType = new InstanceType(CT);
+                ClassType classT = CodegenUtils.getClassEntry(decType.getClassType().getClassID());
+                this.declaredType = new InstanceType(classT);
             } catch (UndeclaredClassException e) {
                 res.add(new SemanticError(e.getMessage()));
             }
         }
+
+        res.addAll(assignedExpression.checkSemantics(env));
 
         //env.offset = -2;
         try {
