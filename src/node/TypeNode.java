@@ -25,6 +25,7 @@ public class TypeNode extends Node {
                 this.type = new BoolType();
                 break;
             default:
+                // TODO questo non setta superType, controllare che vada bene con l'ereditarieta'
                 this.type = new InstanceType(type);
                 break;
         }
