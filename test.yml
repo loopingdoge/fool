@@ -563,3 +563,25 @@ test45 - Subtyping in assignment:
     in
         print(3);
 -   "3"
+
+test46 - Subtying funcall as constructor parameter:
+-   class A
+    class B implements A (A a);
+    let
+        A a = new A;
+        B getA() new B(a);
+        B b2 = new B(getA());
+    in
+        print(4);
+-   "4"
+
+test47 - Subtyping in funccall as funcall parameter:
+-   class A
+    class B implements A (A a);
+    let
+        A a = new A;
+        B getA() new B(a);
+        int f(A a) 2;
+    in
+        print(f(getA()));
+-   "2"

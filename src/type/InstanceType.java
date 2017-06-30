@@ -1,5 +1,12 @@
 package type;
 
+import exception.UndeclaredClassException;
+import main.SemanticError;
+import symbol_table.Environment;
+import util.CodegenUtils;
+
+import java.util.ArrayList;
+
 public class InstanceType implements Type {
 
     private ClassType classT;
@@ -10,6 +17,17 @@ public class InstanceType implements Type {
 
     public ClassType getClassType() {
         return this.classT;
+    }
+
+    // This is used to update the classType filling superType when needed
+    public ArrayList<SemanticError> updateClassType(Environment env) {
+        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        try {
+            this.classT = CodegenUtils.getClassEntry(classT.getClassID());
+        } catch (UndeclaredClassException e) {
+            res.add(new SemanticError(e.getMessage()));
+        }
+        return res;
     }
 
     @Override

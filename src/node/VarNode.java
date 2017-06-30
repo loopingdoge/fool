@@ -38,12 +38,7 @@ public class VarNode extends Node {
         //Se sto istanziando un nuovo oggetto, aggiorno bene le informazioni di ClassType :=D
         if (declaredType instanceof InstanceType) {
             InstanceType decType = (InstanceType) declaredType;
-            try {
-                ClassType classT = CodegenUtils.getClassEntry(decType.getClassType().getClassID());
-                this.declaredType = new InstanceType(classT);
-            } catch (UndeclaredClassException e) {
-                res.add(new SemanticError(e.getMessage()));
-            }
+            res.addAll(decType.updateClassType(env));
         }
 
         res.addAll(assignedExpression.checkSemantics(env));
