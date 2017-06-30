@@ -1,22 +1,22 @@
 package node;
 
+import exception.TypeException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
 import type.BoolType;
 import type.IntType;
 import type.Type;
-import exception.TypeException;
 import util.CodegenUtils;
 
 import java.util.ArrayList;
 
-public class LessEqualNode extends Node {
+public class LessNode extends Node {
 
     private INode left;
     private INode right;
 
-    public LessEqualNode(FOOLParser.FactorContext ctx, INode left, INode right) {
+    public LessNode(FOOLParser.FactorContext ctx, INode left, INode right) {
         super(ctx);
         this.left = left;
         this.right = right;
@@ -40,7 +40,7 @@ public class LessEqualNode extends Node {
         Type l = left.type();
         Type r = right.type();
         if (!l.isSubTypeOf(new IntType()) || !r.isSubTypeOf(new IntType())) {
-            throw new TypeException("Incompatible type for <= (must be int)", ctx);
+            throw new TypeException("Incompatible type for < (must be int)", ctx);
         }
         return new BoolType();
     }
@@ -50,6 +50,8 @@ public class LessEqualNode extends Node {
         String l1 = CodegenUtils.freshLabel();
         String l2 = CodegenUtils.freshLabel();
         return left.codeGeneration() +
+                "push 1\n" +
+                "add\n" +
                 right.codeGeneration() +
                 "bleq " + l1 + "\n" +
                 "push 0\n" +
@@ -71,7 +73,7 @@ public class LessEqualNode extends Node {
 
     @Override
     public String toString() {
-        return "<=";
+        return "<";
     }
 
 }  

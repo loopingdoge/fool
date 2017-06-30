@@ -225,23 +225,34 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     public INode visitFactor(FactorContext ctx) {
         //check whether this is a simple or binary expression
         //notice here the necessity of having named elements in the grammar
-        if (ctx.right == null) {
-            //it is a simple expression
-            return visit(ctx.left);
-        } else {
-            //it is a binary expression, you should visit left and right
-            switch (ctx.operator.getType()) {
-                case FOOLLexer.EQ:
-                    return new EqualNode(ctx, visit(ctx.left), visit(ctx.right));
-                case FOOLLexer.LEQ:
-                    return new LessEqualNode(ctx, visit(ctx.left), visit(ctx.right));
-                case FOOLLexer.GEQ:
-                    return new GreaterEqualNode(ctx, visit(ctx.left), visit(ctx.right));
-                case FOOLLexer.AND:
-                    return new AndNode(ctx, visit(ctx.left), visit(ctx.right));
-                default:
-                    return new OrNode(ctx, visit(ctx.left), visit(ctx.right));
+        try {
+            if (ctx.right == null) {
+                //it is a simple expression
+                return visit(ctx.left);
+            } else {
+                //it is a binary expression, you should visit left and right
+                switch (ctx.operator.getType()) {
+                    case FOOLLexer.EQ:
+                        return new EqualNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.LEQ:
+                        return new LessEqualNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.GEQ:
+                        return new GreaterEqualNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.AND:
+                        return new AndNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.GREATER:
+                        return new GreaterNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.LESS:
+                        return new LessNode(ctx, visit(ctx.left), visit(ctx.right));
+                    case FOOLLexer.OR:
+                        return new OrNode(ctx, visit(ctx.left), visit(ctx.right));
+                    default:
+                        throw new Exception("Invalid operator");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

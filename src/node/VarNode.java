@@ -86,7 +86,7 @@ public class VarNode extends Node {
 
     @Override
     public String toString(){
-        return "var " + id + ": " + declaredType + " =";
+        return declaredType + " " + id + " =";
     }
 
 }  

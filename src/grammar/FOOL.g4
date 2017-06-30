@@ -62,7 +62,7 @@ term
     ;
 
 factor
-    : left=value (operator=(AND | OR | GEQ | EQ | LEQ) right=value)?
+    : left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)?
     ;
 
 value
@@ -91,6 +91,8 @@ COMMA  : ',' ;
 EQ     : '==' ;
 LEQ    : ('<=' | '=<') ;
 GEQ    : ('>=' | '=>') ;
+GREATER: '>' ;
+LESS   : '<' ;
 AND    : '&&' ;
 OR     : '||' ;
 NOT    : '!' ;
