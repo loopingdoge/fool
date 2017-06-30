@@ -1,9 +1,11 @@
 package node;
 
 import exception.RedeclaredVarException;
+import exception.UndeclaredVarException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
+import symbol_table.SymbolTableEntry;
 import type.ClassType;
 import type.FunType;
 import type.InstanceType;
@@ -46,8 +48,9 @@ public class MethodNode extends FunNode {
         env.pushHashMap();
 
         try {
-            env.addEntry("this", new InstanceType(classID), 0 );
-        } catch (RedeclaredVarException e) {
+            SymbolTableEntry classEntry = env.getLatestEntryOfNotFun(classID);
+            env.addEntry("this", new InstanceType((ClassType) classEntry.getType()), 0 );
+        } catch (RedeclaredVarException | UndeclaredVarException e) {
             e.printStackTrace();
         }
 
