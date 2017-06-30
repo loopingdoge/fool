@@ -59,6 +59,12 @@ L'intero progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le lib
 
   contiene le classi che simulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap.
 
+Spiegare le modalità per importare e eseguire il progetto ... TODO
+
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
+
+
+
 ## 2. Analisi lessicale
 
 ## 3. Analisi sintattica
