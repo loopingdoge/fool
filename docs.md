@@ -14,8 +14,6 @@
 
 ------
 
-
-
 ## **Tabella dei contenuti**
 
 [TOC]
