@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class CodegenUtils {
 
-    public static HashMap<String, ClassType> classTable = new HashMap<String, ClassType>();
     private static int label = 0;
     private static int functionsLabelCount = 0;
     private static String functionsCode = "";
@@ -34,17 +33,6 @@ public class CodegenUtils {
 
     public static String getFunctionsCode() {
         return functionsCode;
-    }
-
-    public static void addClassEntry( String classID, ClassType classT ) throws RedeclaredClassException {
-        if( classTable.get( classID ) != null ) throw new RedeclaredClassException( classID );
-        classTable.put( classID, classT );
-    }
-
-    public static ClassType getClassEntry( String classID ) throws UndeclaredClassException {
-        ClassType classT = classTable.get( classID );
-        if( classT == null ) throw new UndeclaredClassException( classID );
-        return classTable.get( classID );
     }
 
     public static void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt) {
@@ -84,7 +72,6 @@ public class CodegenUtils {
         label = 0;
         functionsLabelCount = 0;
         functionsCode = "";
-        classTable = new HashMap<>();
         dispatchTables = new HashMap<>();
     }
 

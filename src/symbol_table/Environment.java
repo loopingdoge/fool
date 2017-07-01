@@ -26,10 +26,6 @@ public class Environment {
         return this.symbolTable.size() - 1;
     }
 
-    public int getCurrentOffset() {
-        return this.offset;
-    }
-
     public Environment pushHashMap() {
         this.symbolTable.add(new HashMap<>());
         return this;

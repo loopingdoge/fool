@@ -733,3 +733,17 @@ test55 - List Sorting:
     in
         print(sortedList.value());
 -   "1"
+
+test56 - Subtyping hell in returntype:
+-   class A
+    class B implements A (A a, A b)
+    class X {
+        B get() new B(new A(), new B(new A(), new A()));
+    };
+    let
+        X x = new X();
+        B kek() x.get();
+        B b2 = new B(x.get(), kek());
+    in
+        print(777);
+-   "777"

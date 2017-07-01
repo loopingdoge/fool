@@ -101,9 +101,7 @@ public class ClassNode extends Node {
         try {
             this.type = new ClassType(classID, superclassType, fieldsList, methodsList);
             env.setEntryType(classID, this.type, 0);
-            // env.addEntry(classID, this.type, 0);
-            CodegenUtils.addClassEntry(classID, this.type);
-        } catch (RedeclaredClassException | UndeclaredClassException e) {
+        } catch ( UndeclaredClassException e) {
             res.add(new SemanticError(e.getMessage()));
         }
 

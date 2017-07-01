@@ -24,7 +24,6 @@ public class InstanceType implements Type {
     public ArrayList<SemanticError> updateClassType(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
         try {
-            //this.classT = CodegenUtils.getClassEntry(classT.getClassID());
             try {
                 this.classT = (ClassType) env.getTypeOf(classT.getClassID());
             } catch (UndeclaredVarException e) {
