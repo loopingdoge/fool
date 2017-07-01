@@ -28,7 +28,7 @@ public class IdNode extends Node {
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create result list
-        ArrayList<SemanticError> res = new ArrayList<SemanticError>();
+        ArrayList<SemanticError> res = new ArrayList<>();
 
         try {
             this.entry = env.getLatestEntryOfNotFun(this.id);
@@ -64,12 +64,12 @@ public class IdNode extends Node {
         if(this.entry.isAttribute()) {
             for (int i = 0; i < nestinglevel - thisNestLevel; i++)
                 getAR.append("lw\n");
-            return  "push " + entry.getOffset() + "\n" + //metto offset sullo stack
+            return  "push " + entry.getOffset() + "\n" + // metto l'offset (logico) sullo stack
                     "push " + thisOffset + "\n" +
                     "lfp\n" + getAR +
                     "add\n" +
                     "lw\n" +
-                    "hoff\n" +
+                    "hoff\n" +  // converto l'offset
                     "add\n" +
                     "lw\n"; //carico sullo stack il valore all'indirizzo ottenuto
         } else {
