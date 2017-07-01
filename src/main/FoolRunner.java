@@ -157,13 +157,9 @@ public class FoolRunner {
     private static String executeVM(int[] code) {
         ExecuteVM vm = new ExecuteVM(code);
         String message = "No output";
-        try {
-            ArrayList<String> output = vm.cpu();
-            if (output.size() > 0)
-                message = output.get(output.size() - 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ArrayList<String> output = vm.cpu();
+        if (output.size() > 0)
+            message = output.get(output.size() - 1);
         return message;
     }
 
@@ -210,8 +206,14 @@ public class FoolRunner {
     }
 
     public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging, boolean showAST) {
-        String actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST);
+        String actualResult = "";
 
+        try {
+            actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST);
+        } catch(Exception e) {
+            System.out.println(testID);
+            e.printStackTrace();
+        }
         StringBuilder output = new StringBuilder();
         output.append("-Expected: ").append(expectedResult).append("\n")
                 .append("-Got: ").append(actualResult).append("\n");
