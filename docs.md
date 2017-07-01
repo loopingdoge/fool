@@ -6,11 +6,10 @@
 
 ##### ***Componenti del gruppo*** (in ordine alfabetico)
 
-// [DEVID] metterei prima i nomi
-- Pietro Battilana (matricola 799486)
-- Mirco Civolani (matricola )
-- Devid Farinelli (matricola 819683)
 - Alberto Nicoletti (matricola 819697)
+- Devid Farinelli (matricola 819683)
+- Mirco Civolani (matricola )
+- Pietro Battilana (matricola 799486)
 
 ------
 
