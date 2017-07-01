@@ -610,3 +610,26 @@ test49 - Undefined var in method:
     in
         print(a.id(i));
 -   "Undeclared variable i"
+
+test50 - Subclass inside superclass:
+-   class A (int x) {
+        B createB() new B(x, 2);
+    }
+    class B implements A (int x, int y) {
+        int getX() x;
+        int getY() y;
+    }
+    ;
+    let
+        A a = new A(1);
+        B b = a.createB();
+    in
+        print(b.getY());
+-   "2"
+
+test51 - Subclass inside superclass' constructor:
+-   class A (B b)
+    class B implements A (B b)
+    ;
+    print(1);
+-   "can't use a subclass in superclass' constructor"
