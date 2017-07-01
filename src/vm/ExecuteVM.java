@@ -10,10 +10,11 @@ import java.util.HashSet;
 public class ExecuteVM {
 
     public static final int MEMORY_START_ADDRESS = 777;
-    private ArrayList<String> outputBuffer = new ArrayList<>();
-    private int memsize = 10000;
-    private int[] memory;
+    private static final int MEMSIZE = 10000;
 
+    private ArrayList<String> outputBuffer = new ArrayList<>();
+
+    private int[] memory;
     private int[] code;
 
     private int hp = 0;
@@ -28,10 +29,10 @@ public class ExecuteVM {
 
     public ExecuteVM(int[] code) {
         this.code = code;
-        this.memory = new int[memsize];
-        this.heap = new HeapMemory(memsize);
-        this.sp = MEMORY_START_ADDRESS + memsize;
-        this.fp = MEMORY_START_ADDRESS + memsize;
+        this.memory = new int[MEMSIZE];
+        this.heap = new HeapMemory(MEMSIZE);
+        this.sp = MEMORY_START_ADDRESS + MEMSIZE;
+        this.fp = MEMORY_START_ADDRESS + MEMSIZE;
     }
 
     private int accessMemory(int address) {
@@ -51,16 +52,21 @@ public class ExecuteVM {
             table.put(m.getIndex(), false);
         }
         // Se viene trovato sullo stack l'indirizzo di un oggetto, setto la table a true
-        for (int i = 99; i >= sp; i--) {
+        for (int i = MEMSIZE + MEMORY_START_ADDRESS - 1; i >= sp; i--) {
             if (table.containsKey(accessMemory(i))) {
                 table.put(accessMemory(i), true);
             }
         }
+        if (table.containsKey(rv)) {
+            table.put(rv, true);
+        }
         heapMemoryInUse.forEach(m -> {
-            if (!table.get(m.getIndex())) heap.deallocate(m);
-            while (m != null) {
-                setMemory(m.getIndex(), 0);
-                m = m.next;
+            if (!table.get(m.getIndex())) {
+                heap.deallocate(m);
+//                while (m != null) {
+//                    setMemory(m.getIndex(), 0);
+//                    m = m.next;
+//                }
             }
         });
         heapMemoryInUse.removeIf(m -> !table.get(m.getIndex()));
@@ -167,8 +173,8 @@ public class ExecuteVM {
                     push(hp);
                     break;
                 case SVMParser.PRINT:
-                    System.out.println((sp < MEMORY_START_ADDRESS + memsize) ? accessMemory(sp) : "Empty stack!");
-                    outputBuffer.add((sp < MEMORY_START_ADDRESS + memsize) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
+                    System.out.println((sp < MEMORY_START_ADDRESS + MEMSIZE) ? accessMemory(sp) : "Empty stack!");
+                    outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
                     break;
                 case SVMParser.NEW:
                     // Il numero di argomenti per il new e' sulla testa dello stack
@@ -180,7 +186,7 @@ public class ExecuteVM {
                         args[i] = pop();
                     }
                     // Alloco memoria per i nargs argomenti + 1 per l'indirizzo alla dispatch table
-                    HeapMemoryCell allocatedMemory = null;
+                    HeapMemoryCell allocatedMemory;
                     try {
                         allocatedMemory = heap.allocate(nargs + 1);
                     } catch (VMOutOfMemoryException e) {
@@ -215,6 +221,21 @@ public class ExecuteVM {
                     break;
                 case SVMParser.COPY:
                     push(accessMemory(sp));
+                    break;
+                case SVMParser.HOFF:
+                    int objAddress = pop(); // indirizzo di this
+                    int objOffset = pop(); // offset dell'oggetto rispetto al coso
+                    HeapMemoryCell list = heapMemoryInUse
+                                    .stream()
+                                    .filter(cell -> cell.getIndex() == objAddress)
+                                    .reduce(new HeapMemoryCell(0, null), (prev, curr) -> curr);
+                    for (int i = 0; i < objOffset; i++) {
+                        list = list.next;
+                    }
+                    int fieldAddress = list.getIndex();
+                    int realOffset = Math.abs(fieldAddress - objAddress);
+                    push(realOffset);
+                    push(objAddress);
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;
