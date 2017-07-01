@@ -1,6 +1,7 @@
 package type;
 
 import exception.UndeclaredClassException;
+import exception.UndeclaredVarException;
 import main.SemanticError;
 import symbol_table.Environment;
 import util.CodegenUtils;
@@ -20,10 +21,15 @@ public class InstanceType implements Type {
     }
 
     // This is used to update the classType filling superType when needed
-    public ArrayList<SemanticError> updateClassType() {
+    public ArrayList<SemanticError> updateClassType(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
         try {
-            this.classT = CodegenUtils.getClassEntry(classT.getClassID());
+            //this.classT = CodegenUtils.getClassEntry(classT.getClassID());
+            try {
+                this.classT = (ClassType) env.getTypeOf(classT.getClassID());
+            } catch (UndeclaredVarException e) {
+                throw new UndeclaredClassException(classT.getClassID());
+            }
         } catch (UndeclaredClassException e) {
             res.add(new SemanticError(e.getMessage()));
         }

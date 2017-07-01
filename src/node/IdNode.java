@@ -41,7 +41,7 @@ public class IdNode extends Node {
 
             if (this.entry.getType() instanceof InstanceType) {
                 InstanceType decType = (InstanceType) this.entry.getType();
-                res.addAll(decType.updateClassType());
+                res.addAll(decType.updateClassType(env));
             }
 
         } catch (UndeclaredVarException e) {

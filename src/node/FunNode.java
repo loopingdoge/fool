@@ -63,7 +63,7 @@ public class FunNode extends Node {
             // Se restituisco un oggetto, aggiorno le informazione sul ClassType
             if ( this.declaredReturnType instanceof InstanceType ) {
                 InstanceType returnType = (InstanceType) this.declaredReturnType;
-                res.addAll(returnType.updateClassType());
+                res.addAll(returnType.updateClassType(env));
             }
             env.addEntry(this.id, new FunType(parTypes, declaredReturnType), env.offset--);
         } catch (RedeclaredVarException e) {
