@@ -17,18 +17,20 @@ import util.CodegenUtils;
 import vm.ExecuteVM;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class TestRunner {
+public class FoolRunner {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED    = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    private static int MEMSIZE;
+    static final String ANSI_RESET = "\u001B[0m";
+    static final String ANSI_BLACK = "\u001B[30m";
+    static final String ANSI_RED = "\u001B[31m";
+    static final String ANSI_GREEN = "\u001B[32m";
+    static final String ANSI_BLUE = "\u001B[34m";
+
+    private static int maxMemsizeWithoutRecursion;
 
 
     private static INode lexicalAndSyntacticAnalysis(CharStream input) throws LexerException {
@@ -52,26 +54,27 @@ public class TestRunner {
 
         if (visualizeAST) {
             System.out.println("\nVisualizing AST...");
-            stampAST(ast);
+            printAST(ast);
         }
 
         return ast.type(); //type-checking bottom-up
     }
 
-    private static int[] codeGeneration(INode ast, String testID, boolean enableLogging) throws IOException {
+    private static int[] codeGeneration(INode ast, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging) throws IOException {
         String code = ast.codeGeneration();
         code += CodegenUtils.generateDispatchTablesCode();
         computeMemoryCapacity(code);
 
-        BufferedWriter out = new BufferedWriter(new FileWriter(testID + ".asm"));
-        out.write(code);
-        out.close();
+        File svmFile = new File(svmFilename + ".svm");
+        BufferedWriter svmWriter = new BufferedWriter(new FileWriter(svmFile.getAbsoluteFile()));
+        svmWriter.write(code);
+        svmWriter.close();
 
         if (enableLogging) {
             System.out.println("SVM code generated (" + code.split("\n").length + " lines). Assembling and running generated code: \n" + code);
         }
 
-        CharStream inputASM = CharStreams.fromFileName(testID + ".asm");
+        CharStream inputASM = CharStreams.fromFileName(svmFile.getName());
         SVMLexer lexerASM = new SVMLexer(inputASM);
         CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
         SVMParser parserASM = new SVMParser(tokensASM);
@@ -93,15 +96,26 @@ public class TestRunner {
             for (int i = 0; i < codeToView.length; i++) System.out.println(codeToView[i]);
         }
 
+        if (!keepSvmFile) {
+            svmFile.delete();
+        }
+
+        if (!bytecodeFilename.equals("")) {
+            File bytecodeFile = new File(bytecodeFilename + ".bytecode");
+            BufferedWriter bytecodeWriter = new BufferedWriter(new FileWriter(bytecodeFile.getAbsoluteFile()));
+            bytecodeWriter.write(code);
+            bytecodeWriter.close();
+        }
+
         return parserASM.getBytecode();
     }
 
-//    version with memory counter incrementing by push()
+    //    version with memory counter incrementing by push()
     private static void computeMemoryCapacity(String SVMcode) {
         String[] instructions = SVMcode.split("\n");
-        MEMSIZE = 0;
-        for (int i = 0; i < instructions.length; i++) {
-            String instruction = instructions[i].split(" ")[0];
+        maxMemsizeWithoutRecursion = 0;
+        for (String instruction1 : instructions) {
+            String instruction = instruction1.split(" ")[0];
             // System.out.println("Instruction " + i + " is " + instruction);
             switch (instruction) {
                 case "print":
@@ -131,7 +145,7 @@ public class TestRunner {
                 case "mult":
                 case "add":
                 case "push":   // 1 increment
-                    MEMSIZE++;
+                    maxMemsizeWithoutRecursion++;
                     break;
                 default:   // reached for labels and blank lines
                     // System.out.println("ERROR! Unknown SVM instruction '" + instruction +"' found in computing VM memory.");
@@ -141,23 +155,21 @@ public class TestRunner {
     }
 
     private static String executeVM(int[] code) {
-        ExecuteVM vm = new ExecuteVM(code, MEMSIZE);
-        String message =  "No output";
+        ExecuteVM vm = new ExecuteVM(code);
+        String message = "No output";
         try {
             ArrayList<String> output = vm.cpu();
             if (output.size() > 0)
                 message = output.get(output.size() - 1);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return message;
     }
 
-    public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging) {
-
+    public static String run(CharStream input, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging, boolean showAST) {
         CodegenUtils.reset();
-        String actualResult = "";
-
+        String result = "";
         try {
 
             if (enableLogging) {
@@ -170,45 +182,50 @@ public class TestRunner {
                 System.out.println("Semantic analysis...");
             }
 
-            Type type = semanticAnalysis(ast, enableLogging);
+            Type type = semanticAnalysis(ast, showAST);
 
             if (enableLogging) {
                 System.out.println("Type: " + type);
             }
 
-            int[] code = codeGeneration(ast, testID, enableLogging);
+            int[] code = codeGeneration(ast, svmFilename, bytecodeFilename, keepSvmFile, enableLogging);
 
             if (enableLogging) {
-                System.out.println("Starting VM (allocated dimensions: bytecode " + code.length +", memory " + MEMSIZE + ")");
+                System.out.println("Starting VM (allocated dimensions: bytecode " + code.length + ", memory " + maxMemsizeWithoutRecursion + ")");
             }
 
-            actualResult = executeVM(code);
+            result = executeVM(code);
 
             if (enableLogging) {
-                System.out.println(actualResult);
+                System.out.println(result);
             }
 
         } catch (LexerException | ScopeException | IOException | TypeException e) {
             if (enableLogging) {
                 System.out.println(e.getMessage());
             }
-            actualResult = e.getMessage();
+            result = e.getMessage();
         }
+        return result;
+    }
+
+    public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging, boolean showAST) {
+        String actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST);
 
         StringBuilder output = new StringBuilder();
-        output.append( "-Expected: " ).append(expectedResult).append("\n")
-                        .append( "-Got: "  ).append(actualResult).append("\n");
+        output.append("-Expected: ").append(expectedResult).append("\n")
+                .append("-Got: ").append(actualResult).append("\n");
         if (actualResult.trim().equals(expectedResult.trim())) {
-            output.append( ANSI_GREEN + "Test PASSED!");
+            output.append(ANSI_GREEN + "Test PASSED!");
         } else {
-            output.append( ANSI_RED + "Test FAILED!");
+            output.append(ANSI_RED + "Test FAILED!");
         }
 
         return output.toString();
     }
 
-    public static void stampAST(INode ast) {
-        System.out.println("\nAbstract Syntax Tree NUOVO: ");
+    private static void printAST(INode ast) {
+        System.out.println("\nAbstract Syntax Tree: ");
         if (ast.getChilds() != null) {
             recursiveStamp(ast, "");
         } else {

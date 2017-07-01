@@ -46,6 +46,6 @@ public class TestDebug {
     public static void main(String[] args) throws Exception {
         String filename = "input.fool";
         CharStream input = CharStreams.fromFileName(filename);
-        String output = TestRunner.test("", input, "", true);
+        String output = FoolRunner.test("", input, "", true, true);
     }
 }

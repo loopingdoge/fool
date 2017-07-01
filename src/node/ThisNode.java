@@ -47,7 +47,7 @@ public class ThisNode extends Node {
 
     @Override
     public ArrayList<INode> getChilds() {
-        return null;
+        return new ArrayList<INode>();
     }
 
     @Override

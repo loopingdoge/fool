@@ -7,6 +7,7 @@ import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 import type.TypeID;
 
@@ -40,15 +41,21 @@ public class FunCallNode extends Node {
 
         try {
             this.entry = env.getLatestEntryOf(id);
-        } catch (UndeclaredVarException e) {
+
+            this.callNestingLevel = env.getNestingLevel();
+
+            for (INode arg : params) {
+                res.addAll(arg.checkSemantics(env));
+                if (arg.type() instanceof InstanceType) {
+                    InstanceType decType = (InstanceType) arg.type();
+                    res.addAll(decType.updateClassType(env));
+                }
+            }
+
+        } catch (UndeclaredVarException | TypeException e) {
             res.add(new SemanticError("Id " + id + " not declared"));
         }
 
-        this.callNestingLevel = env.getNestingLevel();
-
-        for (INode arg : params) {
-            res.addAll(arg.checkSemantics(env));
-        }
 
         return res;
     }

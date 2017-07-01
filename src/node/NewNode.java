@@ -26,12 +26,6 @@ public class NewNode extends Node {
         this.args = args;
     }
 
-    public String getClassID() {
-        return this.classID;
-    }
-
-    ;
-
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         //create the result
@@ -45,16 +39,17 @@ public class NewNode extends Node {
 
             if (args.size() > 0) {
                 //if there are children then check semantics for every child and save the results
-                for (INode n : args)
-                    res.addAll(n.checkSemantics(env));
+                for (INode arg : args) {
+                    res.addAll(arg.checkSemantics(env));
+                    if (arg.type() instanceof InstanceType) {
+                        InstanceType decType = (InstanceType) arg.type();
+                        res.addAll(decType.updateClassType(env));
+                    }
+                }
             }
 
-            try {
-                env.getLatestEntryOf(this.classID);
-            } catch (UndeclaredVarException e) {
-                res.add(new SemanticError(e.getMessage()));
-            }
-        } catch (UndeclaredClassException e) {
+            env.getLatestEntryOf(this.classID);
+        } catch (UndeclaredClassException | UndeclaredVarException | TypeException e) {
             res.add(new SemanticError(e.getMessage()));
         }
         return res;

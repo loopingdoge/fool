@@ -13,13 +13,11 @@ import java.util.Map;
 
 public class TestComplete {
 
-    public static void main(String[] args) throws Exception {
-
-        final String fileName = "test.yml";
+    public static void runTestSuite(String filename) {
         Yaml yaml = new Yaml();
 
         try {
-            InputStream is = new FileInputStream(new File(fileName));
+            InputStream is = new FileInputStream(new File(filename));
             Map<String, ArrayList<String>> tests = (Map<String, ArrayList<String>>) yaml.load(is);
 
             int passed = 0;
@@ -30,18 +28,22 @@ public class TestComplete {
                 String code = String.valueOf(test.get(0));
                 String result = String.valueOf(test.get(1));
 
-                System.out.println( TestRunner.ANSI_BLUE + "Executing: " + testID + TestRunner.ANSI_RESET);
+                System.out.println(FoolRunner.ANSI_BLUE + "Executing: " + testID + FoolRunner.ANSI_RESET);
                 CharStream input = CharStreams.fromString(code);
-                String output = TestRunner.test(testID, input, result, false);
+                String output = FoolRunner.test(testID, input, result, false, false);
 
                 if(output.endsWith( "Test PASSED!" )) passed++;
 
-                System.out.println(output + TestRunner.ANSI_RESET + "\n");
+                System.out.println(output + FoolRunner.ANSI_RESET + "\n");
             }
-            String color = (passed == tests.keySet().size() ) ? TestRunner.ANSI_GREEN : TestRunner.ANSI_RED;
-            System.out.println(TestRunner.ANSI_GREEN + "TESTING COMPLETED. TESTS PASSED " +  color + passed + TestRunner.ANSI_GREEN + "/" + tests.keySet().size() + TestRunner.ANSI_RESET);
+            String color = (passed == tests.keySet().size()) ? FoolRunner.ANSI_GREEN : FoolRunner.ANSI_RED;
+            System.out.println(FoolRunner.ANSI_GREEN + "TESTING COMPLETED. TESTS PASSED " + color + passed + FoolRunner.ANSI_GREEN + "/" + tests.keySet().size() + FoolRunner.ANSI_RESET);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        runTestSuite("test.yml");
     }
 }
