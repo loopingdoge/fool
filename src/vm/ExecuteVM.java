@@ -233,7 +233,7 @@ public class ExecuteVM {
                         list = list.next;
                     }
                     int fieldAddress = list.getIndex();
-                    int realOffset = Math.abs(fieldAddress - objAddress);
+                    int realOffset = fieldAddress - objAddress;
                     push(realOffset);
                     push(objAddress);
                     break;
