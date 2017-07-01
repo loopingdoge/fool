@@ -121,7 +121,7 @@ public class ClassNode extends Node {
                 ClassType paramClass = ((InstanceType) var.getType()).getClassType();
                 //Controllo che i parametri non siano sottotipo della classe in cui sono
                 if (paramClass.isSubTypeOf(this.type))
-                    res.add(new SemanticError("A parameter can't be subtype of the own class."));
+                    res.add(new SemanticError("can't use a subclass in superclass' constructor"));
             }
             res.addAll(var.checkSemantics(env));
         }
