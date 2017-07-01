@@ -625,7 +625,7 @@ test49 - Undefined var in method:
         A a = new A();
     in
         print(a.id(i));
--   "Undeclared variable i"
+-   "undeclared variable i"
 
 test50 - Subclass inside superclass:
 -   class A (int x) {
@@ -641,7 +641,7 @@ test50 - Subclass inside superclass:
         B b = a.createB();
     in
         print(b.getY());
--   "2"
+-   "undeclared class: B"
 
 test51 - Subclass inside superclass' constructor:
 -   class A (B b)

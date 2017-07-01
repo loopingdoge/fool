@@ -82,14 +82,15 @@ public class MethodCallNode extends FunCallNode {
 
             FunType t = (FunType) this.methodType;
             ArrayList<Type> p = t.getParams();
-            if (!(p.size() == params.size())) {
+            if (!(p.size() == args.size())) {
                 res.add(new SemanticError("Wrong number of parameters in the invocation of " + id));
             }
+
+            res.addAll(args.checkSemantics(env));
+
         } catch (UndeclaredVarException | UndeclaredMethodException e) {
             res.add(new SemanticError(e.getMessage()));
         }
-
-        args.checkSemantics(env);
 
         return res;
     }
@@ -99,8 +100,8 @@ public class MethodCallNode extends FunCallNode {
         FunType t = (FunType) this.methodType;
         ArrayList<Type> p = t.getParams();
 
-        for (int i = 0; i < params.size(); i++)
-            if (!params.get(i).type().isSubTypeOf(p.get(i)))
+        for (int i = 0; i < args.size(); i++)
+            if (!args.get(i).type().isSubTypeOf(p.get(i)))
                 throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + id, ctx);
 
         return t.getReturnType();
@@ -109,8 +110,8 @@ public class MethodCallNode extends FunCallNode {
     @Override
     public String codeGeneration() {
         StringBuilder parCode = new StringBuilder();
-        for (int i = params.size() - 1; i >= 0; i--)
-            parCode.append(params.get(i).codeGeneration());
+        for (int i = args.size() - 1; i >= 0; i--)
+            parCode.append(args.get(i).codeGeneration());
 
         StringBuilder getAR = new StringBuilder();
 

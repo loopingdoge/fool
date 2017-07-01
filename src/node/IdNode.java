@@ -38,7 +38,7 @@ public class IdNode extends Node {
             }
             this.nestinglevel = env.getNestingLevel();
         } catch (UndeclaredVarException e) {
-            res.add(new SemanticError(e.getMessage()));
+            res.add(new SemanticError("undeclared variable " + id));
         }
 
         return res;
