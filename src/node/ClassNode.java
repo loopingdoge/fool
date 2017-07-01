@@ -46,14 +46,6 @@ public class ClassNode extends Node {
         return superClassID;
     }
 
-    public HashMap<String, Type> getFields() {
-        return fields;
-    }
-
-    public HashMap<String, FunType> getMethods() {
-        return methods;
-    }
-
     public ArrayList<ParameterNode> getVardeclist() {
         return this.attrDecList;
     }

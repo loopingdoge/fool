@@ -4,8 +4,10 @@ import exception.RedeclaredVarException;
 import exception.TypeException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
+import sun.jvm.hotspot.oops.Instance;
 import symbol_table.Environment;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 import util.CodegenUtils;
 
@@ -57,6 +59,12 @@ public class FunNode extends Node {
             res.add(new SemanticError("Missing ID or Type in a function."));
         }
         try {
+
+            // Se restituisco un oggetto, aggiorno le informazione sul ClassType
+            if ( this.declaredReturnType instanceof InstanceType ) {
+                InstanceType returnType = (InstanceType) this.declaredReturnType;
+                res.addAll(returnType.updateClassType());
+            }
             env.addEntry(this.id, new FunType(parTypes, declaredReturnType), env.offset--);
         } catch (RedeclaredVarException e) {
             res.add(new SemanticError("function " + id + " already declared"));

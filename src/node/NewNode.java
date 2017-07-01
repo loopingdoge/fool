@@ -18,9 +18,9 @@ public class NewNode extends Node {
 
     private String classID;
     private ClassType classType;
-    private ArrayList<INode> args;
+    private ArgumentsNode args;
 
-    public NewNode(FOOLParser.NewExpContext ctx, String classID, ArrayList<INode> args) {
+    public NewNode(FOOLParser.NewExpContext ctx, String classID, ArgumentsNode args) {
         super(ctx);
         this.classID = classID;
         this.args = args;
@@ -44,18 +44,12 @@ public class NewNode extends Node {
             if (classType.getFields().size() != args.size())
                 res.add(new SemanticError("Instantiation of new " + classID + " with the wrong number of parameters."));
 
-            if (args.size() > 0) {
-                //if there are children then check semantics for every child and save the results
-                for (INode arg : args) {
-                    res.addAll(arg.checkSemantics(env));
-                    if (arg.type() instanceof InstanceType) {
-                        InstanceType decType = (InstanceType) arg.type();
-                        res.addAll(decType.updateClassType(env));
-                    }
-                }
-            }
+            //if there are children then check semantics for every child and save the results
+            if (args.size() > 0)
+                res.addAll(args.checkSemantics(env));
+
             env.getLatestEntryOf(this.classID);
-        } catch (UndeclaredClassException | UndeclaredVarException | TypeException e) {
+        } catch (UndeclaredClassException | UndeclaredVarException e) {
             res.add(new SemanticError(e.getMessage()));
         }
         return res;
@@ -77,7 +71,7 @@ public class NewNode extends Node {
     @Override
     public String codeGeneration() {
         StringBuilder argsCode = new StringBuilder();
-        for (INode arg : args) {
+        for (INode arg : args.getChilds()) {
             argsCode.append(arg.codeGeneration());
         }
         return argsCode
@@ -90,7 +84,7 @@ public class NewNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> res = new ArrayList<>();
 
-        res.addAll(args);
+        res.addAll(args.getChilds());
 
         return res;
     }

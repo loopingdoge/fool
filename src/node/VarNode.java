@@ -38,7 +38,7 @@ public class VarNode extends Node {
         //Se sto istanziando un nuovo oggetto, aggiorno bene le informazioni di ClassType :=D
         if (declaredType instanceof InstanceType) {
             InstanceType decType = (InstanceType) declaredType;
-            res.addAll(decType.updateClassType(env));
+            res.addAll(decType.updateClassType());
         }
 
         res.addAll(assignedExpression.checkSemantics(env));

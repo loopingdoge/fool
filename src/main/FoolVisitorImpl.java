@@ -350,16 +350,17 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
 
         //declare the result
         INode res;
-
+        String functionID;
         //get the invocation arguments
         ArrayList<INode> args = new ArrayList<INode>();
+
 
         for (ExpContext exp : ctx.exp())
             args.add(visit(exp));
 
-        String funcId = ctx.ID().getText();
+        functionID = ctx.ID().getText();
 
-        res = new FunCallNode(ctx, funcId, new ArgumentsNode(ctx, args));
+        res = new FunCallNode(ctx, functionID, new ArgumentsNode(ctx, args));
 
         return res;
     }
@@ -368,16 +369,16 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
     public INode visitNewExp(FOOLParser.NewExpContext ctx) {
 
         NewNode res;
-        String id;
-        ArrayList<INode> declarations = new ArrayList<INode>();
+        String classID;
+        ArrayList<INode> args = new ArrayList<INode>();
 
-        id = ctx.ID().getText(); // prendo l'id
+        classID = ctx.ID().getText(); // prendo l'id
 
         for (ExpContext exp : ctx.exp()) {
-            declarations.add(visit(exp)); // prendo tutti i parametri
+            args.add(visit(exp)); // prendo tutti i parametri
         }
 
-        res = new NewNode(ctx, id, declarations);
+        res = new NewNode(ctx, classID, new ArgumentsNode(ctx, args));
 
         return res;
     }

@@ -36,17 +36,10 @@ public class FunCallNode extends Node {
 
             this.callNestingLevel = env.getNestingLevel();
 
-
-            for (INode arg : args.getChilds()) {
+            for (INode arg : args.getChilds())
                 res.addAll(arg.checkSemantics(env));
-                if (arg.type() instanceof InstanceType) {
-                    InstanceType decType = (InstanceType) arg.type();
-                    res.addAll(decType.updateClassType(env));
-                }
-            }
 
-
-        } catch (UndeclaredVarException | TypeException e) {
+        } catch (UndeclaredVarException e) {
             res.add(new SemanticError("Id " + id + " not declared"));
         }
 

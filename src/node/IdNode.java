@@ -39,10 +39,10 @@ public class IdNode extends Node {
             }
             this.nestinglevel = env.getNestingLevel();
 
-//            if (this.entry.getType() instanceof InstanceType) {
-//                InstanceType decType = (InstanceType) this.entry.getType();
-//                res.addAll(decType.updateClassType(env));
-//            }
+            if (this.entry.getType() instanceof InstanceType) {
+                InstanceType decType = (InstanceType) this.entry.getType();
+                res.addAll(decType.updateClassType());
+            }
 
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError("undeclared variable " + id));

@@ -29,26 +29,28 @@ public class ArgumentsNode extends Node {
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<>();
-        for (INode arg : arguments) {
+
+        for (INode arg : arguments)
             res.addAll(arg.checkSemantics(env));
-        }
+
         return res;
     }
 
     @Override
     public Type type() throws TypeException {
-        for (INode arg : arguments) {
+        for (INode arg : arguments)
             arg.type();
-        }
+
         return new VoidType();
     }
 
     @Override
     public String codeGeneration() {
         StringBuilder code = new StringBuilder();
-        for (INode arg : arguments) {
+
+        for (INode arg : arguments)
             code.append(arg.codeGeneration());
-        }
+
         return code.toString();
     }
 

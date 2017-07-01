@@ -41,6 +41,11 @@ public class MethodNode extends FunNode {
             res.add(new SemanticError("Missing ID or Type in a function."));
         }
         try {
+            // Se restituisco un oggetto, aggiorno le informazione sul ClassType
+            if ( this.declaredReturnType instanceof InstanceType ) {
+                InstanceType returnType = (InstanceType) this.declaredReturnType;
+                res.addAll(returnType.updateClassType());
+            }
             env.addEntry(this.id, new FunType(parTypes, declaredReturnType), env.offset--);
         } catch (RedeclaredVarException e) {
             res.add(new SemanticError("function " + id + " already declared"));

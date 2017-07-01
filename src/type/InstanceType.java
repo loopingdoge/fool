@@ -20,7 +20,7 @@ public class InstanceType implements Type {
     }
 
     // This is used to update the classType filling superType when needed
-    public ArrayList<SemanticError> updateClassType(Environment env) {
+    public ArrayList<SemanticError> updateClassType() {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
         try {
             this.classT = CodegenUtils.getClassEntry(classT.getClassID());

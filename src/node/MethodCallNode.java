@@ -34,6 +34,7 @@ public class MethodCallNode extends FunCallNode {
     @Override
     public ArrayList<SemanticError> checkSemantics(Environment env) {
         ArrayList<SemanticError> res = new ArrayList<>();
+
         this.nestinglevel = env.getNestingLevel();
         try {
             ClassType classType = null;
