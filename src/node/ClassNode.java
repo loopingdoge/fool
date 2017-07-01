@@ -117,6 +117,12 @@ public class ClassNode extends Node {
 
         env.pushHashMap(); // Aggiungo i parametri ad una nuova Symbol Table
         for (ParameterNode var : attrDecList) {
+            if (var.getType() instanceof InstanceType) {
+                ClassType paramClass = ((InstanceType) var.getType()).getClassType();
+                //Controllo che i parametri non siano sottotipo della classe in cui sono
+                if (paramClass.isSubTypeOf(this.type))
+                    res.add(new SemanticError("A parameter can't be subtype of the own class."));
+            }
             res.addAll(var.checkSemantics(env));
         }
 

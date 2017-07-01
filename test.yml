@@ -641,7 +641,7 @@ test50 - Subclass inside superclass:
         B b = a.createB();
     in
         print(b.getY());
--   "undeclared class: B"
+-   "2"
 
 test51 - Subclass inside superclass' constructor:
 -   class A (B b)

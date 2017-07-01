@@ -32,7 +32,14 @@ public class NewNode extends Node {
         ArrayList<SemanticError> res = new ArrayList<SemanticError>();
 
         try {
-            classType = CodegenUtils.getClassEntry(classID);
+
+            try {
+                //Catturo la classe all'interno dell'env poichè potrebbe usare classi non ancora dichiarate e quindi non presenti nella ST
+                //Rigenero l'errore giusto poichè se non esiste la classe, il getTypeOf genera un UndeclaredVarException e non una UndeclaredClassException
+                classType = (ClassType) env.getTypeOf(classID);
+            } catch (Exception e1) {
+                throw new UndeclaredClassException(classID);
+            }
 
             if (classType.getFields().size() != args.size())
                 res.add(new SemanticError("Instantiation of new " + classID + " with the wrong number of parameters."));
@@ -47,7 +54,6 @@ public class NewNode extends Node {
                     }
                 }
             }
-
             env.getLatestEntryOf(this.classID);
         } catch (UndeclaredClassException | UndeclaredVarException | TypeException e) {
             res.add(new SemanticError(e.getMessage()));
