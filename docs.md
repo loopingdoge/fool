@@ -6,11 +6,10 @@
 
 ##### ***Componenti del gruppo*** (in ordine alfabetico)
 
-// [DEVID] metterei prima i nomi
-- Pietro Battilana (matricola 799486)
-- Mirco Civolani (matricola )
-- Devid Farinelli (matricola 819683)
 - Alberto Nicoletti (matricola 819697)
+- Devid Farinelli (matricola 819683)
+- Mirco Civolani (matricola )
+- Pietro Battilana (matricola 799486)
 
 ------
 
@@ -62,7 +61,7 @@ Sono state realizzate **entrambe** le richieste opzionali nella consegna del pro
 
 Spiegare le modalità per importare e eseguire il progetto ... TODO
 
-## 2. Analisi lessicale
+## 2. Analisi lessicale e sintattica
 
 In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti delle grammatiche modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
 
@@ -116,19 +115,32 @@ left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? 
 
 ### 2.2 Grammatica SVM
 
-lc, div, sub, code.add()
+È stato necessario apportare modifiche anche alla *attribute grammar* dell'interprete FOOL. Per la operazioni di sottrazione e divisione sono stati semplicemente aggiungi i relativi terminali e non terminali `sub` e `div`. Invece per quanto riguarda l'operazione di '<=' è stata aggiunta una regola `BRANCHLESSQ` che si comporta in modo simile alla regola di '<' aggiungendo una *label* nel codice e alla collezione `labelRef` usata per fare *backpatching* alla fine della fase di parsing. È stata introdotta invece una nuova istruzione `LC` che come viene implementata come mostrato di seguito.
 
-## 3. Analisi sintattica
+```java
+case SVMParser.LC:
+	int codeAddress = pop();
+    push(code[codeAddress]);
+	break;
+```
 
-## 4. Analisi semantica
+come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l'indirizzo in cima allo stack e con questo accede all'array `code`, infine carica sullo stack il valore ottenuto. Questa nuova istruzione è utilizzata nella chiamata ad un metodo ed il valore ottenuto da `LC` è la prima istruzione di tale metodo a cui si salta con l'operazione di `JS`.
 
-## 5. Type checking
 
-## 6. Code generation
 
-## 7. Stack Vector Machine
+Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
-## 8. Testing e conclusioni
+
+
+## 3. Analisi semantica
+
+## 4. Type checking
+
+## 5. Code generation
+
+## 6. Stack Vector Machine
+
+## 7. Testing e conclusioni
 
 
 
