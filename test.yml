@@ -535,7 +535,7 @@ test42 - Function recursion:
       print(fib(12));
 -   "144"
 
-test42 - this with subtyping:
+test43 - this with subtyping:
 -   class A
     class B implements A {
         int get()
@@ -551,7 +551,7 @@ test42 - this with subtyping:
         print(b.get());
 -    "5"
 
-test43 - Incompatible object types assignment:
+test44 - Incompatible object types assignment:
 -   class A
     class N;
     let
@@ -560,7 +560,7 @@ test43 - Incompatible object types assignment:
         print(4);
 -   "Error: \"incompatible value for variable a\" at line 1, column 27."
 
-test44 - Implicit cast to supertype and method invocation:
+test45 - Implicit cast to supertype and method invocation:
 -   class A
     class B {
         int get() 2;
@@ -571,7 +571,7 @@ test44 - Implicit cast to supertype and method invocation:
         print(a.get());
 -   "undeclared method: get"
 
-test45 - Subtyping in assignment:
+test46 - Subtyping in assignment:
 -   class A
     class B implements A;
     let
@@ -580,7 +580,7 @@ test45 - Subtyping in assignment:
         print(3);
 -   "3"
 
-test46 - Subtying funcall as constructor parameter:
+test47 - Subtying funcall as constructor parameter:
 -   class A
     class B implements A (A a);
     let
@@ -591,7 +591,7 @@ test46 - Subtying funcall as constructor parameter:
         print(4);
 -   "4"
 
-test47 - Subtyping in funccall as funcall parameter:
+test48 - Subtyping in funccall as funcall parameter:
 -   class A
     class B implements A (A a);
     let
@@ -602,7 +602,7 @@ test47 - Subtyping in funccall as funcall parameter:
         print(f(getA()));
 -   "2"
 
-test48 - New inside new:
+test49 - New inside new:
 -   class A (int x) {
         int value() x;
     }
@@ -617,7 +617,7 @@ test48 - New inside new:
         print(b.value() == (a.value() - 1));
 -   "1"
 
-test49 - Undefined var in method:
+test50 - Undefined var in method:
 -   class A {
         int id(int x) x;
     };
@@ -627,7 +627,7 @@ test49 - Undefined var in method:
         print(a.id(i));
 -   "undeclared variable i"
 
-test50 - Subclass inside superclass:
+test51 - Subclass inside superclass:
 -   class A (int x) {
         B createB() new B(x, 2);
     }
@@ -643,14 +643,14 @@ test50 - Subclass inside superclass:
         print(b.getY());
 -   "2"
 
-test51 - Subclass inside superclass' constructor:
+test52 - Subclass inside superclass' constructor:
 -   class A (B b)
     class B implements A (B b)
     ;
     print(1);
 -   "can't use a subclass in superclass' constructor"
 
-test52 - Use of undeclared variable as function parameter:
+test53 - Use of undeclared variable as function parameter:
 -   let
         int foo(int a)  a;
         int bar(int a)
@@ -659,7 +659,7 @@ test52 - Use of undeclared variable as function parameter:
         bar(1);
 -   "undeclared variable pippo"
 
-test53 - Use of undeclared variable as constructor parameter:
+test54 - Use of undeclared variable as constructor parameter:
 -   class A(int a, int b);
     let
         int foo(int x)
