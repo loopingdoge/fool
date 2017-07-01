@@ -131,9 +131,35 @@ come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
 
+
+## 3. Analisi semantica
+
+Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
+
+`private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();`
+
+che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
+
+- addEntry
+- setEntryType
+- getLatestEntryOf
+
+
+
+## 4. Type checking
+
+## 5. Code generation
+
+## 6. Stack Vector Machine
+
+## 7. Testing e conclusioni
+
+
+
 ### 2.3 I nodi
 
 #### 2.3.1 Considerazioni generali
+
 Abbiamo scelto di lasciare l'interfaccia nodo come base per gli altri nodi, togliendo il metodo *toPrint()* (abbiamo utilizzato l'ovverriding della funzione nativa di Java *toString()* per stampare l'albero AST) ed aggiungendo un metodo *getChilds()* che restituisce un <ArrayList> di nodi coi figli del nodo interessato.
 
 Il metodo *getChilds()* viene utilizzato in fase di stampa dell'albero AST.
@@ -148,16 +174,6 @@ Ogni nodo operatore (escluso NOT) presenta le stesse variabili (e parametri), ov
 - INode ***right***: è l'elemento a destra dell'operazione.
 
 Il nodo operatore NOT invece ha solamente un INode figlio che è ovviamente il booleano su cui si sta applicando il NOT.
-
-## 3. Analisi semantica
-
-## 4. Type checking
-
-## 5. Code generation
-
-## 6. Stack Vector Machine
-
-## 7. Testing e conclusioni
 
 
 
