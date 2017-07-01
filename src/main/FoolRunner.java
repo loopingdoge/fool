@@ -211,7 +211,6 @@ public class FoolRunner {
         try {
             actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST);
         } catch(Exception e) {
-            System.out.println(testID);
             e.printStackTrace();
         }
         StringBuilder output = new StringBuilder();

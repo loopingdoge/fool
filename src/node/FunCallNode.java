@@ -7,31 +7,23 @@ import main.SemanticError;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.FunType;
-import type.InstanceType;
 import type.Type;
 import type.TypeID;
+import type.InstanceType;
 
 import java.util.ArrayList;
 
 public class FunCallNode extends Node {
 
     protected String id;
-    protected ArrayList<INode> params = new ArrayList<INode>();
+    protected ArgumentsNode args;
     protected SymbolTableEntry entry = null;
     protected int callNestingLevel;
 
-    public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArrayList<INode> params, SymbolTableEntry entry, int nestingLevel) {
+    public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArgumentsNode args) {
         super(ctx);
         this.id = id;
-        this.params = params;
-        this.entry = entry;
-        this.callNestingLevel = nestingLevel;
-    }
-
-    public FunCallNode(FOOLParser.FuncallContext ctx, String id, ArrayList<INode> params) {
-        super(ctx);
-        this.id = id;
-        this.params = params;
+        this.args = args;
     }
 
     @Override
@@ -44,13 +36,15 @@ public class FunCallNode extends Node {
 
             this.callNestingLevel = env.getNestingLevel();
 
-            for (INode arg : params) {
+
+            for (INode arg : args.getChilds()) {
                 res.addAll(arg.checkSemantics(env));
                 if (arg.type() instanceof InstanceType) {
                     InstanceType decType = (InstanceType) arg.type();
                     res.addAll(decType.updateClassType(env));
                 }
             }
+
 
         } catch (UndeclaredVarException | TypeException e) {
             res.add(new SemanticError("Id " + id + " not declared"));
@@ -71,11 +65,11 @@ public class FunCallNode extends Node {
         }
 
         ArrayList<Type> p = t.getParams();
-        if (!(p.size() == params.size())) {
+        if (!(p.size() == args.size())) {
             throw new TypeException("Wrong number of parameters in the invocation of " + id, ctx);
         }
-        for (int i = 0; i < params.size(); i++)
-            if (!params.get(i).type().isSubTypeOf(p.get(i))) {
+        for (int i = 0; i < args.size(); i++)
+            if (!args.get(i).type().isSubTypeOf(p.get(i))) {
                 throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + id, ctx);
             }
         return t.getReturnType();
@@ -84,8 +78,8 @@ public class FunCallNode extends Node {
     @Override
     public String codeGeneration() {
         StringBuilder parCode = new StringBuilder();
-        for (int i = params.size() - 1; i >= 0; i--)
-            parCode.append(params.get(i).codeGeneration());
+        for (int i = args.size() - 1; i >= 0; i--)
+            parCode.append(args.get(i).codeGeneration());
 
         StringBuilder getAR = new StringBuilder();
         for (int i = 0; i < callNestingLevel - entry.getNestinglevel(); i++)
@@ -106,8 +100,8 @@ public class FunCallNode extends Node {
     public ArrayList<INode> getChilds() {
         ArrayList<INode> childs = new ArrayList<>();
 
-        if (params != null && params.size() > 0)
-            childs.addAll(params);
+        if (args != null && args.size() > 0)
+            childs.addAll(args.getChilds());
 
         return childs;
     }

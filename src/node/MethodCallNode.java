@@ -23,14 +23,12 @@ public class MethodCallNode extends FunCallNode {
 
     private String objectID;
     private String methodID;
-    private ArgumentsNode args;
     private Type methodType;
 
     public MethodCallNode(FOOLParser.MethodExpContext ctx, String objectID, String methodID, ArgumentsNode args) {
-        super(ctx.funcall(), methodID, args.getChilds());
+        super(ctx.funcall(), methodID, args);
         this.objectID = objectID;
         this.methodID = methodID;
-        this.args = args;
     }
 
     @Override
@@ -38,7 +36,6 @@ public class MethodCallNode extends FunCallNode {
         ArrayList<SemanticError> res = new ArrayList<>();
         this.nestinglevel = env.getNestingLevel();
         try {
-
             ClassType classType = null;
             // Calcolo gli offset per recuperare l'oggetto
             if (objectID.equals("this")) {

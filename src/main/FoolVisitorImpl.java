@@ -357,7 +357,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         for (ExpContext exp : ctx.exp())
             args.add(visit(exp));
 
-        res = new FunCallNode(ctx, ctx.ID().getText(), args);
+        String funcId = ctx.ID().getText();
+
+        res = new FunCallNode(ctx, funcId, new ArgumentsNode(ctx, args));
 
         return res;
     }

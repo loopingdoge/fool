@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
 import type.FunType;
+import type.InstanceType;
 import type.Type;
 
 import java.util.ArrayList;
@@ -37,6 +38,12 @@ public class IdNode extends Node {
                 this.thisOffset = thisPointer.getOffset();
             }
             this.nestinglevel = env.getNestingLevel();
+
+//            if (this.entry.getType() instanceof InstanceType) {
+//                InstanceType decType = (InstanceType) this.entry.getType();
+//                res.addAll(decType.updateClassType(env));
+//            }
+
         } catch (UndeclaredVarException e) {
             res.add(new SemanticError("undeclared variable " + id));
         }

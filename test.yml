@@ -654,7 +654,7 @@ test53 - Use of undeclared variable as function parameter:
 -   let
         int foo(int a)  a;
         int bar(int a)
-            if (true)  then  { foo(pippo) } else { print(x) };
+            foo(pippo);
     in
         bar(1);
 -   "undeclared variable pippo"
