@@ -69,6 +69,7 @@ public class IdNode extends Node {
                     "lfp\n" + getAR +
                     "add\n" +
                     "lw\n" +
+                    "hoff\n" +
                     "add\n" +
                     "lw\n"; //carico sullo stack il valore all'indirizzo ottenuto
         } else {

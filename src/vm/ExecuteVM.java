@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 public class ExecuteVM {
 
-    public static final int MEMORY_START_ADDRESS = 777;
+    public static final int MEMORY_START_ADDRESS = 0;
     private ArrayList<String> outputBuffer = new ArrayList<>();
     private int memsize = 10000;
     private int[] memory;
@@ -215,6 +215,11 @@ public class ExecuteVM {
                     break;
                 case SVMParser.COPY:
                     push(accessMemory(sp));
+                    break;
+                case SVMParser.HOFF:
+                    int objAddress = accessMemory(sp); // indirizzo di this
+                    accessMemory(sp + 1); // offset dell'oggetto rispetto al coso
+
                     break;
                 case SVMParser.HALT:
                     return outputBuffer;

@@ -69,6 +69,7 @@ assembly:
 	  | l=LABEL                     {   labelRef.put(code.size(), $l.text);
 	                                    code.add(0);        }
 	  | COPY                        {   code.add(COPY);     }
+	  | HOFF                        {   code.add(HOFF);     }
 	)* {
 	        for (Integer refAdd: labelRef.keySet()) {
 	            code.set(refAdd, labelAdd.get(labelRef.get(refAdd)));
@@ -104,6 +105,7 @@ HALT	        : 'halt' ;	// stop execution
 NEW             : 'new' ;
 LC              : 'lc'  ;
 COPY            : 'copy' ;
+HOFF            : 'hoff' ;
 
 COL	            : ':' ;
 LABEL	        : ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;

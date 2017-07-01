@@ -733,3 +733,24 @@ test55 - List Sorting:
     in
         print(sortedList.value());
 -   "1"
+
+test56 - Function nesting:
+-   class A {
+        int numero() 4;
+        int qualcosa()
+            let
+                int culo(A a)
+                    a.numero()
+                ;
+                int cane(A a)
+                    culo(a)
+                ;
+            in
+                cane(this)
+        ;
+    };
+    let
+        A a = new A();
+    in
+        print(a.qualcosa());
+-   "4"
