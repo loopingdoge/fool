@@ -501,7 +501,23 @@ test39 - Class declaration visibility inside global scope 2:
       print(b.foo());
 -   "9"
 
-test40 - Memory allocation independent of code size:
+test40 - Class declaration visibility inside global scope 3:
+-   class C implements B (A a)
+    class B implements A (A a)
+    class A {
+      int foo(F f) 9;
+    }
+    class F {
+      int foo(F f) 6;
+    };
+    let
+      B b = new B(new A());
+      F f = new F();
+    in
+      print(b.foo(f));
+-   "9"
+
+test41 - Memory allocation independent of code size:
 -   class A {
       int f(int x) if (x == 0) then {20} else {this.g(x-1)};
       int g(int x) if (x == 0) then {20} else {this.f(x-1)};
@@ -512,7 +528,7 @@ test40 - Memory allocation independent of code size:
       print(a.f(10));
 -   "20"
 
-test41 - Function recursion:
+test42 - Function recursion:
 -   let
       int fib(int x) if(x <= 2) then {1} else { fib(x-1) + fib(x-2) };
     in
@@ -633,3 +649,21 @@ test51 - Subclass inside superclass' constructor:
     ;
     print(1);
 -   "can't use a subclass in superclass' constructor"
+
+test52 - Use of undeclared variable as function parameter:
+-   let
+        int foo(int a)  a;
+        int bar(int a)
+            if (true)  then  { foo(pippo) } else { print(x) };
+    in
+        bar(1);
+-   "undeclared variable pippo"
+
+test53 - Use of undeclared variable as constructor parameter:
+-   class A(int a, int b);
+    let
+        int foo(int x)
+                if (true) then { new A(1, pluto) } else { print(x) };
+    in
+        foo(1);
+-   "undeclared variable pluto"
