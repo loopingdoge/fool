@@ -12,12 +12,10 @@ import java.util.ArrayList;
 public class BoolNode extends Node {
 
     private boolean val;
-    private boolean not;
 
-    public BoolNode(FOOLParser.BoolValContext ctx, boolean val, boolean not) {
+    public BoolNode(FOOLParser.BoolValContext ctx, boolean val) {
         super(ctx);
         this.val = val;
-        this.not = not;
     }
 
     @Override
@@ -33,16 +31,12 @@ public class BoolNode extends Node {
 
     @Override
     public String codeGeneration() {
-        if (not) {
-            return "push " + (!val ? 1 : 0) + "\n";
-        } else {
-            return "push " + (val ? 1 : 0) + "\n";
-        }
+        return "push " + (val ? 1 : 0) + "\n";
     }
 
     @Override
     public String toString(){
-        return "Bool -> " + (not ? "not ": "") + val;
+        return "Bool -> " + val;
     }
 
     @Override

@@ -270,9 +270,9 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
         //[ADDED] With NOT operator Boolean.parseBoolean accept i.e. '!4' with a 'false' value, the correct solution is to check the input.
         String text = ctx.getText().replace("!", "");
         if (ctx.NOT() == null) {
-            return new BoolNode(ctx, Boolean.parseBoolean(text), false);
+            return new BoolNode(ctx, Boolean.parseBoolean(text));
         } else {
-            return new BoolNode(ctx, Boolean.parseBoolean(text), true);
+            return new NotNode(ctx, new BoolNode(ctx, Boolean.parseBoolean(text)));
         }
     }
 
