@@ -8,7 +8,7 @@
 
 - Alberto Nicoletti (matricola 819697)
 - Devid Farinelli (matricola 819683)
-- Mirco Civolani (matricola )
+- Mirco Civolani (matricola 798717)
 - Pietro Battilana (matricola 799486)
 
 ------
