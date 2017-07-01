@@ -585,3 +585,28 @@ test47 - Subtyping in funccall as funcall parameter:
     in
         print(f(getA()));
 -   "2"
+
+test48 - New inside new:
+-   class A (int x) {
+        int value() x;
+    }
+    class B implements A (int x, A a) {
+        A getA() a;
+    }
+    ;
+    let
+        B b = new B(0, new B(1, new A(2)));
+        A a = b.getA();
+    in
+        print(b.value() == (a.value() - 1));
+-   "1"
+
+test49 - Undefined var in method:
+-   class A {
+        int id(int x) x;
+    };
+    let
+        A a = new A();
+    in
+        print(a.id(i));
+-   "Undeclared variable i"
