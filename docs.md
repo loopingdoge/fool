@@ -130,32 +130,6 @@ come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l
 
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
-
-
-## 3. Analisi semantica
-
-Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
-
-`private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();`
-
-che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
-
-- addEntry
-- setEntryType
-- getLatestEntryOf
-
-
-
-## 4. Type checking
-
-## 5. Code generation
-
-## 6. Stack Vector Machine
-
-## 7. Testing e conclusioni
-
-
-
 ### 2.3 I nodi
 
 #### 2.3.1 Considerazioni generali
@@ -176,6 +150,136 @@ Ogni nodo operatore (escluso NOT) presenta le stesse variabili (e parametri), ov
 Il nodo operatore NOT invece ha solamente un INode figlio che è ovviamente il booleano su cui si sta applicando il NOT.
 
 
+
+## 3. Analisi semantica
+
+Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
+
+`private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();`
+
+che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
+
+- addEntry
+- setEntryType
+- getLatestEntryOf
+
+
+## 4. Type checking
+
+Il type checking del codice preso in input dal compilatore viene eseguito dal basso verso l'alto (bottom-up) e viene chiamato ricorsivamente da ogni nodo padre a quello figlio. Ogni INode presenta un metodo *type()* che restituisce il tipo di quel nodo. Prima di restituire il tipo del nodo corrente, avviene un controllo di tipi sui figli, se presenti, e sui propri parametri e/o argomenti. Da questa logica si può capire facilmente come avvenga prima il controllo di tipi sui nodi figli e poi ricorsivamente si ritorna il tipo dell'intero AST.
+
+Il tipo finale ritornato sarà il tipo dell'AST.
+
+### 4.1 Classi Type
+
+Durante il controllo dei tipi si va a controllare che, per un determinato nodo, operazione, funzione o classe, tutti i componenti rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia Java *Type* su cui estendere il tipo di ogni nodo che riservi un 'trattamento' particolare. Nel nostro compilatore abbiamo i seguenti tipi:
+
+- *VOIDTYPE* - nessun tipo.
+- *BOOLTYPE* - un valore booleano;
+- *INTTYPE* - un valore intero;
+- *FUNTYPE* - una funzione, o metodo (seguono le stesse regole di typing per entrambi);
+- *CLASSTYPE* - una classe;
+- *INSTANCETYPE* - un'istanza di classe;
+
+Ognuna di queste classi presenta i seguenti metodi ereditati dall'interfaccia:
+
+- *String* getID() - restituisce il tipo enum (BOOL, INT, FUN, ecc);
+- *boolean* isSubtypeOf(Type t) - restituisce vero se il tipo su cui viene richiamato questo metodo è sottotipo di *t*.
+
+### 4.2 Subtyping
+
+Il concetto di subtyping specifica come un tipo T sia sottotipo di S se è vera una delle seguenti affermazioni: T ed S sono lo stesso tipo; T è un'estensione di S.
+
+Nell'implementazione del nostro compilatore l'analisi del subtyping diventa fondamentale con l'aggiunta delle classi (con relative estensioni), dei metodi e della loro sovrascrittura. Rimane fondamentale, ovviamente, anche per i tipi più semplici come booleani, interi o void, tuttavia in questi casi il nostro metodo *isSubtypeOf()* eseguirà solamente un confronto di uguaglianza fra i due tipi in questione (INT, BOOL e VOID non hanno estensioni di tipo nel nostro linguaggio FOOL).
+
+#### 4.2.1 FunType
+
+Come esplicitamente descritto nella consegna: *'Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2.'* 
+
+Questo è il nostro codice:
+
+```java
+public boolean isSubTypeOf(Type t) {
+    if (t instanceof FunType) {
+        FunType funType = (FunType) t;
+        boolean check = true;
+
+        if (this.params.size() == funType.getParams().size()) {
+            for (int i = 0; i < this.params.size(); i++) {
+                check &= funType.getParams().get(i).isSubTypeOf(this.params.get(i));
+            }
+
+            check &= this.returnType.isSubTypeOf(funType.returnType);
+        } else {
+            check = false;
+        }
+        return check;
+    } else {
+        return false;
+    }
+}
+```
+
+
+
+Abbiamo dunque, come prima cosa, controllato che il numero di parametri siano gli stessi, dopodiché, se il numero è lo stesso, controlliamo che ogni parametro di f1 sia sopratipo del corrispondente parametro di f2. Infine controlliamo che il tipo ritornato da f1 sia sottotipo del tipo ritornato da f2.
+
+#### 4.2.2 ClassType
+
+Sempre come riportato in consegna: *'Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2. Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo.'* 
+
+Questo il codice:
+
+```java
+public boolean isSubTypeOf(Type t2) {
+    if (t2 instanceof ClassType) {
+        ClassType ct2 = (ClassType) t2;
+
+      	if (this.getClassID().equals(ct2.getClassID())) {
+            return true;
+        }
+      
+        if (superType != null) {
+            return this.getSuperclassID().equals(ct2.getClassID()) || superType.isSubTypeOf(t2);
+        }
+    }
+    return false;
+}
+```
+
+Qua per prima cosa verifichiamo se le due classi hanno lo stesso nome, in tal caso ritorniamo subito **true** senza fare ulteriori controlli. Se hanno nomi diversi allora controlliamo se sia una sottoclasse estesa di *t2*. Come si vede dal codice il valore booleano del return può essere true solo se:
+
+- La classe corrente è una classe estesa di *t2*;
+- La superclasse della classe corrente è sottotipo di *t2*.
+
+Il secondo caso va a coprire quella casistica che vede un'estensione di classe che a sua volta era un'estensione di un'altra classe, in questo caso viene richiamando a sua volta il medesimo metodo, risalendo tutte le superclassi fino ad arrivare alla classe madre per verificarne se sia il suo sottotipo.
+
+#### 4.2.3 InstanceType
+
+Per quanto riguarda le istanze, il controllo di subtyping avviene controllando che l'istanza di classe su cui sto eseguendo il metodo sia sottotipo di un'altra istanza di classe, per confrontare due istanze non facciamo altro che richiamare il controllo di subtyping sulle relative classi di istanza:
+
+```java
+public boolean isSubTypeOf(Type type) {
+    if (type instanceof InstanceType) {
+        InstanceType it2 = (InstanceType) type;
+        return classT.isSubTypeOf(it2.getClassType());
+    } else {
+        return false;
+    }
+}
+```
+
+### 4.3 Typecheck sugli operatori
+
+Come detto nel paragrafo 2.3.2 ogni operatore ha due INode figli che rappresentano l'elemento di destra e l'elemento a sinistra dell'operatore. Nel caso di operatori che confrontano valori interi il nostro controllo di tipo andrà a verificare che il tipo del nodo di destra sia sottotipo del nodo di sinistra, e che siano quindi INT.
+
+Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi che entrambi siano sottotipi di BOOL.
+
+## 5. Code generation
+
+## 6. Stack Vector Machine
+
+## 7. Testing e conclusioni
 
 
 
