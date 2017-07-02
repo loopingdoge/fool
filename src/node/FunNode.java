@@ -4,7 +4,6 @@ import exception.RedeclaredVarException;
 import exception.TypeException;
 import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
-import sun.jvm.hotspot.oops.Instance;
 import symbol_table.Environment;
 import type.FunType;
 import type.InstanceType;

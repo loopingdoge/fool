@@ -33,7 +33,7 @@ class HeapMemory {
     HeapMemoryCell allocate(int size) throws VMOutOfMemoryException {
         assert size > 0;
 
-        if (this.size < size) throw new VMOutOfMemoryException();
+        if (this.size < size) throw new VMOutOfMemoryException(VMOutOfMemoryException.OverflowType.HEAP);
 
         // Il primo elemento da restituire e' la testa della lista
         HeapMemoryCell res = head;
