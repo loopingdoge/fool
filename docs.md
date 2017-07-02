@@ -403,7 +403,36 @@ Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi 
 
 ## 5. Code generation
 
-## 6. Stack Vector Machine
+## 6. Stack Virtual Machine
+
+Una volta generato il bytecode, questo viene eseguito da una **SVM** (Stack Virtual Machine), una macchina virtuale che dispone di memoria ed esegue il codice generato. La VM dispone di uno **stack**, che rappresenta la memoria della macchina, e la computazione e' espressa da ripetute modifiche allo stack tramite operazioni di **push** e **pop**.
+
+La macchina virtuale richiede in input un parametro `int[] code`, un array contenente una serie di istruzioni definite nella grammatica `svm.g4`. Queste vengono lette una ad una e per ognuna di loro e' fornita una implementazione in Java in termini di operazioni di push e pop sullo stack.
+
+Rispetto all'implementazione iniziale della VM, la modifica piu' degna di nota e' l'introduzione di una operazione di **new**, usata per allocare un oggetto in memoria. Gli oggetti infatti non possono vivere nello stack, e per questo motivo la loro creazione non puo' essere definita tramite operazioni di push e pop.
+
+Per risolvere questo problema l'operazione new alloca gli oggetti nella parte piu' alta dello stack, in un'area denominata **heap**.
+
+### 6.1 Heap
+
+Lo heap e' implementato tramite una lista libera e rende disponibili i metodi:
+
+- `HeapMemoryCell allocate(int size) throws VMOutOfMemoryException`
+  - alloca un'area di memoria, rimuovendo dalla lista libera `size` elementi, e restituisce al chiamante il primo elemento rimosso. Da questo e' possibile accedere agli elementi successivi tramite il suo attributo `next`
+  - nel caso la memoria richiesta sia superiore a quella disponibile, viene lanciata un'eccezione
+- `void deallocate(HeapMemoryCell firstCell)`
+  - dealloca la memoria il cui primo blocco viene passato come parametro e la reinserisce nella lista libera, in modo che torni ad essere disponibile per l'allocazione
+
+E' stato scelto di implementare lo heap con una lista libera in modo da facilitare la gestione della **garbage collection**, infatti dopo una serie di allocazioni e deallocazioni di dimensioni differenti, lo heap potrebbe presentare *frammentazione interna*. L'uso della lista libera permette alla VM di ottenere blocchi di memoria logicamente ma non fisicamente contigui, in modo che essa possa operare senza tenere conto di questo problema.
+
+### 6.2 Garbage Collection
+
+E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto puo' essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack puo' produrre *falsi positivi*, poiche' l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre la probabilita' di ottenere falsi positivi e' stato introdotto un offset con un numero elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che e' sempre presente come primo valore sullo stack) o in generale numeri bassi sono piu' facilmente trovabili in programmi comuni, si pensi ad un iteratore.
+
+L'operazione di garbage collection viene eseguita se prima di allocare un oggetto, la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
+
+- 5% della memoria totale
+- 10 (in caso di memoria particolarmente piccola)
 
 ## 7. Testing e conclusioni
 
