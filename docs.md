@@ -128,11 +128,37 @@ come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l
 
 
 
+Alla grammatica dell'interprete inoltre è stata aggiunta un istruzione chiamata `HOFF` che sta per 'heap offset' utilizzato nella referenza ad un campo di un oggetto. Il suo scopo è quello di convertire l'offset del campo di un oggetto nell'offset reale tra l'inizio dell'oggetto nello heap ed il valore di questo campo. 
+
+```java
+case SVMParser.HOFF:
+	int objAddress = pop(); // indirizzo di this
+    int objOffset = pop(); // offset logico rispetto all'oggetto
+    HeapMemoryCell list = heapMemoryInUse
+    						.stream()
+                            .filter(cell -> cell.getIndex() == objAddress)
+                            .reduce(new HeapMemoryCell(0, null), (prev, curr) -> curr);
+    for (int i = 0; i < objOffset; i++) {
+    	list = list.next;
+    }
+    int fieldAddress = list.getIndex();
+    int realOffset = fieldAddress - objAddress;
+    push(realOffset);
+    push(objAddress);
+    break;
+```
+
+La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verrà discussa successivamente.  In questo esempio, come in altre parti del progetto, vengono utilizzati i metodi `stream` di Java 8 per lavorare su collezzioni in modo compatto senza usare cicli.
+
+
+
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
 
 
 ## 3. Analisi semantica
+
+### 3.1 Symbol Table
 
 Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
 
@@ -140,10 +166,110 @@ Per discutere la nostra implementazione della fase di analisi semantica è fonda
 
 che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
 
-- addEntry
-- setEntryType
-- getLatestEntryOf
+- `addEntry(String id, Type type, int offset)`
 
+  inserisce nella più recente hashmap un oggetto `SymbolTableEntry` con nome e tipo dati come parametro alla funzione.
+
+- `getLatestEntryOf(String id)`
+
+  che sfrutta oggetti di tipo `Iterator` per scorrere la lista di tabella hash ed in ognuna di queste controlla se è contenuta un'entrata con un `id` uguale a quello passato come parametro. In caso positivo l'entrata viene ritornata, in caso negativo viene sollevata una `UndeclaredVarException`.
+
+- `setEntryType(String id, Type newtype, int offset)`
+
+  questo metodo è stato introdotto per permettere di fare riferimento ad una classe all'interno di un altra definita precedentemente nel codice.  Prima di procedere al controllo semantico di ogni classe, viene fatta un inserzione nella tabella dei simboli di una entry 'incompleta' di tutte le classi e successivamente con questo metodo la entry 'incompleta' viene sostituita a quella con il `type` correttamente costruito.
+
+
+
+
+### 3.2 Dichiarazione di classi
+
+Passiamo ora a discutere il funzionamento del controllo semantico nel caso di programmi FOOL contenenti dichiarazioni di classi. Innanzitutto il metodo `visitClassExp` della classe FoolVisitorImpl.java avendo a disposizione tutto il codice parsato instanzia oggetti delle varie classi nodo (`ParameterNode` per i campi e `MethodNode` per i metodi che insieme concorrono a creare `ClassNode`, `LetNode` per le dichiarazioni di variabili e funzioni e `InNode` per l'espressione conclusiva). Tutti questi oggetti vengono passati al costruttore dell'oggetto `ProgClassDecNode` che costituisce il nodo radice dell'AST. È proprio dalla radice, andando verso le foglie che parte il controllo semantico, lanciato dal metodo `semanticAnalysis` della classe FoolRunner.java.
+
+
+
+Il controllo semantico in `ProgClassDecNode`, per prima cosa, si occupa di eseguire un inserzione preliminare delle classi nella symbol table (come detto in precedenza). Per ogni elemento della lista `classDeclarations`,  istanza di `ClassNode`, viene poi chiamato il controllo semantico su di essa. 
+
+
+
+#### 3.2.1 Class Node
+
+La classe `ClassNode` dispone di:
+
+| Campo          | Tipo                       | Descrizione                              |
+| -------------- | -------------------------- | ---------------------------------------- |
+| `classID`      | `String`                   | Id della classe                          |
+| `superClassID` | `String`                   | Id della eventuale superclasse           |
+| `attrDecList`  | `ArrayList<ParameterNode>` | Lista dei nodi campi (passata dal costruttore) |
+| `metDecList`   | `ArrayList<MethodNode>`    | Lista dei nodi metodi (passata dal costruttore) |
+| `fields`       | `HashMap<String, Type>`    | Mappa nome-tipo dei campi                |
+| `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei campi                |
+| `type`         | `ClassType`                | Tipo della classe                        |
+
+
+
+#### 3.2.2 Field
+
+La classe `Field` dispone di:
+
+| Campo  | Tipo     | Descrizione    |
+| ------ | -------- | -------------- |
+| `id`   | `String` | Id della campo |
+| `type` | `Type`   | Tipo del campo |
+
+
+
+#### 3.2.2 Method
+
+La classe `Method` dispone di:
+
+| Campo  | Tipo      | Descrizione             |
+| ------ | --------- | ----------------------- |
+| `id`   | `String`  | Id della campo          |
+| `type` | `FunType` | Tipo (firma) del metodo |
+
+
+
+La **validazione semantica di una classe** ha i seguenti passi:
+
+1. Per ogni campo `a` di  `attrDecList` creare un oggetto `Field` passando id e tipo ottenuti da `a`
+2. Aggiungere questo oggetto ad un `ArrayList<Field> fieldsList` e alla mappa `fields`  
+3. Per ogni metodo `m` di  `metDecList`:
+   - ciclare sui parametri `p` del metodo `m` 
+   - aggiungere il tipo `t` di `p` all'`ArrayList<Type> paramsType`
+     - se `t` è un  ID di una classe `c`, cercare `c` nella symbol table ed inserire il relativo `ClassType` in `paramsType`. Se non si è trovata `c` allora si sollevare un **eccezione** di classe non dichiarata.
+   - infine creare un oggetto `fun` di tipo `FunType` passando il tipo di ritorno di `m` e i `paramsType`
+4. Aggiungere l'oggetto `fun` ad un `ArrayList<Method> methodList` e alla mappa `methods`  
+5. Cercare nella symbol table il tipo `superType` della super classe: `getLatestEntryOf(superClassID)`
+6. Assegnare a `this.type` un `ClassType` creato passando: 
+   - `classID`
+   - `superType`
+   - `fieldsList`
+   - `methodList`
+7. Aggiornare la entry con `classID` come chiave nella symbol table con il nuovo `this.type`
+8. Fare un push di una nuova symbol hashtable (incrementando il nesting level)
+9. Per ogni attributo `var` in `attrDecList`:
+   - se `var` è di tipo sotto classe rispetto alla classe in dichiarazione allora sollevare un eccezione. <u>**Non** è consentito utilizzare sottoclassi come campi della superclasse</u>, altrimenti sarebbe impossibile istanziare la sottoclasse.
+   - altrimenti, creare ed inserire una entry all'interno della symbol table per `var` con il suo tipo
+10. Fare un altro push di una nuova symbol hashtable (incrementando il nesting level)
+11. Per ogni metodo `fun` in `metDecList`:
+    - controllare che abbia un id ed un tipo di ritorno (?)  // TODO
+    - se il tipo di ritorno è un `InstanceType`  aggiornare il suo campo `classType` con il tipo di classe recuperato dalla symbol table una classe. Se tale classe non è contenuta nella symbol table sollevare un eccezione.
+    - altrimenti, creare ed inserire una entry all'interno della symbol table per `fun`
+    - fare push di una nuova symbol hashtable (incrementando il nesting level)
+    - aggiungere una entry con chiave `this` avente `InstanceType` della classe che contiene `fun`
+    - aggiungere una entry per ogni parametro dichiarato da `fun`
+    - chiamare il metodo `checkSemantics` sul espressione che costituisce il body di `fun`
+    - infine fare un pop dell'ultima symbol hashtable (decrementando il nesting level)
+12. Fare due pop di symbol table poichè si sono conclusi gli *scope* di campi e metodi
+13. Se la classe `C` estende un'altra classe `Super`:
+    - recuperare dalla symbol table il tipo `supertype` di `Super` (se non esiste o non è una classe sollevare un eccezione)
+    - scorrere `supertype.fields` con un indice `i = 0`
+      - se `fields.size()` >= `supertype.fields.size()` e
+      - se `supertype.fields[i].id` è uguale a `fields[i].id` e `fields[i]` è sottotipo di `supertype.fields[i]`
+      - allora `C` sta estendendo correttamente `Super` per quanto riguarda i campi, altrimenti vengono sollevati i corrispondenti `SemanticError`
+    - per ogni metodo `m` di `C`:
+      - se esiste un omonimo (i.e. `Super.m()`) nella superclasse controllare che `C.m()` lo sottotipi correttamente (si rimanda alla sezione 4 per i dettagli)
+      - altrimenti vengono sollevati i corrispondenti `SemanticError`
 
 
 ## 4. Type checking
@@ -177,46 +303,8 @@ Il nodo operatore NOT invece ha solamente un INode figlio che è ovviamente il b
 
 
 
+### Validazione di tipo (classdec)
 
-
-### Attributi
-
-La classe `C` dispone di:
-
-| Attributo      | Tipo                | Descrizione                    |
-| -------------- | ------------------- | ------------------------------ |
-| `classID`      | `String`            | id della classe                |
-| `superClassID` | `String`            | id della eventuale superclasse |
-| `fields`       | `ArrayList<Field>`  | Lista dei tipi dei campi       |
-| `methods`      | `ArrayList<Method>` | Lista dei tipi dei metodi      |
-
-- Ogni `Field` è costituito da:
-
-| Attributo | Tipo     | Descrizione         |
-| --------- | -------- | ------------------- |
-| `id`      | `String` | id dell'attributo   |
-| `type`    | `Type`   | tipo dell'attributo |
-
-- Ogni `Method` è costituito da:
-
-| Attributo | Tipo      | Descrizione     |
-| --------- | --------- | --------------- |
-| `id`      | `String`  | id del metodo   |
-| `type`    | `FunType` | tipo del metodo |
-
-### Validazione semantica
-- Creare una entry nella lista di symbol table
-- Fare un push della symbol table (incrementando il nesting level)
-- Per ogni attributo `f` in `fields`:
-  - creare una entry nella symbol table per `f`
-- Per ogni metodo `m` in `methods`:
-  - creare una entry nella symbol table per `m`
-- Se `C` estende un'altra classe `Super`:
-  - recuperare dalla symbol table il classtype `supertype` di `Super`
-  - scorrere `supertype.fields` con un indice `i = 0`
-    - verificare che `supertype.fields[i].id` sia uguale a `fields[i].id`
-
-### Validazione di tipo
 - Per ogni `f` in `fields`:
   - eseguire il typecheck di `f`
 - Per ogni `m` in `methods`:
@@ -231,7 +319,8 @@ La classe `C` dispone di:
       - verificare che `m` sia sottotipo di `overridden_m`
 - Restituire `C.classtype`
 
-### Code generation
+### Code generation (classdec)
+
 - Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
 - Se `C` estende un'altra classe `Super`:
   - creare una nuova entry `c_entry` nella dispatch table copiando quella di `Super`
