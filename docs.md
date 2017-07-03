@@ -302,12 +302,15 @@ Il type checking del programma FOOL in input dal compilatore viene eseguito subi
 
 Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo della espressione `exp` finale del programma FOOL.
 
-### 4.1 Classi Type
+### 4.1 Type system
 
 Durante il controllo dei tipi si va a controllare che, per un determinato nodo, l'operazione, la funzione o la classe, o più in generale tutti i componenti di quel nodo rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia `Type` che presenta i seguenti metodi su cui basare le regole di tipaggio: 
 
 - `String getID()` - restituisce un valore dell'enumerazione `TypeID` 
+
 - `boolean isSubtypeOf(Type t)` - restituisce vero se la classe tipo da cui viene chiamato  è sottotipo di `t`
+
+  ​
 
 Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID`:
 
@@ -317,6 +320,16 @@ Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID`:
 - `FUN` - una funzione o un metodo (seguono le stesse regole di typing)
 - `CLASSDEC` - una classe
 - `INSTANCE` - un'istanza di classe
+
+
+
+Per fornire un esempio del funzionamento del type system in FOOL consideriamo il caso di applicazione di un operatore a due elementi. Come spiegato nel paragrafo 2.3.2, ogni operatore ha due `INode` figli che rappresentano l'elemento di destra e l'elemento di sinistra. 
+
+1. Nel caso di operatori che confrontano valori interi il controllo andrà a verificare che sia il tipo dell'elemento destro sia dell'elemento sinistro destra sia sottotipo del tipo `INT`.
+
+2. Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi che entrambi siano sottotipi di BOOL
+
+   ​
 
 ### 4.2 Subtyping
 
@@ -332,7 +345,11 @@ Nel nostro compilatore l'analisi del subtyping diventa fondamentale con l'aggiun
 
 #### 4.2.1 FunType
 
-Questa classe si occupa di controllare il corretto sottotipaggio tra due metodi come descritto nella consegna: *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
+Questa classe si occupa di controllare il corretto sottotipaggio tra due metodi come descritto nella consegna:
+
+> *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
+
+
 
 Supponendo che siano definite le funzioni
 
@@ -387,8 +404,9 @@ Notare come le chiamate ricorsive a `isSubtypeOf()` scandaglino la gerarchia dei
 
 Questa classe si occupa di controllare il corretto sottotipaggio tra due classi che, come descritto nella consegna, può avvenire se: 
 
-1. [Estensione **diretta**] *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2...*
-2. [Estensione **indiretta**] *..Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
+1. > [Estensione **diretta**] *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2...*
+
+2. > [Estensione **indiretta**] *..Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
 
 Supponendo che siano definite le due classi
 
@@ -458,85 +476,15 @@ Per prima cosa verifichiamo che le due classi non siano dello stesso tipo, ovver
 
 #### 4.2.3 InstanceType
 
-Per quanto riguarda le istanze, il controllo di subtyping avviene controllando che l'istanza di classe su cui sto eseguendo il metodo sia sottotipo di un'altra istanza di classe, per confrontare due istanze non facciamo altro che richiamare il controllo di subtyping sulle relative classi di istanza:
-
-```java
-public boolean isSubTypeOf(Type type) {
-    if (type instanceof InstanceType) {
-        InstanceType it2 = (InstanceType) type;
-        return classT.isSubTypeOf(it2.getClassType());
-    } else {
-        return false;
-    }
-}
-```
-
-
-
-### 4.3 Typecheck sugli operatori
-
-Come detto nel paragrafo 2.3.2 ogni operatore ha due INode figli che rappresentano l'elemento di destra e l'elemento a sinistra dell'operatore. Nel caso di operatori che confrontano valori interi il nostro controllo di tipo andrà a verificare che il tipo del nodo di destra sia sottotipo del nodo di sinistra, e che siano quindi INT.
-
-Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi che entrambi siano sottotipi di BOOL.
+La classe che rappresenta il tipo istanza di una classe contiene al suo interno il `ClassType` della classe di cui è istanza. Il controllo sul subtyping avviene delegando al metodo `isSubTypeOf()` di `ClassType` 
 
 
 
 ## 5. Code generation
 
+// TODO: scegliere cosa tenere della roba seguente
 
-
-## 6. Stack Virtual Machine
-
-Una volta generato il bytecode, questo viene eseguito da una **SVM** (Stack Virtual Machine). Questa macchina virtuale dispone di uno **stack**, che rappresenta la memoria della macchina; la computazione è espressa da ripetute modifiche allo stack tramite operazioni di **push** e **pop**.
-
-La macchina virtuale richiede in input un parametro `int[] code`, un array contenente una serie di istruzioni definite nella grammatica `SVM.g4`. Queste vengono lette una ad una e, tramite un costrutto *switch-case* in `ExecuteVM.java`, per ognuna di loro è fornita una implementazione in termini di operazioni di push e pop sullo stack.
-
-Rispetto all'implementazione iniziale della VM, la modifica più importante è l'introduzione di una operazione di **new**, usata per allocare un oggetto in memoria. Gli oggetti, che sono istanze delle classi, non possono risiedere sullo stack insieme al resto dei dati e per questo motivo la loro creazione non può essere definita tramite le classiche operazioni di push e pop.
-
-Per risolvere questo problema l'operazione `new` alloca gli oggetti nella parte più alta dello stack (indirizzi bassi), in un'area denominata **heap**.
-
-### 6.1 Heap
-
-Lo heap è implementato tramite una lista libera e rende disponibili i metodi:
-
-- `HeapMemoryCell allocate(int size) throws VMOutOfMemoryException`
-  - alloca un'area di memoria, rimuovendo dalla lista libera `size` elementi, e restituisce al chiamante il primo elemento rimosso. Da questo è possibile accedere agli elementi successivi tramite il suo attributo `next`
-  - nel caso la memoria richiesta sia superiore a quella disponibile, viene lanciata un'eccezione
-- `void deallocate(HeapMemoryCell firstCell)`
-  - dealloca la memoria il cui primo blocco viene passato come parametro e la reinserisce nella lista libera, in modo che torni ad essere disponibile per l'allocazione
-
-E' stato scelto di implementare lo heap con una lista libera in modo da facilitare la gestione della **garbage collection**, infatti dopo una serie di allocazioni e deallocazioni di dimensioni differenti, lo heap potrebbe presentare *frammentazione interna*. L'uso della lista libera permette alla VM di ottenere blocchi di memoria logicamente, ma non fisicamente, contigui; in modo che essa possa operare senza tenere conto di questo problema.
-
-### 6.2 Garbage Collection
-
-E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto può essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack può produrre *falsi positivi*, poichè l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre questa probabilità è stato introdotto un offset (`MEMORY_START_ADDRESS`) con un valore elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che è sempre presente come primo valore sullo stack), o più in generale numeri bassi, sono più facilmente trovabili in programmi comuni (p.e si pensi ad un iteratore).
-
-L'operazione di garbage collection viene eseguita se prima di allocare un oggetto, la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
-
-- 5% della memoria totale
-- 10 (in caso di memoria particolarmente piccola)
-
-## 7. Testing e conclusioni
-
-Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
-
-
-
-### Validazione di tipo (classdec)
-
-- Per ogni `f` in `fields`:
-  - eseguire il typecheck di `f`
-- Per ogni `m` in `methods`:
-  - per ogni dichiarazione `d` in `m`:
-    - eseguire il typecheck di `d`
-  - verificare che il tipo di `m.body` sia sottotipo di `m.returntype` (il tipo di ritorno dichiarato dal metodo)
-- Se `C` estende un'altra classe `Super`:
-  - recuperare dalla symbol table il classtype `supertype` di `Super`
-  - recuperare la mappa dei metodi `super_methods_map` da `supertype`
-  - per ogni metodo `m` in `methods`:
-    - se `super_methods_map` contiene un `overridden_m` tale `overridden_m.id` sia uguale a `m.id`
-      - verificare che `m` sia sottotipo di `overridden_m`
-- Restituire `C.classtype`
+/* -----------------------------------------------------------------------------------------------------------------
 
 ### Code generation (classdec)
 
@@ -551,6 +499,7 @@ Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come q
   - aggiungere in `c_entry` un nuovo metodo `new_m.id` con label `new_m_label`
 
 ------
+
 ## 2. Istanziazione di classe (oggetto)
 
 ### Descrizione
@@ -565,10 +514,12 @@ L'istanziazione di classe è definita in `NewNode` e si occupa di creare oggetti
 | `args`    | `ArrayList<INode>` | lista dei parametri |
 
 ### Validazione semantica
+
 - Recuperare il `ClassType` corrispondente a `classID` dalla tabella dei simboli
 - Verificare che il numero di attributi passati al costruttore sia uguale a `classtype.fields.size()`
 
 ### Validazione di tipo
+
 - Scorrere `args` con un indice `i = 0`:
   - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(classtype.fields[i])`
 
@@ -581,24 +532,20 @@ $$
 [new]
 $$
 
-### Code generation\Gamma \vdash A : \text{Class } \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  St_1 <: T_1 \ldots St_n <: T_n
-}{
-
-	\Gamma \vdash \text{new } A(a_1 : St_1 , \ldots , a_n : St_n ) : \text{Instance}
-}
-[new]
-
 - Allocare una nuova area di memoria nello heap
 - Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
 - TODO
 
 ------
+
 ## 3. Utilizzo di un attributo
 
 ### Descrizione
+
 Gli attributi sono dei casi particolari di `IdNode` il cui valore non si trova in uno scope esterno ma in un oggetto nello heap 
 
 ### Attributi
+
 | Nome                   | Tipo               | Descrizione                              |
 | ---------------------- | ------------------ | ---------------------------------------- |
 | `attrib_id`            | `String`           | L'id dell'attributo                      |
@@ -608,15 +555,19 @@ Gli attributi sono dei casi particolari di `IdNode` il cui valore non si trova i
 | `object_nesting_level` | `Integer`          | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
+
 - TODO
 
 ### Validazione di tipo
+
 - TODO
 
 ### Code generation
+
 - TODO
 
 ------
+
 ## 4. Chiamata di metodo
 
 ### Descrizione
@@ -636,15 +587,18 @@ La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una 
 | `object_nesting_level` | `Integer`         | Nesting level di definizione dell'oggetto |
 
 ### Validazione semantica
+
 - Recupera dalla symbol table l' `object_type` di `object_id`
 - Verifica che `object_type` sia di tipo `InstanceType`
 - Verifica che il `class_type` di `object_type` contenga un metodo che abbia  `id` uguale a `method_id` e recupera `method_type`
 - Verifica che il numero di `args` sia uguale al numero di parametri definito in `method_type`
 
 ### Validazione di tipo
+
 - Scorre `args` con un indice `i = 0` verificando per ogni argomento il tipo di `args[i]` sia sottotipo di `method_type.args[i]`
 
 ### Code generation
+
 - Carica il valore di `$fp` sullo stack
 - Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
 - Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
@@ -654,6 +608,7 @@ La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una 
 - Setta `$ra` e salta all'esecuzione del codice del metodo
 
 ------
+
 ## 5. Dispatch tables
 
 ### Descrizione
@@ -663,6 +618,7 @@ Le dispatch tables sono implementate in `CodegenUtils` come strutture dati popol
 ### Attributi
 
 Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
+
 | Nome           | Tipo     | Descrizione                              |
 | -------------- | -------- | ---------------------------------------- |
 | `method_id`    | `String` | L'id del metodo chiamato                 |
@@ -671,12 +627,11 @@ Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che as
 ### Metodi
 
 Per gestire le strutture dati sono disponibili: 
+
 - `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
   Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
-
 - `ArrayList<DispatchTableEntry> getDispatchTable(String classID)`
   Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
-
 - `String generateDispatchTablesCode()`
   Genera e restituisce il codice `SVM` delle dispatch tables
 
@@ -761,3 +716,42 @@ class WrongCalculator implements Calculator (
 | 1       | `address(wc)` |
 | 2       | 7             |
 | 3       | 6             |
+
+-------------------------------------------------------------------------------------------------------------------------- */
+
+
+
+## 6. Stack Virtual Machine
+
+Una volta generato il bytecode, questo viene eseguito da una **SVM** (Stack Virtual Machine). Questa macchina virtuale dispone di uno **stack**, che rappresenta la memoria della macchina; la computazione è espressa da ripetute modifiche allo stack tramite operazioni di **push** e **pop**.
+
+La macchina virtuale richiede in input un parametro `int[] code`, un array contenente una serie di istruzioni definite nella grammatica `SVM.g4`. Queste vengono lette una ad una e, tramite un costrutto *switch-case* in `ExecuteVM.java`, per ognuna di loro è fornita una implementazione in termini di operazioni di push e pop sullo stack.
+
+Rispetto all'implementazione iniziale della VM, la modifica più importante è l'introduzione di una operazione di **new**, usata per allocare un oggetto in memoria. Gli oggetti, che sono istanze delle classi, non possono risiedere sullo stack insieme al resto dei dati e per questo motivo la loro creazione non può essere definita tramite le classiche operazioni di push e pop.
+
+Per risolvere questo problema l'operazione `new` alloca gli oggetti nella parte più alta dello stack (indirizzi bassi), in un'area denominata **heap**.
+
+### 6.1 Heap
+
+Lo heap è implementato tramite una lista libera e rende disponibili i metodi:
+
+- `HeapMemoryCell allocate(int size) throws VMOutOfMemoryException`
+  - alloca un'area di memoria, rimuovendo dalla lista libera `size` elementi, e restituisce al chiamante il primo elemento rimosso. Da questo è possibile accedere agli elementi successivi tramite il suo attributo `next`
+  - nel caso la memoria richiesta sia superiore a quella disponibile, viene lanciata un'eccezione
+- `void deallocate(HeapMemoryCell firstCell)`
+  - dealloca la memoria il cui primo blocco viene passato come parametro e la reinserisce nella lista libera, in modo che torni ad essere disponibile per l'allocazione
+
+E' stato scelto di implementare lo heap con una lista libera in modo da facilitare la gestione della **garbage collection**, infatti dopo una serie di allocazioni e deallocazioni di dimensioni differenti, lo heap potrebbe presentare *frammentazione interna*. L'uso della lista libera permette alla VM di ottenere blocchi di memoria logicamente, ma non fisicamente, contigui; in modo che essa possa operare senza tenere conto di questo problema.
+
+### 6.2 Garbage Collection
+
+E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto può essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack può produrre *falsi positivi*, poichè l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre questa probabilità è stato introdotto un offset (`MEMORY_START_ADDRESS`) con un valore elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che è sempre presente come primo valore sullo stack), o più in generale numeri bassi, sono più facilmente trovabili in programmi comuni (p.e si pensi ad un iteratore).
+
+L'operazione di garbage collection viene eseguita se prima di allocare un oggetto, la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
+
+- 5% della memoria totale
+- 10 (in caso di memoria particolarmente piccola)
+
+## 7. Testing e conclusioni
+
+Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
