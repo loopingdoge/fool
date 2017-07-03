@@ -8,7 +8,6 @@ import type.ClassType;
 import type.FunType;
 import type.Type;
 import exception.TypeException;
-import type.VoidType;
 import util.Field;
 import util.Method;
 

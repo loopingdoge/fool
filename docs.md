@@ -1,10 +1,10 @@
 # FOOL - Functional Object Oriented Language
 
-#### Progetto del corso di Compilatori ed Interpreti AA 2016/2017
+***Progetto del corso di Compilatori ed Interpreti AA 2016/2017***
 
-##### Corso di Laurea Magistrale in Informatica, Università di Bologna
+***Corso di Laurea Magistrale in Informatica, Università di Bologna***
 
-##### ***Componenti del gruppo*** (in ordine alfabetico)
+***Componenti del gruppo***
 
 - Alberto Nicoletti (matricola 819697)
 - Devid Farinelli (matricola 819683)
@@ -13,51 +13,54 @@
 
 ------
 
-## **Tabella dei contenuti**
+***Tabella dei contenuti***
 
 [TOC]
 
 ## 1. Struttura del progetto
 
-Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente FOOL ed un interprete che prendendo il codice intermedio, generato dal compilatore, lo traducesse in istruzioni eseguibili direttamente dal calcolatore. Il processore finale viene simulato dalla classe `ExecuteVM.java` che recuperando le istruzioni dal codice e modificando i valori delle memoria produce il risultato voluto.
+Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` e le esegua su un calcolatore emulato. 
 
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection ed estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`)
 
+Il progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di `ANTLR v4.7`.  
 
-L'intero progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di ANTLR v4.7.  La cartella `src` contiene il codice sorgente che è suddiviso in diversi package
+La cartella `src` contiene il codice sorgente che è suddiviso in diversi package:
 
 - `exception`
 
-  contiene le classi necessarie ad istanziare le eccezzioni sintattiche, semantiche e a run-time con i corretti messaggi d'errore.
+  contiene le classi che implementano le eccezioni sintattiche, semantiche e di run-time con i relativi messaggi d'errore
 
 - `grammar`
 
-  contiene le grammatiche del linguaggio FOOL e del linguaggio dell'interprete nel formato *.g4* di ANTLR che a partire da queste produce una serie di classi (i.e. lexer e costruzione AST)
+  contiene le grammatiche in formato `.g4` del linguaggio `FOOL` e del linguaggio `SVM`. A partire da questi file, ANTLR genera le risorse necessarie per implementare Lexer, Parser e Visitor
 
 - `main`
 
-  contiene la nostra implementazione della classe per la la costruzione per visita dell'albero sintattico astratto. Inoltre contiene le classi che avviano e configurano l'intero processo di compilazione-interpretazione-esecuzione su un singolo input oppure sulla test unit *test.yml*
+  contiene le classi necessarie alla sequenzializzazione delle varie fasi di esecuzione di un programma `FOOL`: analisi lessicale e sintattica, analisi semantica, code generation ed esecuzione effettiva. Sono disponibili le modalitá:
+
+  - `TestDebug`, che prende come input un solo programma contenuto in `input.fool`
+  - `TestComplete` , che esegue in sequenza tutti i programmi contenuti in `test.yml`
 
 - `node`
 
-  contiene una classe per ogni nodo dell'AST creato dal lexer. Ognuno di questi nodi contiene i metodi il controllo semantico, la generazione di codice (visita con modalità top-down) e di tipo (visita con modalità bottom-up). 
+  contiene una classe per ogni nodo dell'AST creato dal lexer. Ciascuno dei nodi implementa i metodi necessari per il controllo semantico, il type checking (visita bottom-up) e la code generation (visita top-down)
 
 - `symbol_table`
 
-  contiene la tabella dei simboli, implementata con una lista di hashtable, necessaria nella fase di dichiarazione e di referenza ad una variabile e nella fase di controllo semantico.
+  contiene la tabella dei simboli, implementata con una lista di hashtable, utilizzata durante il controllo semantico in caso di dichiarazione o di riferimento ad una variabile
 
 - `type`
 
-  contiene le classi corrispondenti ai tipi forniti dal linguaggio FOOL. Le istanze di queste classi, con tutte le informazioni necessarie, vengono memorizzate all'interno della tabella dei simboli che ha visibilità globale.
+  contiene le classi che implementano i tipi primitivi del linguaggio `FOOL`. Ad ogni nodo dell'albero corrispone un tipo che viene utilizzato per il controllo semantico, il type checking e come entry della tabella dei simboli per le variabili e le funzioni. 
 
 - `util`
 
-  contiene metodi di utilità utilizzati nella fase di code generation, infatti è quì che viene creata e gestita la dispatch table necessaria agli oggetti a run-time.
+  contiene metodi di utilitá, principalmente utility usate in fase di code generation per la creazione di label e la generazione delle dispatch tables
 
 - `vm`
 
-  contiene le classi che simulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap.
-
-Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
+  contiene le classi che emulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap
 
 ### 1.1 Installazione ed esecuzione
 
@@ -65,13 +68,15 @@ Spiegare le modalità per importare e eseguire il progetto ... TODO
 
 ## 2. Analisi lessicale e sintattica
 
-In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti delle grammatiche modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
+In questa sezione si descriveranno le grammatiche che definiscono i linguaggi `FOOL` e  `SVM`, con particolare attenzione alle motivazioni che hanno portato alle modifiche delle grammatiche originali.
 
 ### 2.1 Grammatica FOOL
 
-Non è stato necessario modificare la produzione iniziale `prog` del linguaggio che può essere una semplice espressione oppure un espressione preceduta da dichiarazioni di variabili `let in` o di classi. Si è scelto di usare il non terminale `met`  per la definizione di metodi che per gestirli diversamente successivamente a livello semantico rispetto alla definizione di funzioni. Come è possibile vedere a riga 10, `met` è solo un wrapper per il non terminale `fun`. 
+#### 2.1.1 Met
 
-```ANT
+È stato aggiunto il non terminale `met`  per gestire separatamente le definizioni di metodi dalle definizioni di funzioni a livello semantico e di code generation. A riga 10 è possibile vedere come `met` sia solo un wrapper per il non terminale `fun` utilizzato all'interno di `classdec`:
+
+```ANTLR
 prog
     : exp SEMIC                 		    #singleExp
     | let exp SEMIC                 	    #letInExp
@@ -86,9 +91,14 @@ met : fun;
 fun : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp;
 ```
 
+#### 2.1.2 funExp e methodExp
 
+Per permettere di utilizzare il valore di ritorno delle chiamate di funzioni e di metodi come fossero `exp`, sono state create due produzioni sotto `value`:
 
-Si è deciso di unificare a livello sintattico la chiamata di funzione con la chiamata di metodo come fatto per la loro definizione. Il non terminale corrispondente è chiamato `funcall`. Una espressione `exp` si può ridurre ad un `value` le cui produzioni sono distinte attraverso le direttive che iniziano con '\#' in `funExp` per la chiamata di funzione ed in `methodExp` per la chiamata di metodi. Queste due direttive ci permettono di scrivere due procedure diverse (`visitFunExp` e `visitMethodExp`) per la visita dei relativi nodi nell'albero di sintassi astratta.
+- `#funExp` che rappresenta la chiamata di una funzione
+- `#methodExp` che rappresenta la chiamata di un metodo
+
+Queste due etichette permettono di gestire i nodi separatamente durante l'analisi lessicale implementando logiche diverse per i metodi `visitFunExp` e `visitMethodExp`:
 
 ```ANTLR
 value
@@ -100,9 +110,9 @@ value
 funcall : ID ( LPAR (exp (COMMA exp)* )? RPAR ) ;
 ```
 
+### 2.1.3 Operatori aggiuntivi
 
-
-L'implementazioni degli operatori aggiuntivi a livello sintattico è stata fatta in modo molto semplice aggiungendo delle opzioni per la riduzione del non terminale `operator`.  
+Gli operatori aggiuntivi sono stati realizzati semplicemente aggiungendo delle opzioni per la riduzione del non terminale `operator`:
 
 ```ANTLR
 exp :  ('-')? left=term (operator=(PLUS | MINUS) right=exp)? ;
@@ -117,7 +127,33 @@ left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? 
 
 ### 2.2 Grammatica SVM
 
-È stato necessario apportare modifiche anche alla *attribute grammar* dell'interprete FOOL. Per la operazioni di sottrazione e divisione sono stati semplicemente aggiungi i relativi terminali e non terminali `sub` e `div`. Invece per quanto riguarda l'operazione di `<=` è stata aggiunta una regola `BRANCHLESSQ` che si comporta in modo simile alla regola di `<` aggiungendo una *label* nel codice e alla collezione `labelRef` usata per fare *backpatching* alla fine della fase di parsing. È stata introdotta invece una nuova istruzione `LC` che come viene implementata come mostrato di seguito.
+#### 2.2.1 COPY
+
+Per semplificare  il riutilizzo dei valori sullo stack è stata aggiunta l'istruzione `COPY` che duplica il valore in cima alla pila. L'istruzione è implementata come segue:
+
+```ANTLR
+| COPY                        {   code.add(COPY);     }
+```
+
+```java
+case SVMParser.COPY:
+	push(memory[sp - MEMORY_START_ADDRESS]);
+	break;
+```
+
+#### 2.2.1 l = LABEL
+
+// TODO
+
+#### 2.2.2 LC
+
+Per implementare le chiamate di funzioni è stata aggiunta l'istruzione `LC` che permette di ottenere l'indirizzo del codice di una funzione partendo dalla sua label:
+
+```ANTLR
+| LC                          {   code.add(LC);       }
+```
+
+L'istruzione `LC` si aspetta in cima allo stack la label di una funzione, rimuove il valore dalla pila e lo usa come indice nell'array `code`, pushando il valore ottenuto in cima allo stack:
 
 ```java
 case SVMParser.LC:
@@ -126,11 +162,19 @@ case SVMParser.LC:
 	break;
 ```
 
-come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l'indirizzo in cima allo stack e con questo accede all'array `code`, infine carica sullo stack il valore ottenuto. Questa nuova istruzione è utilizzata nella chiamata ad un metodo ed il valore ottenuto da `LC` è la prima istruzione di tale metodo a cui si salta con l'operazione di `JS`.
+#### 2.2.4 NEW
 
+//TODO
 
+#### 2.2.5 HOFF
 
-Alla grammatica dell'interprete inoltre è stata aggiunta un istruzione chiamata `HOFF` che sta per 'heap offset' utilizzato nella referenza ad un campo di un oggetto. Il suo scopo è quello di convertire l'offset del campo di un oggetto nell'offset reale tra l'inizio dell'oggetto nello heap ed il valore di questo campo. 
+L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap ed l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
+
+L'istruzione `HOFF` è implementata come segue:
+
+```ANTLR
+| HOFF                        {   code.add(HOFF);     }
+```
 
 ```java
 case SVMParser.HOFF:
@@ -150,30 +194,39 @@ case SVMParser.HOFF:
     break;
 ```
 
-La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verrà discussa successivamente.  In questo esempio, come in altre parti del progetto, vengono utilizzati i metodi `stream` di Java 8 per lavorare su collezzioni in modo compatto senza usare cicli.
+La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse successivamente,  in questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
 
 
+
+// TODO sistemare questo sotto, non fa parte della grammatica
 
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
 
 
-### 2.3 Classi Node
+### 2.3 Nodi
 
-Le componenti di un programma FOOL vengono legate a delle classi nodo; queste implementano il comportamento corretto delle varie produzioni della grammatica nelle diverse fasi di compilazione. L'interfaccia `INode` contiene le definizioni dei metodi necessari e viene implementata da tutti gli altri nodi. A questa interfaccia abbiamo scelto di rimpiazzare il metodo `toPrint()` con quello nativo di Java  `toString()` per la stampa dell'intero albero AST. Per fare questo abbiamo aggiunto un metodo `getChilds()` che restituisce un `ArrayList<INode>`  con i figli del nodo attuale.
+Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'interfaccia `INode` che rispetto alla versione originale è stata modificata come segue:
+
+- Il metodo `toPrint()` è stato sostituito dal metodo `toString()` nativo di Java
+- Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale
 
 #### 2.3.2 Nodi operatore
 
-La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore `==`, che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di adempiere alla richiesta opzionale di aggiungere `<=`, `>=`, `<`, `>` per i confronti fra interi,  `&&`, `||`  per i confronti fra booleani ed anche gli operatori di divisione, sottrazione e il NOT (i.e. `!`).
+La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
 
-Ogni nodo operatore (escluso il NOT) presenta gli stessi parametri, ovvero:
-
-- `INode left` :  l'elemento a sinistra dell'operazione
-- `INode right`:  l'elemento a destra dell'operazione
-
-mentre il nodo operatore NOT ha solamente un `INode` figlio che è il booleano su cui si sta applicando il NOT.
+- gli operatori sottrazione e divisione `-` e `/`
 
 
+- gli operatori per il confronto fra interi  `<=`, `>=`, `<` e `>` 
+- gli operatori booleani  `&&`, `||` e `!` 
+
+Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
+
+- `INode left`,  l'operando sinistro
+- `INode right`,  l'operando destro
+
+mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato
 
 
 
@@ -181,25 +234,29 @@ mentre il nodo operatore NOT ha solamente un `INode` figlio che è il booleano s
 
 ### 3.1 Symbol Table
 
-Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
+La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
 
-`private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();`
+```java
+private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
+```
 
-che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
+All'ambiente sono stati aggiunti anche i seguenti metodi per gestire la symbol table:
 
-- `addEntry(String id, Type type, int offset)`
+Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
 
-  inserisce nella più recente hashmap un oggetto `SymbolTableEntry` con nome e tipo dati come parametro alla funzione.
+- `public Environment addEntry(String id, Type type, int offset)`
 
-- `getLatestEntryOf(String id)`
+  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una`RedeclaredVarException`
 
-  che sfrutta oggetti di tipo `Iterator` per scorrere la lista di tabella hash ed in ognuna di queste controlla se è contenuta un'entrata con un `id` uguale a quello passato come parametro. In caso positivo l'entrata viene ritornata, in caso negativo viene sollevata una `UndeclaredVarException`.
+- `public SymbolTableEntry getLatestEntryOf(String id)`
 
-- `setEntryType(String id, Type newtype, int offset)`
+  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una`UndeclaredVarException` 
 
-  questo metodo è stato introdotto per permettere di fare riferimento ad una classe all'interno di un altra definita precedentemente nel codice.  Prima di procedere al controllo semantico di ogni classe, viene fatta un inserzione nella tabella dei simboli di una entry 'incompleta' di tutte le classi e successivamente con questo metodo la entry 'incompleta' viene sostituita a quella con il `type` correttamente costruito.
+- `public Environment setEntryType(String id, Type newtype, int offset)`
 
+  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
 
+  ​
 
 
 ### 3.2 Dichiarazione di classi
