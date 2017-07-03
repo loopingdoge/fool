@@ -115,7 +115,7 @@ left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? 
 
 ### 2.2 Grammatica SVM
 
-È stato necessario apportare modifiche anche alla *attribute grammar* dell'interprete FOOL. Per la operazioni di sottrazione e divisione sono stati semplicemente aggiungi i relativi terminali e non terminali `sub` e `div`. Invece per quanto riguarda l'operazione di '<=' è stata aggiunta una regola `BRANCHLESSQ` che si comporta in modo simile alla regola di '<' aggiungendo una *label* nel codice e alla collezione `labelRef` usata per fare *backpatching* alla fine della fase di parsing. È stata introdotta invece una nuova istruzione `LC` che come viene implementata come mostrato di seguito.
+È stato necessario apportare modifiche anche alla *attribute grammar* dell'interprete FOOL. Per la operazioni di sottrazione e divisione sono stati semplicemente aggiungi i relativi terminali e non terminali `sub` e `div`. Invece per quanto riguarda l'operazione di `<=` è stata aggiunta una regola `BRANCHLESSQ` che si comporta in modo simile alla regola di `<` aggiungendo una *label* nel codice e alla collezione `labelRef` usata per fare *backpatching* alla fine della fase di parsing. È stata introdotta invece una nuova istruzione `LC` che come viene implementata come mostrato di seguito.
 
 ```java
 case SVMParser.LC:
@@ -158,20 +158,20 @@ Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a 
 
 #### 2.3.1 Considerazioni generali
 
-Abbiamo scelto di lasciare l'interfaccia nodo come base per gli altri nodi, togliendo il metodo *toPrint()* (abbiamo utilizzato l'ovverriding della funzione nativa di Java *toString()* per stampare l'albero AST) ed aggiungendo un metodo *getChilds()* che restituisce un <ArrayList> di nodi coi figli del nodo interessato.
+Abbiamo scelto di lasciare l'interfaccia nodo come base per gli altri nodi, togliendo il metodo `toPrint()` (abbiamo utilizzato l'ovverriding della funzione nativa di Java `toString()` per stampare l'albero AST) ed aggiungendo un metodo `getChilds()` che restituisce un `<ArrayList>` di nodi coi figli del nodo interessato.
 
-Il metodo *getChilds()* viene utilizzato in fase di stampa dell'albero AST.
+Il metodo `getChilds()` viene utilizzato in fase di stampa dell'albero AST.
 
 #### 2.3.2 Nodi operatore
 
-La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore '==', che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di sviluppare il punto opzionale aggiungendo '<=, >=, <, >' per quanto riguarda i confronti fra interi, '&&, ||' invece per i confronti fra Booleani ed inoltre anche gli operatori di divisione, sottrazione e NOT.
+La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore `==`, che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di sviluppare il punto opzionale aggiungendo `<=`, `>=`, `<`, `>` per quanto riguarda i confronti fra interi, `&&`, `||` invece per i confronti fra Booleani ed inoltre anche gli operatori di divisione, sottrazione e NOT.
 
 Ogni nodo operatore (escluso NOT) presenta le stesse variabili (e parametri), ovvero:
 
-- INode ***left*** : è l'elemento a sinistra dell'operazione;
-- INode ***right***: è l'elemento a destra dell'operazione.
+- `INode left` : è l'elemento a sinistra dell'operazione;
+- `INode right`: è l'elemento a destra dell'operazione.
 
-Il nodo operatore NOT invece ha solamente un INode figlio che è ovviamente il booleano su cui si sta applicando il NOT.
+Il nodo operatore NOT invece ha solamente un `INode` figlio che è ovviamente il booleano su cui si sta applicando il NOT.
 
 
 
@@ -292,7 +292,7 @@ La **validazione semantica di una classe** ha i seguenti passi:
 
 ## 4. Type checking
 
-Il type checking del codice preso in input dal compilatore viene eseguito dal basso verso l'alto (bottom-up) e viene chiamato ricorsivamente da ogni nodo padre a quello figlio. Ogni INode presenta un metodo *type()* che restituisce il tipo di quel nodo. Prima di restituire il tipo del nodo corrente, avviene un controllo di tipi sui figli, se presenti, e sui propri parametri e/o argomenti. Da questa logica si può capire facilmente come avvenga prima il controllo di tipi sui nodi figli e poi ricorsivamente si ritorna il tipo dell'intero AST.
+Il type checking del codice preso in input dal compilatore viene eseguito dal basso verso l'alto (bottom-up) e viene chiamato ricorsivamente da ogni nodo padre a quello figlio. Ogni INode presenta un metodo `type()` che restituisce il tipo di quel nodo. Prima di restituire il tipo del nodo corrente, avviene un controllo di tipi sui figli, se presenti, e sui propri parametri e/o argomenti. Da questa logica si può capire facilmente come avvenga prima il controllo di tipi sui nodi figli e poi ricorsivamente si ritorna il tipo dell'intero AST.
 
 Il tipo finale ritornato sarà il tipo dell'AST.
 
@@ -300,17 +300,17 @@ Il tipo finale ritornato sarà il tipo dell'AST.
 
 Durante il controllo dei tipi si va a controllare che, per un determinato nodo, operazione, funzione o classe, tutti i componenti rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia Java *Type* su cui estendere il tipo di ogni nodo che riservi un 'trattamento' particolare. Nel nostro compilatore abbiamo i seguenti tipi:
 
-- *VOIDTYPE* - nessun tipo.
-- *BOOLTYPE* - un valore booleano;
-- *INTTYPE* - un valore intero;
-- *FUNTYPE* - una funzione, o metodo (seguono le stesse regole di typing per entrambi);
-- *CLASSTYPE* - una classe;
-- *INSTANCETYPE* - un'istanza di classe;
+- `VOIDTYPE` - nessun tipo.
+- `BOOLTYPE` - un valore booleano;
+- `INTTYPE` - un valore intero;
+- `FUNTYPE` - una funzione, o metodo (seguono le stesse regole di typing per entrambi);
+- `CLASSTYPE` - una classe;
+- `INSTANCETYPE` - un'istanza di classe;
 
 Ognuna di queste classi presenta i seguenti metodi ereditati dall'interfaccia:
 
-- *String* getID() - restituisce il tipo enum (BOOL, INT, FUN, ecc);
-- *boolean* isSubtypeOf(Type t) - restituisce vero se il tipo su cui viene richiamato questo metodo è sottotipo di *t*.
+- `String getID()` - restituisce il tipo `enum` (`BOOL`, `INT`, `FUN`, ecc);
+- `boolean isSubtypeOf(Type t)` - restituisce vero se il tipo su cui viene richiamato questo metodo è sottotipo di `t`.
 
 ### 4.2 Subtyping
 
@@ -320,7 +320,7 @@ Nell'implementazione del nostro compilatore l'analisi del subtyping diventa fond
 
 #### 4.2.1 FunType
 
-Come esplicitamente descritto nella consegna: *'Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2.'* 
+Come esplicitamente descritto nella consegna: *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
 
 Questo è il nostro codice:
 
@@ -352,7 +352,7 @@ Abbiamo dunque, come prima cosa, controllato che il numero di parametri siano gl
 
 #### 4.2.2 ClassType
 
-Sempre come riportato in consegna: *'Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2. Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo.'* 
+Sempre come riportato in consegna: *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2. Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
 
 Questo il codice:
 
