@@ -59,6 +59,8 @@ L'intero progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le lib
 
 Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
 
+### 1.1 Installazione ed esecuzione
+
 Spiegare le modalità per importare e eseguire il progetto ... TODO
 
 ## 2. Analisi lessicale e sintattica
@@ -154,24 +156,24 @@ La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze 
 
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
-### 2.3 I nodi
 
-#### 2.3.1 Considerazioni generali
 
-Abbiamo scelto di lasciare l'interfaccia nodo come base per gli altri nodi, togliendo il metodo `toPrint()` (abbiamo utilizzato l'ovverriding della funzione nativa di Java `toString()` per stampare l'albero AST) ed aggiungendo un metodo `getChilds()` che restituisce un `<ArrayList>` di nodi coi figli del nodo interessato.
+### 2.3 Classi Node
 
-Il metodo `getChilds()` viene utilizzato in fase di stampa dell'albero AST.
+Le componenti di un programma FOOL vengono legate a delle classi nodo; queste implementano il comportamento corretto delle varie produzioni della grammatica nelle diverse fasi di compilazione. L'interfaccia `INode` contiene le definizioni dei metodi necessari e viene implementata da tutti gli altri nodi. A questa interfaccia abbiamo scelto di rimpiazzare il metodo `toPrint()` con quello nativo di Java  `toString()` per la stampa dell'intero albero AST. Per fare questo abbiamo aggiunto un metodo `getChilds()` che restituisce un `ArrayList<INode>`  con i figli del nodo attuale.
 
 #### 2.3.2 Nodi operatore
 
-La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore `==`, che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di sviluppare il punto opzionale aggiungendo `<=`, `>=`, `<`, `>` per quanto riguarda i confronti fra interi, `&&`, `||` invece per i confronti fra Booleani ed inoltre anche gli operatori di divisione, sottrazione e NOT.
+La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore `==`, che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di adempiere alla richiesta opzionale di aggiungere `<=`, `>=`, `<`, `>` per i confronti fra interi,  `&&`, `||`  per i confronti fra booleani ed anche gli operatori di divisione, sottrazione e il NOT (i.e. `!`).
 
-Ogni nodo operatore (escluso NOT) presenta le stesse variabili (e parametri), ovvero:
+Ogni nodo operatore (escluso il NOT) presenta gli stessi parametri, ovvero:
 
-- `INode left` : è l'elemento a sinistra dell'operazione;
-- `INode right`: è l'elemento a destra dell'operazione.
+- `INode left` :  l'elemento a sinistra dell'operazione
+- `INode right`:  l'elemento a destra dell'operazione
 
-Il nodo operatore NOT invece ha solamente un `INode` figlio che è ovviamente il booleano su cui si sta applicando il NOT.
+mentre il nodo operatore NOT ha solamente un `INode` figlio che è il booleano su cui si sta applicando il NOT.
+
+
 
 
 
@@ -292,25 +294,27 @@ La **validazione semantica di una classe** ha i seguenti passi:
 
 ## 4. Type checking
 
-Il type checking del codice preso in input dal compilatore viene eseguito dal basso verso l'alto (bottom-up) e viene chiamato ricorsivamente da ogni nodo padre a quello figlio. Ogni INode presenta un metodo `type()` che restituisce il tipo di quel nodo. Prima di restituire il tipo del nodo corrente, avviene un controllo di tipi sui figli, se presenti, e sui propri parametri e/o argomenti. Da questa logica si può capire facilmente come avvenga prima il controllo di tipi sui nodi figli e poi ricorsivamente si ritorna il tipo dell'intero AST.
+Il type checking del programma FOOL in input dal compilatore viene eseguito subito dopo l'analisi semantica e ogni nodo padre chiama quello del figlio. Il controllo del tipaggio corretto viene però logicamente svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che restituisce il tipo di quel nodo. Prima questo tipo, avviene un controllo sui tipi dei figli, e se presenti, e sui propri parametri e/o argomenti. 
 
-Il tipo finale ritornato sarà il tipo dell'AST.
+
+
+Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo della espressione `exp` finale del programma FOOL.
 
 ### 4.1 Classi Type
 
-Durante il controllo dei tipi si va a controllare che, per un determinato nodo, operazione, funzione o classe, tutti i componenti rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia Java *Type* su cui estendere il tipo di ogni nodo che riservi un 'trattamento' particolare. Nel nostro compilatore abbiamo i seguenti tipi:
+Durante il controllo dei tipi si va a controllare che, per un determinato nodo, l'operazione, la funzione o la classe, o più in generale tutti i componenti di quel nodo rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia `Type` che presenta i seguenti metodi su cui basare le regole di tipaggio: 
 
-- `VOIDTYPE` - nessun tipo.
-- `BOOLTYPE` - un valore booleano;
-- `INTTYPE` - un valore intero;
-- `FUNTYPE` - una funzione, o metodo (seguono le stesse regole di typing per entrambi);
-- `CLASSTYPE` - una classe;
-- `INSTANCETYPE` - un'istanza di classe;
+- `String getID()` - restituisce un valore dell'enumerazione `TypeID` 
+- `boolean isSubtypeOf(Type t)` - restituisce vero se la classe tipo da cui viene chiamato  è sottotipo di `t`
 
-Ognuna di queste classi presenta i seguenti metodi ereditati dall'interfaccia:
+Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID`:
 
-- `String getID()` - restituisce il tipo `enum` (`BOOL`, `INT`, `FUN`, ecc);
-- `boolean isSubtypeOf(Type t)` - restituisce vero se il tipo su cui viene richiamato questo metodo è sottotipo di `t`.
+- `VOIDTYPE` - nessun tipo
+- `BOOLTYPE` - un valore booleano
+- `INTTYPE` - un valore intero
+- `FUNTYPE` - una funzione o un metodo (seguono le stesse regole di typing)
+- `CLASSTYPE` - una classe
+- `INSTANCETYPE` - un'istanza di classe
 
 ### 4.2 Subtyping
 
@@ -405,29 +409,29 @@ Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi 
 
 ## 6. Stack Virtual Machine
 
-Una volta generato il bytecode, questo viene eseguito da una **SVM** (Stack Virtual Machine), una macchina virtuale che dispone di memoria ed esegue il codice generato. La VM dispone di uno **stack**, che rappresenta la memoria della macchina, e la computazione e' espressa da ripetute modifiche allo stack tramite operazioni di **push** e **pop**.
+Una volta generato il bytecode, questo viene eseguito da una **SVM** (Stack Virtual Machine). Questa macchina virtuale dispone di uno **stack**, che rappresenta la memoria della macchina; la computazione è espressa da ripetute modifiche allo stack tramite operazioni di **push** e **pop**.
 
-La macchina virtuale richiede in input un parametro `int[] code`, un array contenente una serie di istruzioni definite nella grammatica `svm.g4`. Queste vengono lette una ad una e per ognuna di loro e' fornita una implementazione in Java in termini di operazioni di push e pop sullo stack.
+La macchina virtuale richiede in input un parametro `int[] code`, un array contenente una serie di istruzioni definite nella grammatica `SVM.g4`. Queste vengono lette una ad una e, tramite un costrutto *switch-case* in `ExecuteVM.java`, per ognuna di loro è fornita una implementazione in termini di operazioni di push e pop sullo stack.
 
-Rispetto all'implementazione iniziale della VM, la modifica piu' degna di nota e' l'introduzione di una operazione di **new**, usata per allocare un oggetto in memoria. Gli oggetti infatti non possono vivere nello stack, e per questo motivo la loro creazione non puo' essere definita tramite operazioni di push e pop.
+Rispetto all'implementazione iniziale della VM, la modifica più importante è l'introduzione di una operazione di **new**, usata per allocare un oggetto in memoria. Gli oggetti, che sono istanze delle classi, non possono risiedere sullo stack insieme al resto dei dati e per questo motivo la loro creazione non può essere definita tramite le classiche operazioni di push e pop.
 
-Per risolvere questo problema l'operazione new alloca gli oggetti nella parte piu' alta dello stack, in un'area denominata **heap**.
+Per risolvere questo problema l'operazione `new` alloca gli oggetti nella parte più alta dello stack (indirizzi bassi), in un'area denominata **heap**.
 
 ### 6.1 Heap
 
-Lo heap e' implementato tramite una lista libera e rende disponibili i metodi:
+Lo heap è implementato tramite una lista libera e rende disponibili i metodi:
 
 - `HeapMemoryCell allocate(int size) throws VMOutOfMemoryException`
-  - alloca un'area di memoria, rimuovendo dalla lista libera `size` elementi, e restituisce al chiamante il primo elemento rimosso. Da questo e' possibile accedere agli elementi successivi tramite il suo attributo `next`
+  - alloca un'area di memoria, rimuovendo dalla lista libera `size` elementi, e restituisce al chiamante il primo elemento rimosso. Da questo è possibile accedere agli elementi successivi tramite il suo attributo `next`
   - nel caso la memoria richiesta sia superiore a quella disponibile, viene lanciata un'eccezione
 - `void deallocate(HeapMemoryCell firstCell)`
   - dealloca la memoria il cui primo blocco viene passato come parametro e la reinserisce nella lista libera, in modo che torni ad essere disponibile per l'allocazione
 
-E' stato scelto di implementare lo heap con una lista libera in modo da facilitare la gestione della **garbage collection**, infatti dopo una serie di allocazioni e deallocazioni di dimensioni differenti, lo heap potrebbe presentare *frammentazione interna*. L'uso della lista libera permette alla VM di ottenere blocchi di memoria logicamente ma non fisicamente contigui, in modo che essa possa operare senza tenere conto di questo problema.
+E' stato scelto di implementare lo heap con una lista libera in modo da facilitare la gestione della **garbage collection**, infatti dopo una serie di allocazioni e deallocazioni di dimensioni differenti, lo heap potrebbe presentare *frammentazione interna*. L'uso della lista libera permette alla VM di ottenere blocchi di memoria logicamente, ma non fisicamente, contigui; in modo che essa possa operare senza tenere conto di questo problema.
 
 ### 6.2 Garbage Collection
 
-E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto puo' essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack puo' produrre *falsi positivi*, poiche' l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre la probabilita' di ottenere falsi positivi e' stato introdotto un offset con un numero elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che e' sempre presente come primo valore sullo stack) o in generale numeri bassi sono piu' facilmente trovabili in programmi comuni, si pensi ad un iteratore.
+E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto può essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack può produrre *falsi positivi*, poichè l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre questa probabilità è stato introdotto un offset (`MEMORY_START_ADDRESS`) con un valore elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che è sempre presente come primo valore sullo stack), o più in generale numeri bassi, sono più facilmente trovabili in programmi comuni (p.e si pensi ad un iteratore).
 
 L'operazione di garbage collection viene eseguita se prima di allocare un oggetto, la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
 
