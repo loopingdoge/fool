@@ -72,7 +72,7 @@ In questa sezione si descriveranno le grammatiche che definiscono i linguaggi `F
 
 ### 2.1 Grammatica FOOL
 
-La produzione iniziale `prog` è rimasta invariata, può essere una semplice espressione `exp` oppure un'espressione preceduta da dichiarazioni di variabili `let in` e/o di classi `classdec`.
+#### 2.1.1 Met
 
 È stato aggiunto il non terminale `met`  per gestire separatamente le definizioni di metodi dalle definizioni di funzioni a livello semantico e di code generation. A riga 10 è possibile vedere come `met` sia solo un wrapper per il non terminale `fun` utilizzato all'interno di `classdec`:
 
@@ -91,6 +91,8 @@ met : fun;
 fun : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp;
 ```
 
+#### 2.1.2 funExp e methodExp
+
 Per permettere di utilizzare il valore di ritorno delle chiamate di funzioni e di metodi come fossero `exp`, sono state create due produzioni sotto `value`:
 
 - `#funExp` che rappresenta la chiamata di una funzione
@@ -108,6 +110,8 @@ value
 funcall : ID ( LPAR (exp (COMMA exp)* )? RPAR ) ;
 ```
 
+### 2.1.3 Operatori aggiuntivi
+
 Gli operatori aggiuntivi sono stati realizzati semplicemente aggiungendo delle opzioni per la riduzione del non terminale `operator`:
 
 ```ANTLR
@@ -123,7 +127,33 @@ left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? 
 
 ### 2.2 Grammatica SVM
 
-È stato necessario apportare modifiche anche alla *attribute grammar* dell'interprete FOOL. Per la operazioni di sottrazione e divisione sono stati semplicemente aggiungi i relativi terminali e non terminali `sub` e `div`. Invece per quanto riguarda l'operazione di `<=` è stata aggiunta una regola `BRANCHLESSQ` che si comporta in modo simile alla regola di `<` aggiungendo una *label* nel codice e alla collezione `labelRef` usata per fare *backpatching* alla fine della fase di parsing. È stata introdotta invece una nuova istruzione `LC` che come viene implementata come mostrato di seguito.
+#### 2.2.1 COPY
+
+Per semplificare  il riutilizzo dei valori sullo stack è stata aggiunta l'istruzione `COPY` che duplica il valore in cima alla pila. L'istruzione è implementata come segue:
+
+```ANTLR
+| COPY                        {   code.add(COPY);     }
+```
+
+```java
+case SVMParser.COPY:
+	push(memory[sp - MEMORY_START_ADDRESS]);
+	break;
+```
+
+#### 2.2.1 l = LABEL
+
+// TODO
+
+#### 2.2.2 LC
+
+Per implementare le chiamate di funzioni è stata aggiunta l'istruzione `LC` che permette di ottenere l'indirizzo del codice di una funzione partendo dalla sua label:
+
+```ANTLR
+| LC                          {   code.add(LC);       }
+```
+
+L'istruzione `LC` si aspetta in cima allo stack la label di una funzione, rimuove il valore dalla pila e lo usa come indice nell'array `code`, pushando il valore ottenuto in cima allo stack:
 
 ```java
 case SVMParser.LC:
@@ -132,11 +162,19 @@ case SVMParser.LC:
 	break;
 ```
 
-come si può vedere svolge un operazione molto simile a `LOADW`, ovvero prende l'indirizzo in cima allo stack e con questo accede all'array `code`, infine carica sullo stack il valore ottenuto. Questa nuova istruzione è utilizzata nella chiamata ad un metodo ed il valore ottenuto da `LC` è la prima istruzione di tale metodo a cui si salta con l'operazione di `JS`.
+#### 2.2.4 NEW
 
+//TODO
 
+#### 2.2.5 HOFF
 
-Alla grammatica dell'interprete inoltre è stata aggiunta un istruzione chiamata `HOFF` che sta per 'heap offset' utilizzato nella referenza ad un campo di un oggetto. Il suo scopo è quello di convertire l'offset del campo di un oggetto nell'offset reale tra l'inizio dell'oggetto nello heap ed il valore di questo campo. 
+L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap ed l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
+
+L'istruzione `HOFF` è implementata come segue:
+
+```ANTLR
+| HOFF                        {   code.add(HOFF);     }
+```
 
 ```java
 case SVMParser.HOFF:
@@ -156,30 +194,39 @@ case SVMParser.HOFF:
     break;
 ```
 
-La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verrà discussa successivamente.  In questo esempio, come in altre parti del progetto, vengono utilizzati i metodi `stream` di Java 8 per lavorare su collezzioni in modo compatto senza usare cicli.
+La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse successivamente,  in questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
 
 
+
+// TODO sistemare questo sotto, non fa parte della grammatica
 
 Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
 
 
 
-### 2.3 Classi Node
+### 2.3 Nodi
 
-Le componenti di un programma FOOL vengono legate a delle classi nodo; queste implementano il comportamento corretto delle varie produzioni della grammatica nelle diverse fasi di compilazione. L'interfaccia `INode` contiene le definizioni dei metodi necessari e viene implementata da tutti gli altri nodi. A questa interfaccia abbiamo scelto di rimpiazzare il metodo `toPrint()` con quello nativo di Java  `toString()` per la stampa dell'intero albero AST. Per fare questo abbiamo aggiunto un metodo `getChilds()` che restituisce un `ArrayList<INode>`  con i figli del nodo attuale.
+Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'interfaccia `INode` che rispetto alla versione originale è stata modificata come segue:
+
+- Il metodo `toPrint()` è stato sostituito dal metodo `toString()` nativo di Java
+- Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale
 
 #### 2.3.2 Nodi operatore
 
-La grammatica inizialmente permetteva solamente l'utilizzo dell'operatore `==`, che rendeva il linguaggio davvero limitato. Abbiamo quindi scelto di adempiere alla richiesta opzionale di aggiungere `<=`, `>=`, `<`, `>` per i confronti fra interi,  `&&`, `||`  per i confronti fra booleani ed anche gli operatori di divisione, sottrazione e il NOT (i.e. `!`).
+La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
 
-Ogni nodo operatore (escluso il NOT) presenta gli stessi parametri, ovvero:
-
-- `INode left` :  l'elemento a sinistra dell'operazione
-- `INode right`:  l'elemento a destra dell'operazione
-
-mentre il nodo operatore NOT ha solamente un `INode` figlio che è il booleano su cui si sta applicando il NOT.
+- gli operatori sottrazione e divisione `-` e `/`
 
 
+- gli operatori per il confronto fra interi  `<=`, `>=`, `<` e `>` 
+- gli operatori booleani  `&&`, `||` e `!` 
+
+Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
+
+- `INode left`,  l'operando sinistro
+- `INode right`,  l'operando destro
+
+mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato
 
 
 
