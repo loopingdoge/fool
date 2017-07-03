@@ -3,8 +3,9 @@
 
 Setup
 -
-1) Aggiungere il file `antlr-4.7-complete.jar` come libreria
-2) Aggiungere il file `snakeyaml-1.18.jar` come libreria
+1) Aggiungere il file `libs/antlr-4.7-complete.jar` come libreria
+2) Aggiungere il file `libs/snakeyaml-1.18.jar` come libreria
+3) Aggiungere il file `libs/commons-cli-1.4.jar` come libreria
  
 Descrizione:
 -
