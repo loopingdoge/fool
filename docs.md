@@ -71,7 +71,7 @@ In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL 
 
 Non è stato necessario modificare la produzione iniziale `prog` del linguaggio che può essere una semplice espressione oppure un espressione preceduta da dichiarazioni di variabili `let in` o di classi. Si è scelto di usare il non terminale `met`  per la definizione di metodi che per gestirli diversamente successivamente a livello semantico rispetto alla definizione di funzioni. Come è possibile vedere a riga 10, `met` è solo un wrapper per il non terminale `fun`. 
 
-```ANTLR
+```ANT
 prog
     : exp SEMIC                 		    #singleExp
     | let exp SEMIC                 	    #letInExp
@@ -250,6 +250,8 @@ La classe `Method` dispone di:
 
 
 
+#### 3.2.3 Validazione dichiarazione di classe
+
 La **validazione semantica di una classe** ha i seguenti passi:
 
 1. Per ogni campo `a` di  `attrDecList` creare un oggetto `Field` passando id e tipo ottenuti da `a`
@@ -309,36 +311,63 @@ Durante il controllo dei tipi si va a controllare che, per un determinato nodo, 
 
 Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID`:
 
-- `VOIDTYPE` - nessun tipo
-- `BOOLTYPE` - un valore booleano
-- `INTTYPE` - un valore intero
-- `FUNTYPE` - una funzione o un metodo (seguono le stesse regole di typing)
-- `CLASSTYPE` - una classe
-- `INSTANCETYPE` - un'istanza di classe
+- `VOID` - nessun tipo
+- `BOOL` - un valore booleano
+- `INT` - un valore intero
+- `FUN` - una funzione o un metodo (seguono le stesse regole di typing)
+- `CLASSDEC` - una classe
+- `INSTANCE` - un'istanza di classe
 
 ### 4.2 Subtyping
 
-Il concetto di subtyping specifica come un tipo T sia sottotipo di S se è vera una delle seguenti affermazioni: T ed S sono lo stesso tipo; T è un'estensione di S.
+Il concetto di subtyping identifica un tipo T come sottotipo di un tipo S (i.e. `T <: S`) se è vera una delle seguenti affermazioni: 
 
-Nell'implementazione del nostro compilatore l'analisi del subtyping diventa fondamentale con l'aggiunta delle classi (con relative estensioni), dei metodi e della loro sovrascrittura. Rimane fondamentale, ovviamente, anche per i tipi più semplici come booleani, interi o void, tuttavia in questi casi il nostro metodo *isSubtypeOf()* eseguirà solamente un confronto di uguaglianza fra i due tipi in questione (INT, BOOL e VOID non hanno estensioni di tipo nel nostro linguaggio FOOL).
+- T ed S sono lo stesso tipo   (`T <: T`)
+- T eredita da S   (`T <: S`)
+- T eredita da un tipo U che eredita da S   (`T <: U && U <: S`)
+
+Nel nostro compilatore l'analisi del subtyping diventa fondamentale con l'aggiunta delle classi e dell'**ereditarietà**, dei metodi e dell'**overriding**. Il type checking viene fatto anche per i tipi più semplici come booleani, interi tuttavia in questi casi il metodo `isSubtypeOf()` eseguirà solamente un confronto di uguaglianza fra i due tipi in questione poichè questi tipi non possono avere estensioni nel linguaggio FOOL.
+
+
 
 #### 4.2.1 FunType
 
-Come esplicitamente descritto nella consegna: *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
+Questa classe si occupa di controllare il corretto sottotipaggio tra due metodi come descritto nella consegna: *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
 
-Questo è il nostro codice:
+Supponendo che siano definite le funzioni
+
+-  `T' f1(T1', ... , Tn')` 
+-  `T f2(T1, ... , Tn)`
+
+allora la regola per il sottotipaggio tra funzioni è:
+
+
+$$
+\frac
+{
+T_1 <: T_1^{'} \quad \ldots \quad T_n <: T_n^{'} \qquad \&\& \qquad
+T^{'} <: T
+}
+{
+T_1^{'} \times \ldots \times T_n^{'} \rightarrow T^{'} 
+\quad 	<:  \quad
+T_1 \times \ldots \times T_n \rightarrow T 
+} \quad [metOver]
+$$
+
+
+All'interno di `FunType.java` questa regola è implementata con il seguente metodo:
 
 ```java
 public boolean isSubTypeOf(Type t) {
-    if (t instanceof FunType) {
-        FunType funType = (FunType) t;
+	if (t instanceof FunType) {
+    	FunType funType = (FunType) t;
         boolean check = true;
-
         if (this.params.size() == funType.getParams().size()) {
-            for (int i = 0; i < this.params.size(); i++) {
-                check &= funType.getParams().get(i).isSubTypeOf(this.params.get(i));
+            for (int i = 0; i < this.params.size(); i++) {  
+              check &= funType.getParams().get(i)
+                		.isSubTypeOf(this.params.get(i));
             }
-
             check &= this.returnType.isSubTypeOf(funType.returnType);
         } else {
             check = false;
@@ -350,39 +379,82 @@ public boolean isSubTypeOf(Type t) {
 }
 ```
 
+Notare come le chiamate ricorsive a `isSubtypeOf()` scandaglino la gerarchia dei tipi e come per il controllo del tipo di ritorno vengono invertiti i ruoli dei tipi chiamante e parametro.
 
 
-Abbiamo dunque, come prima cosa, controllato che il numero di parametri siano gli stessi, dopodiché, se il numero è lo stesso, controlliamo che ogni parametro di f1 sia sopratipo del corrispondente parametro di f2. Infine controlliamo che il tipo ritornato da f1 sia sottotipo del tipo ritornato da f2.
 
 #### 4.2.2 ClassType
 
-Sempre come riportato in consegna: *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2. Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
+Questa classe si occupa di controllare il corretto sottotipaggio tra due classi che, come descritto nella consegna, può avvenire se: 
 
-Questo il codice:
+1. [Estensione **diretta**] *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2...*
+2. [Estensione **indiretta**] *..Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
+
+Supponendo che siano definite le due classi
+
+- ```fool
+  class A (t1 a1, ... , tn an) {
+    t1' fa1(...)   
+   	// exp with type t1'
+    ... 
+    tn' fan(...)   
+   	// exp with type tn'
+  } 
+  ```
+
+- ```
+  class B (T1 b1, ... , Tn bn) {
+    T1' fb1(...)   
+   	// exp with type T1'
+    ... 
+    Tn' fbn(...)   
+   	// exp with type Tn'
+  }
+  ```
+
+
+
+allora la regola per il sottotipaggio tra due classi è:
+
+
+$$
+\frac
+{
+b1 <: a1 \quad \ldots \quad bn <: an
+\qquad \&\& \qquad
+fb1 <: fa1 \quad \ldots \quad fbn <: fan
+}
+{
+A
+\quad 	<:  \quad
+B
+} \quad [classExt]
+$$
+Questa regola, che al suo interno sfrutta anche la regola ==[metOver]== per il sottotipaggio di metodi, viene implementata nel metodo `checkSemantics` come precedentemente descritto nel punto 13 della sezione 3.2.3 di questa relazione. 
+
+
+
+All'interno di `ClassType.java` viene implementato solo il controllo sull'estensione indiretta con il seguente metodo:
 
 ```java
 public boolean isSubTypeOf(Type t2) {
     if (t2 instanceof ClassType) {
         ClassType ct2 = (ClassType) t2;
-
       	if (this.getClassID().equals(ct2.getClassID())) {
             return true;
         }
-      
         if (superType != null) {
-            return this.getSuperclassID().equals(ct2.getClassID()) || superType.isSubTypeOf(t2);
+            return this.getSuperclassID().equals(ct2.getClassID()) ||
+                   superType.isSubTypeOf(t2);
         }
     }
     return false;
 }
 ```
 
-Qua per prima cosa verifichiamo se le due classi hanno lo stesso nome, in tal caso ritorniamo subito **true** senza fare ulteriori controlli. Se hanno nomi diversi allora controlliamo se sia una sottoclasse estesa di *t2*. Come si vede dal codice il valore booleano del return può essere true solo se:
+Per prima cosa verifichiamo che le due classi non siano dello stesso tipo, ovvero abbiano lo stesso nome, in tal caso ritorniamo immediatamente **true**. Altrimenti, si procede a controllare se siamo in presenza di eredetarietà multilivello, ovvero se è la superclasse di `this` ad essere un estensione diretta di `t2`. Con il secondo costrutto *if* si risale ricorsivamente la catena di eredetarietà cercando `t2`.
 
-- La classe corrente è una classe estesa di *t2*;
-- La superclasse della classe corrente è sottotipo di *t2*.
 
-Il secondo caso va a coprire quella casistica che vede un'estensione di classe che a sua volta era un'estensione di un'altra classe, in questo caso viene richiamando a sua volta il medesimo metodo, risalendo tutte le superclassi fino ad arrivare alla classe madre per verificarne se sia il suo sottotipo.
 
 #### 4.2.3 InstanceType
 
@@ -399,13 +471,19 @@ public boolean isSubTypeOf(Type type) {
 }
 ```
 
+
+
 ### 4.3 Typecheck sugli operatori
 
 Come detto nel paragrafo 2.3.2 ogni operatore ha due INode figli che rappresentano l'elemento di destra e l'elemento a sinistra dell'operatore. Nel caso di operatori che confrontano valori interi il nostro controllo di tipo andrà a verificare che il tipo del nodo di destra sia sottotipo del nodo di sinistra, e che siano quindi INT.
 
 Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi che entrambi siano sottotipi di BOOL.
 
+
+
 ## 5. Code generation
+
+
 
 ## 6. Stack Virtual Machine
 
@@ -439,6 +517,10 @@ L'operazione di garbage collection viene eseguita se prima di allocare un oggett
 - 10 (in caso di memoria particolarmente piccola)
 
 ## 7. Testing e conclusioni
+
+Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
+
+
 
 ### Validazione di tipo (classdec)
 
@@ -499,7 +581,12 @@ $$
 [new]
 $$
 
-### Code generation
+### Code generation\Gamma \vdash A : \text{Class } \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  St_1 <: T_1 \ldots St_n <: T_n
+}{
+
+	\Gamma \vdash \text{new } A(a_1 : St_1 , \ldots , a_n : St_n ) : \text{Instance}
+}
+[new]
 
 - Allocare una nuova area di memoria nello heap
 - Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
