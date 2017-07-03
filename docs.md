@@ -296,7 +296,7 @@ La **validazione semantica di una classe** ha i seguenti passi:
 
 ## 4. Type checking
 
-Il type checking del programma FOOL in input dal compilatore viene eseguito subito dopo l'analisi semantica e ogni nodo padre chiama quello del figlio. Il controllo del tipaggio corretto viene però logicamente svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che restituisce il tipo di quel nodo. Prima questo tipo, avviene un controllo sui tipi dei figli, e se presenti, e sui propri parametri e/o argomenti. 
+In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo dei tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
 
 
 
@@ -304,189 +304,172 @@ Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo 
 
 ### 4.1 Type system
 
-Durante il controllo dei tipi si va a controllare che, per un determinato nodo, l'operazione, la funzione o la classe, o più in generale tutti i componenti di quel nodo rispettino le regole di tipaggio. Ogni struttura quindi ha le proprie regole di typing che sono diverse dalle altre, come ad esempio le regole di subtyping. Abbiamo scelto quindi di creare un'interfaccia `Type` che presenta i seguenti metodi su cui basare le regole di tipaggio: 
+Durante il controllo dei tipi si va a controllare che, per un determinato nodo, l'operazione, la funzione o la classe, o più in generale tutti i componenti di quel nodo rispettino le regole di inferenza. Nella nostra implementazione Java, abbiamo scelto di creare un'interfaccia `Type` che presenta i seguenti metodi su cui basare le regole di typing: 
 
 - `String getID()` - restituisce un valore dell'enumerazione `TypeID` 
 
-- `boolean isSubtypeOf(Type t)` - restituisce vero se la classe tipo da cui viene chiamato  è sottotipo di `t`
+- `boolean isSubtypeOf(Type t)` - restituisce `true` se la classe tipo da cui viene chiamato è sottotipo di `t`, `false` altrimenti
 
   ​
 
-Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID`:
+Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID` in seguito elencata:
 
-- `VOID` - nessun tipo
-- `BOOL` - un valore booleano
-- `INT` - un valore intero
-- `FUN` - una funzione o un metodo (seguono le stesse regole di typing)
-- `CLASSDEC` - una classe
-- `INSTANCE` - un'istanza di classe
+- `BOOL` - un valore booleano:
 
 
+$$
+\frac{}{\Gamma \vdash true : Bool}[BoolTrue]
+\qquad \qquad 
+\frac{}{\Gamma \vdash false : Bool}[BoolFalse]
+$$
 
-Per fornire un esempio del funzionamento del type system in FOOL consideriamo il caso di applicazione di un operatore a due elementi. Come spiegato nel paragrafo 2.3.2, ogni operatore ha due `INode` figli che rappresentano l'elemento di destra e l'elemento di sinistra. 
+$$
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ \&\& \ e_2 : Bool}[And]
+\qquad
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ || \ e_2 : Bool}[Or]
+$$
 
-1. Nel caso di operatori che confrontano valori interi il controllo andrà a verificare che sia il tipo dell'elemento destro sia dell'elemento sinistro destra sia sottotipo del tipo `INT`.
+$$
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ < \ e_2 : Bool}[Less]
+\qquad
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ > \ e_2 : Bool}[Greater]
+$$
 
-2. Nel caso invece di operatori booleani avverrà la medesima cosa ma accertandosi che entrambi siano sottotipi di BOOL
+$$
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ <= \ e_2 : Bool}[LessEqual]
+\qquad
+\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ >= \ e_2 : Bool}[GreaterEqual]
+$$
 
-   ​
+$$
+\frac{\Gamma \vdash c : Bool \qquad e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ c \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
+$$
+
+- `INT` - un valore intero:
+
+
+$$
+\frac{\text{x is an} \ \ Int \ \ \text{token}}{\Gamma \vdash x : Int}[Int]
+$$
+
+$$
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ + \ e_2 : Int}[Sum]
+\qquad
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ - \ e_2 : Int}[Sub]
+$$
+
+- `FUN` - una funzione o un metodo (seguono le stesse regole di typing):
+
+
+$$
+\frac{\Gamma [p_1 \rightarrow T_1] \ ... \ [p_n \rightarrow T_n] \vdash e : T}{\Gamma \vdash T \ foo(T_1 \ p_1, ..., T_n \ p_n) \ e; \  : (T_1, ..., T_n) \rightarrow T}[FunDef]
+$$
+
+$$
+\frac{\Gamma \vdash foo : (T_1, ..., T_n) \rightarrow T \qquad a_1 : ST_1 <: T_1 ,\ldots, a_n : ST_n <: T_n}{\Gamma \vdash foo(ST_1 \ a_1,...,ST_n \ a_n) : T}[FunApp]
+$$
+
+- `CLASSDEC` - una classe:
+
+
+$$
+\frac{\Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_1p_1 \rightarrow F_1T_1] \ ... \ [f_1p_n \rightarrow F_1T_n] \vdash e_1 : F_1 \ ... \ \Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_np_1 \rightarrow F_nT_1] \ ... \ [f_np_n \rightarrow F_nT_n] \vdash e_n : F_n}{\Gamma \vdash class \ A \ (T_1 \ a_1, ..., T_n \ a_n) \ \{F_1 \ f_1(F_1T_1 \ f_1p_1, ..., F_1T_n \ f_1p_n) \ e_1;,...,F_n \ f_n(F_nT_1 \ f_np_1, ..., F_nT_n \ f_np_n) \ e_n;\} : Class}[ClassDef]
+$$
+
+- `INSTANCE` - un'istanza di classe:
+
+
+
+$$
+\frac{
+	\Gamma \vdash A : Class \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  a_1 : ST_1 <: T_1 ,\ldots, a_n : ST_n <: T_n
+}{
+	\Gamma \vdash \text{new } A(ST_1 \ a_1, \ldots ,ST_n \ a_n) : Instance
+}
+[New]
+$$
+
+$$
+\frac{\Gamma \vdash o : Instance \quad \exists \ foo : (T_1,...,T_n) \rightarrow T \in methods(class(o)) \ | \ a_1 : T'_1,...,a_n : T'_n \quad T'_1 <: T_1 \ ... \ T'_n <: T_n}{\Gamma \vdash o.foo(a_1,...,a_n) : T}[MethodCall]
+$$
+
+In aggiunta a queste regole, e' stato anche definito l'operatore **let-in** per permettere l'introduzione di variabili all'interno di un'espressione:
+$$
+\frac{\Gamma[x \rightarrow T''] \vdash e' : T' \quad e:T <: T''}{\Gamma \vdash let \ T'' \ x \ = \ e \ in \ e' \ : T'}[LetIn]
+$$
 
 ### 4.2 Subtyping
 
-Il concetto di subtyping identifica un tipo T come sottotipo di un tipo S (i.e. `T <: S`) se è vera una delle seguenti affermazioni: 
+Si considerano in seguito le regole di subtyping per i tipi definiti precedentemente.
 
-- T ed S sono lo stesso tipo   (`T <: T`)
-- T eredita da S   (`T <: S`)
-- T eredita da un tipo U che eredita da S   (`T <: U && U <: S`)
+#### 4.2.1 Interi
 
-Nel nostro compilatore l'analisi del subtyping diventa fondamentale con l'aggiunta delle classi e dell'**ereditarietà**, dei metodi e dell'**overriding**. Il type checking viene fatto anche per i tipi più semplici come booleani, interi tuttavia in questi casi il metodo `isSubtypeOf()` eseguirà solamente un confronto di uguaglianza fra i due tipi in questione poichè questi tipi non possono avere estensioni nel linguaggio FOOL.
+$$
+\frac{\Gamma \vdash n_1 : Int \quad n_2 : Int}{\Gamma \vdash n_1 <: n_2}[IntSubtype]
+$$
 
+#### 4.2.2 Booleani
 
+$$
+\frac{\Gamma \vdash b_1 : Bool \quad b_2 : Bool}{\Gamma \vdash b_1 <: b_2}[BoolSubtype]
+$$
 
-#### 4.2.1 FunType
+#### 4.2.1 Funzioni
 
-Questa classe si occupa di controllare il corretto sottotipaggio tra due metodi come descritto nella consegna:
-
-> *"Il tipo di una funzione f1 è sottotipo del tipo di una funzione f2 se il tipo ritornato da f1 è sottotipo del tipo ritornato da f2, se hanno il medesimo numero di parametri, e se ogni tipo di paramentro di f1 è sopratipo del corrisponde tipo di parametro di f2."* 
-
-
-
-Supponendo che siano definite le funzioni
-
--  `T' f1(T1', ... , Tn')` 
--  `T f2(T1, ... , Tn)`
-
-allora la regola per il sottotipaggio tra funzioni è:
+La regola di subtyping per le funzioni e':
 
 
 $$
 \frac
 {
-T_1 <: T_1^{'} \quad \ldots \quad T_n <: T_n^{'} \qquad \&\& \qquad
-T^{'} <: T
+\Gamma \vdash f_1 : (T_1^{'} , \ldots , T_n^{'}) \rightarrow T^{'}
+\qquad \Gamma \vdash f_2 : (T_1 , \ldots , T_n) \rightarrow T 
+\qquad T_1 <: T_1^{'} \ \ldots \ T_n <: T_n^{'}
+\qquad T^{'} <: T
 }
 {
-T_1^{'} \times \ldots \times T_n^{'} \rightarrow T^{'} 
-\quad 	<:  \quad
-T_1 \times \ldots \times T_n \rightarrow T 
-} \quad [metOver]
+\Gamma \vdash f_1<: f_2 
+}[FunSubtype]
 $$
 
 
-All'interno di `FunType.java` questa regola è implementata con il seguente metodo:
+Questa regola viene implementata all'interno del file `FunType.java`.
 
-```java
-public boolean isSubTypeOf(Type t) {
-	if (t instanceof FunType) {
-    	FunType funType = (FunType) t;
-        boolean check = true;
-        if (this.params.size() == funType.getParams().size()) {
-            for (int i = 0; i < this.params.size(); i++) {  
-              check &= funType.getParams().get(i)
-                		.isSubTypeOf(this.params.get(i));
-            }
-            check &= this.returnType.isSubTypeOf(funType.returnType);
-        } else {
-            check = false;
-        }
-        return check;
-    } else {
-        return false;
-    }
-}
-```
+#### 4.2.2 Classi
 
-Notare come le chiamate ricorsive a `isSubtypeOf()` scandaglino la gerarchia dei tipi e come per il controllo del tipo di ritorno vengono invertiti i ruoli dei tipi chiamante e parametro.
-
-
-
-#### 4.2.2 ClassType
-
-Questa classe si occupa di controllare il corretto sottotipaggio tra due classi che, come descritto nella consegna, può avvenire se: 
-
-1. > [Estensione **diretta**] *"Una classe C1 è sottotipo di una classe C2 se C1 estende C2 e se i campi e metodi che vengono sovrascritti sono sottotipi rispetto ai campi e metodi corrispondenti di C2...*
-
-2. > [Estensione **indiretta**] *..Inoltre, C1 è sottotipo di C2 se esiste una classe C3 sottotipo di C2 di cui C1 è sottotipo."*
-
-Supponendo che siano definite le due classi
-
-- ```fool
-  class A (t1 a1, ... , tn an) {
-    t1' fa1(...)   
-   	// exp with type t1'
-    ... 
-    tn' fan(...)   
-   	// exp with type tn'
-  } 
-  ```
-
-- ```
-  class B (T1 b1, ... , Tn bn) {
-    T1' fb1(...)   
-   	// exp with type T1'
-    ... 
-    Tn' fbn(...)   
-   	// exp with type Tn'
-  }
-  ```
-
-
-
-allora la regola per il sottotipaggio tra due classi è:
-
+Le regole di subtyping tra classi sono:
 
 $$
 \frac
 {
-b1 <: a1 \quad \ldots \quad bn <: an
-\qquad \&\& \qquad
-fb1 <: fa1 \quad \ldots \quad fbn <: fan
+\Gamma \vdash A : Class \quad B:Class
+\quad B \ \ implements \ \ A
+\quad \forall \ a_i \in fields(A) ,\ \exists \ b_i \in fields(B) \ | \ b_i <: a_i
+\quad \forall fb_i \in redefined\_methods(B), \ \exists \ fa_i \in methods(A) \ | fb_i <: fa_i
 }
 {
-A
-\quad 	<:  \quad
-B
-} \quad [classExt]
+B <: A
+} [ClassDirectSubtype]
 $$
-Questa regola, che al suo interno sfrutta anche la regola ==[metOver]== per il sottotipaggio di metodi, viene implementata nel metodo `checkSemantics` come precedentemente descritto nel punto 13 della sezione 3.2.3 di questa relazione. 
+$$
+\frac
+{\Gamma \vdash A : Class \quad C : Class \qquad \exists \ B :Class \ | \ C <: B \quad B <: A}
+{\Gamma \vdash C <: A}[ClassIndirectSubtype]
+$$
 
+Queste regole di subtyping vengono implementate all'interno del file `ClassType.java`.
 
+#### 4.2.3 Istanze
 
-All'interno di `ClassType.java` viene implementato solo il controllo sull'estensione indiretta con il seguente metodo:
-
-```java
-public boolean isSubTypeOf(Type t2) {
-    if (t2 instanceof ClassType) {
-        ClassType ct2 = (ClassType) t2;
-      	if (this.getClassID().equals(ct2.getClassID())) {
-            return true;
-        }
-        if (superType != null) {
-            return this.getSuperclassID().equals(ct2.getClassID()) ||
-                   superType.isSubTypeOf(t2);
-        }
-    }
-    return false;
-}
-```
-
-Per prima cosa verifichiamo che le due classi non siano dello stesso tipo, ovvero abbiano lo stesso nome, in tal caso ritorniamo immediatamente **true**. Altrimenti, si procede a controllare se siamo in presenza di eredetarietà multilivello, ovvero se è la superclasse di `this` ad essere un estensione diretta di `t2`. Con il secondo costrutto *if* si risale ricorsivamente la catena di eredetarietà cercando `t2`.
-
-
-
-#### 4.2.3 InstanceType
-
-La classe che rappresenta il tipo istanza di una classe contiene al suo interno il `ClassType` della classe di cui è istanza. Il controllo sul subtyping avviene delegando al metodo `isSubTypeOf()` di `ClassType` 
-
-
+La regola di subtyping tra istanze di classi e':
+$$
+\frac{\Gamma \vdash a : Instance \quad b : Instance \quad class(a) <: class(b)}{\Gamma \vdash a <: b}[InstanceSubtype]
+$$
+Questa regola di subtyping e' implementata nel file `InstanceType.java`.
 
 ## 5. Code generation
 
-// TODO: scegliere cosa tenere della roba seguente
-
-/* -----------------------------------------------------------------------------------------------------------------
-
-### Code generation (classdec)
+### 5.1 Class definition
 
 - Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
 - Se `C` estende un'altra classe `Super`:
@@ -498,106 +481,7 @@ La classe che rappresenta il tipo istanza di una classe contiene al suo interno 
   - inserire `new_m_label` + `codegen(new_m)` nel codice delle funzioni
   - aggiungere in `c_entry` un nuovo metodo `new_m.id` con label `new_m_label`
 
-------
-
-## 2. Istanziazione di classe (oggetto)
-
-### Descrizione
-
-L'istanziazione di classe è definita in `NewNode` e si occupa di creare oggetti nello heap e restituirne l'indirizzo
-
-### Attributi
-
-| Attributo | Tipo               | Descrizione         |
-| --------- | ------------------ | ------------------- |
-| `classID` | `String`           | id della classe     |
-| `args`    | `ArrayList<INode>` | lista dei parametri |
-
-### Validazione semantica
-
-- Recuperare il `ClassType` corrispondente a `classID` dalla tabella dei simboli
-- Verificare che il numero di attributi passati al costruttore sia uguale a `classtype.fields.size()`
-
-### Validazione di tipo
-
-- Scorrere `args` con un indice `i = 0`:
-  - verificare che `typecheck(args[i])` sia sottotipo di `typecheck(classtype.fields[i])`
-
-$$
-\frac{
-	\Gamma \vdash A : \text{Class } \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  St_1 <: T_1 \ldots St_n <: T_n
-}{
-	\Gamma \vdash \text{new } A(a_1 : St_1 , \ldots , a_n : St_n ) : \text{Instance}
-}
-[new]
-$$
-
-- Allocare una nuova area di memoria nello heap
-- Quando creo un oggetto di classe C, devo dargli un puntatore che punti alla dispatch table di classe C (TODO)
-- TODO
-
-------
-
-## 3. Utilizzo di un attributo
-
-### Descrizione
-
-Gli attributi sono dei casi particolari di `IdNode` il cui valore non si trova in uno scope esterno ma in un oggetto nello heap 
-
-### Attributi
-
-| Nome                   | Tipo               | Descrizione                              |
-| ---------------------- | ------------------ | ---------------------------------------- |
-| `attrib_id`            | `String`           | L'id dell'attributo                      |
-| `entry`                | `SymbolTableEntry` | Entry della definizione dell'attributo nell Symbol Table |
-| `nesting_level`        | `Integer`          | Nesting level dell'utilizzo dell'attributo |
-| `object_offset`        | `Integer`          | L'offset dell'oggetto rispetto al `frame pointer` |
-| `object_nesting_level` | `Integer`          | Nesting level di definizione dell'oggetto |
-
-### Validazione semantica
-
-- TODO
-
-### Validazione di tipo
-
-- TODO
-
-### Code generation
-
-- TODO
-
-------
-
-## 4. Chiamata di metodo
-
-### Descrizione
-
-La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una chiamata a funzione, deve mettere sullo stack un riferimento all'oggetto sul quale viene eseguita
-
-### Attributi
-
-| Nome                   | Tipo              | Descrizione                              |
-| ---------------------- | ----------------- | ---------------------------------------- |
-| `method_id`            | `String`          | L'id del metodo chiamato                 |
-| `method_offset`        | `Integer`         | Offset del metodo nella dispatch table   |
-| `args`                 | `ArrayList<Node>` | La lista degli argomenti passati al metodo |
-| `nesting_level`        | `Integer`         | Nesting level della chiamata del metodo  |
-| `object_id`            | `String`          | L'id dell'oggetto su cui è chiamato il metodo |
-| `object_offset`        | `Integer`         | L'offset dell'oggetto rispetto al `frame pointer` |
-| `object_nesting_level` | `Integer`         | Nesting level di definizione dell'oggetto |
-
-### Validazione semantica
-
-- Recupera dalla symbol table l' `object_type` di `object_id`
-- Verifica che `object_type` sia di tipo `InstanceType`
-- Verifica che il `class_type` di `object_type` contenga un metodo che abbia  `id` uguale a `method_id` e recupera `method_type`
-- Verifica che il numero di `args` sia uguale al numero di parametri definito in `method_type`
-
-### Validazione di tipo
-
-- Scorre `args` con un indice `i = 0` verificando per ogni argomento il tipo di `args[i]` sia sottotipo di `method_type.args[i]`
-
-### Code generation
+### 5.2 Method call
 
 - Carica il valore di `$fp` sullo stack
 - Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
@@ -607,15 +491,17 @@ La chiamata ad un metodo è definita in `MethodCallNode` e, diversamente da una 
 - Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
 - Setta `$ra` e salta all'esecuzione del codice del metodo
 
-------
+### 5.3 Istanziazione di classe
 
-## 5. Dispatch tables
+TODO
 
-### Descrizione
+### 5.4 Utilizzo di un attributo
 
-Le dispatch tables sono implementate in `CodegenUtils` come strutture dati popolate durante la valutazione semantica, dalle quali successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation
+TODO
 
-### Attributi
+### 5.5 Dispatch table
+
+La dispatch table e' implementata in `CodegenUtils` come struttura dati popolata durante la valutazione semantica, dalle quale successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation.
 
 Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
 
@@ -624,9 +510,7 @@ Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che as
 | `method_id`    | `String` | L'id del metodo chiamato                 |
 | `method_label` | `String` | label corrispondente all'indirizzo del codice della funzione |
 
-### Metodi
-
-Per gestire le strutture dati sono disponibili: 
+Per gestire le strutture dati sono disponibili i metodi: 
 
 - `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
   Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
@@ -635,91 +519,7 @@ Per gestire le strutture dati sono disponibili:
 - `String generateDispatchTablesCode()`
   Genera e restituisce il codice `SVM` delle dispatch tables
 
-## 6. Esempi
-
-- ### Esempio 1
-
-```fool
-class Calculator (
-  int x
-) {
-  int xPlus(int i)
-    x + i
-  ;
-}
-
-class BetterCalculator implements Calculator (
-  int x
-) {
-  int xPlusOne()
-    xPlus(1)
-  ;
-}
-
-class WrongCalculator implements Calculator (
-  int x,
-  int y
-) {
-  int xPlus(int i)
-    y
-  ;
-}
-```
-
-- ### Dispatch tables
-
-#### Calculator
-
-| Offset | Value          |
-| :----- | :------------- |
-| 1      | label of xPlus |
-
-#### BetterCalculator
-
-| Offset | Value              |
-| :----- | :----------------- |
-| 1      | label of  xPlus    |
-| 2      | label of  xPlusOne |
-
-- #### WrongCalculator
-
-| Offset | Value                     |
-| :----- | :------------------------ |
-| 1      | label of overridden xPlus |
-
-- ### Heap layout
-
-#### Calculator
-
-`Calculator c = new Calculator(1)`
-
-| Row no. | Value        |
-| :------ | :----------- |
-| 1       | `address(c)` |
-| 2       | 1            |
-
-#### BetterCalculator
-
-`BetterCalculator bc = new BetterCalculator(2)`
-
-| Row no. | Value         |
-| :------ | :------------ |
-| 1       | `address(bc)` |
-| 2       | 2             |
-
-#### WrongCalculator
-
-`WrongCalculator wc = new WrongCalculator(7, 6)`
-
-| Row no. | Value         |
-| :------ | :------------ |
-| 1       | `address(wc)` |
-| 2       | 7             |
-| 3       | 6             |
-
--------------------------------------------------------------------------------------------------------------------------- */
-
-
+TODO dire qualcosa di piu'
 
 ## 6. Stack Virtual Machine
 
@@ -752,6 +552,22 @@ L'operazione di garbage collection viene eseguita se prima di allocare un oggett
 - 5% della memoria totale
 - 10 (in caso di memoria particolarmente piccola)
 
-## 7. Testing e conclusioni
+## 7. Testing
 
-Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
+Durante lo sviluppo e' stato adottato un processo Test Driven Development (**TDD**) in modo da evitare che con cambiamenti al codice sorgente si "rompessero" feature gia' funzionanti.
+
+Nello specifico e' stata creata una test suite dentro al file `test.yml`, il quale, adottando la sintassi YAML, presenta la seguente struttura:
+
+```yaml
+testId - descrizione del test:
+-	codice fool
+-	risultato atteso
+```
+
+Il file viene parsato e da ogni test viene estratto il codice fool, il quale viene eseguito e viene confrontato il risultato ottenuto con quello atteso. Se i due risultati sono diversi, il test viene segnato come fallito. Al termine dell'esecuzione di tutti i test viene indicato quanti di essi sono stati superati con successo.
+
+Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo ne' di ottenere il risultato finale di un'esecuzione, ne' di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. E' stato quindi eseguito un refactoring del codice inserendo una eccezione al metodo `type`, ed e' stato fatto in modo che il metodo `cpu` della VM restituisca un valore al termine dell'esecuzione.
+
+## 8. Conclusioni
+
+TODO Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
