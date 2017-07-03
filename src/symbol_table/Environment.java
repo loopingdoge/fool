@@ -1,6 +1,5 @@
 package symbol_table;
 
-import exception.RedeclaredClassException;
 import exception.RedeclaredVarException;
 import exception.UndeclaredClassException;
 import exception.UndeclaredVarException;

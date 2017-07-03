@@ -234,25 +234,29 @@ mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode`
 
 ### 3.1 Symbol Table
 
-Per discutere la nostra implementazione della fase di analisi semantica è fondamentale partire dalla struttura della symbol table.  La tabella dei simboli fa parte dell'ambiente (istanza della classe `Environment`) che viene passato ad ogni nodo dell'AST per eseguire la sua analisi semantica. Come detto in precedenza, la tabella dei simboli è stata implementata con una lista di hashtable:
+La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
 
-`private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable = new ArrayList<>();`
+```java
+private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
+```
 
-che come si può osservare è stata resa pubblica. Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
+All'ambiente sono stati aggiunti anche i seguenti metodi per gestire la symbol table:
 
-- `addEntry(String id, Type type, int offset)`
+Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
 
-  inserisce nella più recente hashmap un oggetto `SymbolTableEntry` con nome e tipo dati come parametro alla funzione.
+- `public Environment addEntry(String id, Type type, int offset)`
 
-- `getLatestEntryOf(String id)`
+  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una`RedeclaredVarException`
 
-  che sfrutta oggetti di tipo `Iterator` per scorrere la lista di tabella hash ed in ognuna di queste controlla se è contenuta un'entrata con un `id` uguale a quello passato come parametro. In caso positivo l'entrata viene ritornata, in caso negativo viene sollevata una `UndeclaredVarException`.
+- `public SymbolTableEntry getLatestEntryOf(String id)`
 
-- `setEntryType(String id, Type newtype, int offset)`
+  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una`UndeclaredVarException` 
 
-  questo metodo è stato introdotto per permettere di fare riferimento ad una classe all'interno di un altra definita precedentemente nel codice.  Prima di procedere al controllo semantico di ogni classe, viene fatta un inserzione nella tabella dei simboli di una entry 'incompleta' di tutte le classi e successivamente con questo metodo la entry 'incompleta' viene sostituita a quella con il `type` correttamente costruito.
+- `public Environment setEntryType(String id, Type newtype, int offset)`
 
+  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
 
+  ​
 
 
 ### 3.2 Dichiarazione di classi
