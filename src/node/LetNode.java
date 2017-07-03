@@ -5,7 +5,6 @@ import main.SemanticError;
 import symbol_table.Environment;
 import type.Type;
 import exception.TypeException;
-import util.CodegenUtils;
 
 import java.util.ArrayList;
 

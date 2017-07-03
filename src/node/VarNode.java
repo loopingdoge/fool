@@ -2,14 +2,11 @@ package node;
 
 import exception.RedeclaredVarException;
 import exception.TypeException;
-import exception.UndeclaredClassException;
 import grammar.FOOLParser;
 import main.SemanticError;
 import symbol_table.Environment;
-import type.ClassType;
 import type.InstanceType;
 import type.Type;
-import util.CodegenUtils;
 
 import java.util.ArrayList;
 

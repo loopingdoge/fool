@@ -4,7 +4,6 @@ import exception.UndeclaredClassException;
 import exception.UndeclaredVarException;
 import main.SemanticError;
 import symbol_table.Environment;
-import util.CodegenUtils;
 
 import java.util.ArrayList;
 

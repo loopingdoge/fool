@@ -1,10 +1,10 @@
 # FOOL - Functional Object Oriented Language
 
-#### Progetto del corso di Compilatori ed Interpreti AA 2016/2017
+***Progetto del corso di Compilatori ed Interpreti AA 2016/2017***
 
-##### Corso di Laurea Magistrale in Informatica, Università di Bologna
+***Corso di Laurea Magistrale in Informatica, Università di Bologna***
 
-##### ***Componenti del gruppo*** (in ordine alfabetico)
+***Componenti del gruppo***
 
 - Alberto Nicoletti (matricola 819697)
 - Devid Farinelli (matricola 819683)
@@ -13,51 +13,54 @@
 
 ------
 
-## **Tabella dei contenuti**
+***Tabella dei contenuti***
 
 [TOC]
 
 ## 1. Struttura del progetto
 
-Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente FOOL ed un interprete che prendendo il codice intermedio, generato dal compilatore, lo traducesse in istruzioni eseguibili direttamente dal calcolatore. Il processore finale viene simulato dalla classe `ExecuteVM.java` che recuperando le istruzioni dal codice e modificando i valori delle memoria produce il risultato voluto.
+Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` e le esegua su un calcolatore emulato. 
 
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection ed estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`)
 
+Il progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di `ANTLR v4.7`.  
 
-L'intero progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di ANTLR v4.7.  La cartella `src` contiene il codice sorgente che è suddiviso in diversi package
+La cartella `src` contiene il codice sorgente che è suddiviso in diversi package:
 
 - `exception`
 
-  contiene le classi necessarie ad istanziare le eccezzioni sintattiche, semantiche e a run-time con i corretti messaggi d'errore.
+  contiene le classi che implementano le eccezioni sintattiche, semantiche e di run-time con i relativi messaggi d'errore
 
 - `grammar`
 
-  contiene le grammatiche del linguaggio FOOL e del linguaggio dell'interprete nel formato *.g4* di ANTLR che a partire da queste produce una serie di classi (i.e. lexer e costruzione AST)
+  contiene le grammatiche in formato `.g4` del linguaggio `FOOL` e del linguaggio `SVM`. A partire da questi file, ANTLR genera le risorse necessarie per implementare Lexer, Parser e Visitor
 
 - `main`
 
-  contiene la nostra implementazione della classe per la la costruzione per visita dell'albero sintattico astratto. Inoltre contiene le classi che avviano e configurano l'intero processo di compilazione-interpretazione-esecuzione su un singolo input oppure sulla test unit *test.yml*
+  contiene le classi necessarie alla sequenzializzazione delle varie fasi di esecuzione di un programma `FOOL`: analisi lessicale e sintattica, analisi semantica, code generation ed esecuzione effettiva. Sono disponibili le modalitá:
+
+  - `TestDebug`, che prende come input un solo programma contenuto in `input.fool`
+  - `TestComplete` , che esegue in sequenza tutti i programmi contenuti in `test.yml`
 
 - `node`
 
-  contiene una classe per ogni nodo dell'AST creato dal lexer. Ognuno di questi nodi contiene i metodi il controllo semantico, la generazione di codice (visita con modalità top-down) e di tipo (visita con modalità bottom-up). 
+  contiene una classe per ogni nodo dell'AST creato dal lexer. Ciascuno dei nodi implementa i metodi necessari per il controllo semantico, il type checking (visita bottom-up) e la code generation (visita top-down)
 
 - `symbol_table`
 
-  contiene la tabella dei simboli, implementata con una lista di hashtable, necessaria nella fase di dichiarazione e di referenza ad una variabile e nella fase di controllo semantico.
+  contiene la tabella dei simboli, implementata con una lista di hashtable, utilizzata durante il controllo semantico in caso di dichiarazione o di riferimento ad una variabile
 
 - `type`
 
-  contiene le classi corrispondenti ai tipi forniti dal linguaggio FOOL. Le istanze di queste classi, con tutte le informazioni necessarie, vengono memorizzate all'interno della tabella dei simboli che ha visibilità globale.
+  contiene le classi che implementano i tipi primitivi del linguaggio `FOOL`. Ad ogni nodo dell'albero corrispone un tipo che viene utilizzato per il controllo semantico, il type checking e come entry della tabella dei simboli per le variabili e le funzioni. 
 
 - `util`
 
-  contiene metodi di utilità utilizzati nella fase di code generation, infatti è quì che viene creata e gestita la dispatch table necessaria agli oggetti a run-time.
+  contiene metodi di utilitá, principalmente utility usate in fase di code generation per la creazione di label e la generazione delle dispatch tables
 
 - `vm`
 
-  contiene le classi che simulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap.
-
-Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
+  contiene le classi che emulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap
 
 ### 1.1 Installazione ed esecuzione
 
@@ -65,13 +68,15 @@ Spiegare le modalità per importare e eseguire il progetto ... TODO
 
 ## 2. Analisi lessicale e sintattica
 
-In questa sezione discuteremo delle grammatiche definite per il linguaggio FOOL e per il linguaggio SVM. In particolare ci soffermeremo sulle parti delle grammatiche modificate che riguardano le funzionalità aggiunte rispetto ai linguaggi forniti nella consegna.
+In questa sezione si descriveranno le grammatiche che definiscono i linguaggi `FOOL` e  `SVM`, con particolare attenzione alle motivazioni che hanno portato alle modifiche delle grammatiche originali.
 
 ### 2.1 Grammatica FOOL
 
-Non è stato necessario modificare la produzione iniziale `prog` del linguaggio che può essere una semplice espressione oppure un espressione preceduta da dichiarazioni di variabili `let in` o di classi. Si è scelto di usare il non terminale `met`  per la definizione di metodi che per gestirli diversamente successivamente a livello semantico rispetto alla definizione di funzioni. Come è possibile vedere a riga 10, `met` è solo un wrapper per il non terminale `fun`. 
+La produzione iniziale `prog` è rimasta invariata, può essere una semplice espressione `exp` oppure un'espressione preceduta da dichiarazioni di variabili `let in` e/o di classi `classdec`.
 
-```ANT
+È stato aggiunto il non terminale `met`  per gestire separatamente le definizioni di metodi dalle definizioni di funzioni a livello semantico e di code generation. A riga 10 è possibile vedere come `met` sia solo un wrapper per il non terminale `fun` utilizzato all'interno di `classdec`:
+
+```ANTLR
 prog
     : exp SEMIC                 		    #singleExp
     | let exp SEMIC                 	    #letInExp
@@ -86,9 +91,12 @@ met : fun;
 fun : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp;
 ```
 
+Per permettere di utilizzare il valore di ritorno delle chiamate di funzioni e di metodi come fossero `exp`, sono state create due produzioni sotto `value`:
 
+- `#funExp` che rappresenta la chiamata di una funzione
+- `#methodExp` che rappresenta la chiamata di un metodo
 
-Si è deciso di unificare a livello sintattico la chiamata di funzione con la chiamata di metodo come fatto per la loro definizione. Il non terminale corrispondente è chiamato `funcall`. Una espressione `exp` si può ridurre ad un `value` le cui produzioni sono distinte attraverso le direttive che iniziano con '\#' in `funExp` per la chiamata di funzione ed in `methodExp` per la chiamata di metodi. Queste due direttive ci permettono di scrivere due procedure diverse (`visitFunExp` e `visitMethodExp`) per la visita dei relativi nodi nell'albero di sintassi astratta.
+Queste due etichette permettono di gestire i nodi separatamente durante l'analisi lessicale implementando logiche diverse per i metodi `visitFunExp` e `visitMethodExp`:
 
 ```ANTLR
 value
@@ -100,9 +108,7 @@ value
 funcall : ID ( LPAR (exp (COMMA exp)* )? RPAR ) ;
 ```
 
-
-
-L'implementazioni degli operatori aggiuntivi a livello sintattico è stata fatta in modo molto semplice aggiungendo delle opzioni per la riduzione del non terminale `operator`.  
+Gli operatori aggiuntivi sono stati realizzati semplicemente aggiungendo delle opzioni per la riduzione del non terminale `operator`:
 
 ```ANTLR
 exp :  ('-')? left=term (operator=(PLUS | MINUS) right=exp)? ;

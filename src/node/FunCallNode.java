@@ -9,7 +9,6 @@ import symbol_table.SymbolTableEntry;
 import type.FunType;
 import type.Type;
 import type.TypeID;
-import type.InstanceType;
 
 import java.util.ArrayList;
 

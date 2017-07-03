@@ -6,7 +6,6 @@ import main.SemanticError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import symbol_table.Environment;
 import symbol_table.SymbolTableEntry;
-import type.InstanceType;
 import type.Type;
 
 import java.util.ArrayList;
