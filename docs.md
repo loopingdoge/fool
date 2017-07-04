@@ -143,7 +143,13 @@ case SVMParser.COPY:
 
 #### 2.2.1 l = LABEL
 
-TODO
+Per la generazione del codice delle dispatch tables delle varie classi è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`).
+
+```antlr
+| l=LABEL  {   labelRef.put(code.size(), $l.text);   code.add(0);    }
+```
+
+L'effetto di questa istruzione è di inserire nell'array `code` nella posizione corrente l'etichetta che sarà il nome di un metodo dell'oggetto di cui stiamo assemblando la dispatch table.
 
 #### 2.2.2 LC
 
@@ -164,7 +170,13 @@ case SVMParser.LC:
 
 #### 2.2.4 NEW
 
-TODO
+Questa istruzione, la cui implementazione è fornita in `ExecuteVM.java`, serve a riservare un area di memoria e riempirla con i campi di un oggetto che si intende istanziare.
+
+```antlr
+| NEW                         {   code.add(NEW);      }
+```
+
+Il numero di questi campi ed i loro valori sono stati già predisposti in fondo allo stack. Dopo aver recuperato questi valori, viene allocata la memoria necessaria all'oggetto nello heap (eventualmente facendo garbage collection) ed infine con un ciclo si scorre tale area di memoria assegnando il valore dei campi. Si noti però che la prima locazione di memoria nello heap di ogni oggetto è l'indirizzo della sua dispatch table.
 
 #### 2.2.5 HOFF
 
@@ -549,6 +561,10 @@ La regola `classSubtype` verifica sia l'eredetarietà diretta che quella indiret
 
 ## 5. Code generation
 
+Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
+
+
+
 ### 5.1 Class definition
 
 - Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
@@ -601,13 +617,6 @@ Per gestire le strutture dati sono disponibili i metodi:
 - `String generateDispatchTablesCode()`
   Genera e restituisce il codice `SVM` delle dispatch tables
 
-  ​
-
-#### 5.6 Memorizzazione codice
-
-Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
-
-
 
 
 
@@ -644,20 +653,16 @@ L'operazione di garbage collection viene eseguita se prima di allocare un oggett
 
 ## 7. Testing
 
-Durante lo sviluppo e' stato adottato un processo Test Driven Development (**TDD**) in modo da evitare che con cambiamenti al codice sorgente si "rompessero" feature gia' funzionanti.
+Durante lo sviluppo è stato adottato un processo di Test Driven Development (**TDD**) in modo da evitare che con cambiamenti al codice sorgente si "rompessero" feature già funzionanti.
 
-Nello specifico e' stata creata una test suite dentro al file `test.yml`, il quale, adottando la sintassi YAML, presenta la seguente struttura:
+Nello specifico è stata creata una test suite dentro al file `test.yml`, il quale, adottando la sintassi YAML, presenta la seguente struttura:
 
 ```yaml
 testId - descrizione del test:
 -	codice fool
--	risultato atteso
+-	"risultato atteso"
 ```
 
 Il file viene parsato e da ogni test viene estratto il codice fool, il quale viene eseguito e viene confrontato il risultato ottenuto con quello atteso. Se i due risultati sono diversi, il test viene segnato come fallito. Al termine dell'esecuzione di tutti i test viene indicato quanti di essi sono stati superati con successo.
 
-Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo ne' di ottenere il risultato finale di un'esecuzione, ne' di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. E' stato quindi eseguito un refactoring del codice inserendo una eccezione al metodo `type`, ed e' stato fatto in modo che il metodo `cpu` della VM restituisca un valore al termine dell'esecuzione.
-
-## 8. Conclusioni
-
-TODO Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
+Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo né  di ottenere il risultato finale di un'esecuzione, né di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. È stato quindi fatto un refactoring del codice che ha inserito il sollevamento di una `TypeException` nel metodo `type`, ed è stato fatto in modo che il metodo `cpu` della SVM accumuli in `outputBuffer` i valori calcolati durante la computazione e restituisca alla fine di essa.
