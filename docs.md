@@ -576,17 +576,29 @@ La generazione di codice della creazione di un oggetto avviene in modo abbastanz
 
 ### 5.4 Riferimento ad un campo
 
+La generazione del codice per quanto riguarda l'accesso ad una variabile era giá implementata all'interno di `IdNode.java`, ciò che è stato aggiunto a questo file è l'accesso ad un campo della classe (concesso solo dall'interno di un metodo di essa). La distinzione fra i due casi precedenti avviene in base al valore booleano di ritorno del metodo `isAttribute()` chiamato  sull'oggetto `SymbolTableEntry` che è campo della classe `IdNode`.  
 
+In caso si tratti di un campo di classe: si mette sullo stack per prima cosa l'offset della `SymbolTableEntry` ovvero l'offset del campo rispetto all'indirizzo di inizio della sua classe che viene pushato subito dopo. Successivamente si risale la catena statica dal *Frame Pointer* attuale per un totale di livelli (o *activation record*) uguale alla differenza di nesting level tra la referenza a `this` e la dichiarazione del campo. A questo punto la SVM può calcolare l'indirizzo finale del campo tramite due operazioni di `lw` e di `add` ed una di `hoff`.
 
 ### 5.5 Chiamata di un metodo
 
-- Carica il valore di `$fp` sullo stack
-- Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
-- Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
-- Somma i due valori precedenti ottenendo e caricando sullo stack l'`object_address`, l'indirizzo dell'oggetto nello heap
-- Carica sullo stack l'`object_address` e `method_offset` decrementato di `1` perché //TODO
-- Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
-- Setta `$ra` e salta all'esecuzione del codice del metodo
+La generazione del codice per l'invocazione di un metodo è implementata all'interno del file `MethodCallNode.java` con queste modalità: 
+
+- Si carica il valore di `$fp` sullo stack
+
+- Per ogni `a` in `args` si inserisce sullo stack `codegen(a)`
+
+- Si carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
+
+- Si sommano i due valori precedenti ottenendo e si carica sullo stack l'`object_address` ovvero l'indirizzo dell'oggetto nello heap
+
+- SI carica sullo stack una copia dell'`object_address` e sommandola al `method_offset` si trova l'indirizzo di memoria nell'array `code` del metodo
+
+- Tramite la nuova operazione di `lc` (descritta nel paragrafo 2.2.2) si pusha sullo stack l'indirizzo dell'array `code` a cui saltare 
+
+- Infine si setta `$ra` = `$ip` e si salta alla prima istruzione del metodo impostando 
+
+  `$ip` = `pop()`
 
 ## 6. Stack Virtual Machine
 
