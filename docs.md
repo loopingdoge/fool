@@ -135,15 +135,15 @@ Per semplificare il riutilizzo dei valori sullo stack è stata aggiunta l'istruz
 | COPY                        {   code.add(COPY);     }
 ```
 
-```java
-case SVMParser.COPY:
-	push(memory[sp - MEMORY_START_ADDRESS]);
-	break;
-```
-
 #### 2.2.1 l = LABEL
 
-TODO
+Per la generazione del codice delle dispatch tables delle varie classi è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`):
+
+```antlr
+| l=LABEL  {   labelRef.put(code.size(), $l.text);   code.add(0);    }
+```
+
+Questa istruzione inserisce in fondo all'array `code` l'etichetta che corrisponde al metodo dell'oggetto del quale stiamo generando la dispatch table
 
 #### 2.2.2 LC
 
@@ -155,50 +155,23 @@ Per implementare le chiamate di funzioni è stata aggiunta l'istruzione `LC` che
 
 L'istruzione `LC` si aspetta in cima allo stack la label di una funzione, rimuove il valore dalla pila e lo usa come indice nell'array `code`, pushando il valore ottenuto in cima allo stack:
 
-```java
-case SVMParser.LC:
-	int codeAddress = pop();
-    push(code[codeAddress]);
-	break;
-```
-
 #### 2.2.4 NEW
 
-TODO
+Serve ad allocare un'area di memoria nello heap e riempirla con i valori dei campi dell'oggetto che si vuole istanziare:
+
+```antlr
+| NEW                         {   code.add(NEW);      }
+```
+
+Questa istruzione si aspetta di avere in cima allo stack il numero di campi ed i rispettivi valori. Dopo averli recuperati alloca la memoria e la popola facendo garbage collection se necessario. La prima locazione di memoria occupata contiene l'indirizzo della dispatch table.
 
 #### 2.2.5 HOFF
 
-L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
-
-L'istruzione `HOFF` è implementata come segue:
+L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria:
 
 ```ANTLR
 | HOFF                        {   code.add(HOFF);     }
 ```
-
-```java
-case SVMParser.HOFF:
-	int objAddress = pop(); // indirizzo di this
-    int objOffset = pop(); // offset logico rispetto all'oggetto
-    HeapMemoryCell list = heapMemoryInUse
-    						.stream()
-                            .filter(cell -> cell.getIndex() == 
-                                            objAddress)
-                            .reduce(new HeapMemoryCell(0, null)
-                                    , (prev, curr) -> curr);
-    for (int i = 0; i < objOffset; i++) {
-    	list = list.next;
-    }
-    int fieldAddress = list.getIndex();
-    int realOffset = fieldAddress - objAddress;
-    push(realOffset);
-    push(objAddress);
-    break;
-```
-
-La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse nel paragrafo 6.1. In questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
-
-
 
 ### 2.3 Nodi
 
@@ -207,7 +180,7 @@ Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'inte
 - Il metodo `toPrint()` è stato sostituito dal metodo `toString()` nativo di Java
 - Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale
 
-#### 2.3.2 Nodi operatore
+#### 2.3.1 Nodi operatore
 
 La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
 
@@ -219,53 +192,14 @@ La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata q
 
 Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
 
-- `INode left`,  l'operando sinistro
-- `INode right`,  l'operando destro
+| Campo   | Tipo    | Descrizione         |
+| ------- | ------- | ------------------- |
+| `left`  | `INode` | l'operando sinistro |
+| `right` | `INode` | l'operando destro   |
 
 mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato.
 
-
-
-## 3. Analisi semantica
-
-### 3.1 Symbol Table
-
-La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
-
-```java
-private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
-```
-
-All'ambiente sono stati aggiunti anche diversi metodi per gestire la symbol table.
-
-Sono stati aggiunti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry). Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
-
-- `public Environment addEntry(String id, Type type, int offset)`
-
-  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una `RedeclaredVarException`
-
-- `public SymbolTableEntry getLatestEntryOf(String id)`
-
-  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una `UndeclaredVarException` 
-
-- `public Environment setEntryType(String id, Type newtype, int offset)`
-
-  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
-
-  ​
-
-
-### 3.2 Dichiarazione di classi
-
-Passiamo ora a discutere il funzionamento del controllo semantico nel caso di programmi FOOL contenenti dichiarazioni di classi. Innanzitutto il metodo `visitClassExp` della classe FoolVisitorImpl.java avendo a disposizione tutto il codice parsato instanzia oggetti delle varie classi nodo (`ParameterNode` per i campi e `MethodNode` per i metodi che insieme concorrono a creare `ClassNode`, `LetNode` per le dichiarazioni di variabili e funzioni e `InNode` per l'espressione conclusiva). Tutti questi oggetti vengono passati al costruttore dell'oggetto `ProgClassDecNode` che costituisce il nodo radice dell'AST. È proprio dalla radice, andando verso le foglie che parte il controllo semantico, lanciato dal metodo `semanticAnalysis` della classe FoolRunner.java.
-
-
-
-Il controllo semantico in `ProgClassDecNode`, per prima cosa, si occupa di eseguire un inserzione preliminare delle classi nella symbol table (come detto in precedenza). Per ogni elemento della lista `classDeclarations`,  istanza di `ClassNode`, viene poi chiamato il controllo semantico su di essa. 
-
-
-
-#### 3.2.1 Class Node
+#### 2.3.2 Nodi classe
 
 La classe `ClassNode` dispone di:
 
@@ -279,31 +213,66 @@ La classe `ClassNode` dispone di:
 | `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei campi                |
 | `type`         | `ClassType`                | Tipo della classe                        |
 
+## 3. Analisi semantica
 
+### 3.1 Symbol Table
 
-#### 3.2.2 Field
+La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
 
-La classe `Field` dispone di:
+```java
+private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
+```
 
-| Campo  | Tipo     | Descrizione    |
-| ------ | -------- | -------------- |
-| `id`   | `String` | Id della campo |
-| `type` | `Type`   | Tipo del campo |
+Dove `SymbolTableEntry` è una classe che ha come attributi:
 
+| Campo          | Tipo      | Descrizione                              |
+| -------------- | --------- | ---------------------------------------- |
+| `nestingLevel` | `int`     | livello di nesting al quale si trova la entry |
+| `type`         | `Type`    | tipo della entry                         |
+| `offset`       | `int`     | offset della entry rispetto all'area di memoria in cui è definita |
+| `isAttribute`  | `boolean` | indica se la entry è stata definita come attributo di una classe |
 
+All'ambiente sono stati aggiunti anche diversi metodi per gestire le symbol table:
 
-#### 3.2.2 Method
+- `public Environment pushHashMap()`
 
-La classe `Method` dispone di:
+  aggiunge alla lista una nuova HashMap, viene usato quando si visita un nuovo scope
 
-| Campo  | Tipo      | Descrizione             |
-| ------ | --------- | ----------------------- |
-| `id`   | `String`  | Id della campo          |
-| `type` | `FunType` | Tipo (firma) del metodo |
+- `public Environment popHashMap()`
 
+  rimuove l'ultima HashMap aggiunta, viene usato all'uscita da uno scope
 
+- `public Environment addEntry(String id, Type type, int offset)`
 
-#### 3.2.3 Validazione dichiarazione di classe
+  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una `RedeclaredVarException`
+
+- `public Environment setEntryType(String id, Type newtype, int offset)`
+
+  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
+
+- `public int getNestingLevel()`
+
+  restituisce il valore di nesting level corrente
+
+- `public SymbolTableEntry getLatestEntryOf(String id)`
+
+  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una `UndeclaredVarException` 
+
+- `public SymbolTableEntry getLatestEntryOfNotFun(String id)`
+
+  come il metodo precedente ma ignora le entry di tipo `FunType`
+
+- `public Type getTypeOf(String id)`
+
+  come i metodi precedenti ma restituisce solo il `type` della entry
+
+- `public SymbolTableEntry getLatestClassEntry()`
+
+  restituisce la entry dell'ultima classe visitata, viene usato durante il controllo semantico nel caso di chiamata di un metodo usando `this`
+
+### 3.2 Dichiarazioni di classi
+
+Nel caso vi siano delle dichiarazioni di classi, la radice dell'AST sarà un `ProgClassDecNode` e l'analisi semantica visiterà per prima cosa tutti i `ClassNode` . Durante questo passaggio per ogni classe viene inserita una entry nella symbol table.
 
 La **validazione semantica di una classe** ha i seguenti passi:
 
@@ -350,8 +319,6 @@ La **validazione semantica di una classe** ha i seguenti passi:
 ## 4. Type checking
 
 In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo sui tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
-
-
 
 Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo della espressione `exp` finale del programma FOOL.
 
@@ -549,6 +516,10 @@ La regola `classSubtype` verifica sia l'eredetarietà diretta che quella indiret
 
 ## 5. Code generation
 
+Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
+
+
+
 ### 5.1 Class definition
 
 - Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
@@ -601,13 +572,6 @@ Per gestire le strutture dati sono disponibili i metodi:
 - `String generateDispatchTablesCode()`
   Genera e restituisce il codice `SVM` delle dispatch tables
 
-  ​
-
-#### 5.6 Memorizzazione codice
-
-Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
-
-
 
 
 
@@ -644,20 +608,16 @@ L'operazione di garbage collection viene eseguita se prima di allocare un oggett
 
 ## 7. Testing
 
-Durante lo sviluppo e' stato adottato un processo Test Driven Development (**TDD**) in modo da evitare che con cambiamenti al codice sorgente si "rompessero" feature gia' funzionanti.
+Durante lo sviluppo è stato adottato un processo di Test Driven Development (**TDD**) in modo da evitare che con cambiamenti al codice sorgente si "rompessero" feature già funzionanti.
 
-Nello specifico e' stata creata una test suite dentro al file `test.yml`, il quale, adottando la sintassi YAML, presenta la seguente struttura:
+Nello specifico è stata creata una test suite dentro al file `test.yml`, il quale, adottando la sintassi YAML, presenta la seguente struttura:
 
 ```yaml
 testId - descrizione del test:
 -	codice fool
--	risultato atteso
+-	"risultato atteso"
 ```
 
 Il file viene parsato e da ogni test viene estratto il codice fool, il quale viene eseguito e viene confrontato il risultato ottenuto con quello atteso. Se i due risultati sono diversi, il test viene segnato come fallito. Al termine dell'esecuzione di tutti i test viene indicato quanti di essi sono stati superati con successo.
 
-Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo ne' di ottenere il risultato finale di un'esecuzione, ne' di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. E' stato quindi eseguito un refactoring del codice inserendo una eccezione al metodo `type`, ed e' stato fatto in modo che il metodo `cpu` della VM restituisca un valore al termine dell'esecuzione.
-
-## 8. Conclusioni
-
-TODO Se si ha voglia, sarebbe carino con qualche programma FOOL fare un albero come quello a pagina 68 della slide 6 di Laneve...
+Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo né  di ottenere il risultato finale di un'esecuzione, né di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. È stato quindi fatto un refactoring del codice che ha inserito il sollevamento di una `TypeException` nel metodo `type`, ed è stato fatto in modo che il metodo `cpu` della SVM accumuli in `outputBuffer` i valori calcolati durante la computazione e restituisca alla fine di essa.
