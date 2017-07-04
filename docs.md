@@ -64,7 +64,26 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 ### 1.1 Installazione ed esecuzione
 
-Spiegare le modalità per importare e eseguire il progetto ... TODO
+#### Installazione
+
+Le modalità per importare il progetto in Eclipse sono semplici e prevedono tre passaggi:
+
+1. Scompattare l'archivio .zip contenente il progetto;
+2. Su Eclipse, andare su 'File' -> 'Open Projects from File System...'
+   1. Nella schermata successiva cliccare sul pulsante 'Directory' e selezionare la cartella 'fool' appena scompattata e cliccare Finish.
+3. Fare click destro sul progetto quindi andare alla voce 'Build Path -> Configure Build Path'. Nella schermata che appare andare nel tab 'Libraries' e cliccare sul bottone 'Add External JARs', quindi selezionare tutti e 3 i file .Jar presenti nella cartella 'fool/libs'. Cliccare quindi 'Apply and Close'.
+
+#### Esecuzione
+
+Nel nostro progetto abbiamo due possibili file da poter eseguire, entrambi si trovano in 'fool/src/main', per eseguirli basta cliccare col tasto destro su di essi ed andare alla voce 'Run As' -> 'Java Application' e sono:
+
+1. TestDebug.java:
+
+   Prende in input il codice presente nel file 'fool/input.fool' e stampa nella console l'albero AST del codice, il byteCode ed il risultato;
+
+2. TestComplete.java:
+
+   Prende in input tutti gli esempi di codice che si trovano all'interno del file 'fool/test.yml' e nella console vengono stampati tutti gli esiti per ogni test, confrontando l'esito ottenuto con quello previsto(corretto). Al termine dell'esecuzione di ogni test viene stampato quanti test hanno avuto esito positivo sul totale.
 
 ## 2. Analisi lessicale e sintattica
 
@@ -339,8 +358,10 @@ Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID` in 
 
 $$
 \frac{}{\vdash true : Bool}[BoolTrue]
-\qquad \qquad 
+\qquad
 \frac{}{\vdash false : Bool}[BoolFalse]
+\qquad
+\frac{\vdash e : Bool}{\vdash ! e}[Not]
 $$
 
 $$
@@ -350,15 +371,19 @@ $$
 $$
 
 $$
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ < \ e_2 : Bool}[Less]
-\qquad
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ > \ e_2 : Bool}[Greater]
+\frac{ e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2<:T}{\Gamma \vdash e_1 \ == \ e_2 : Bool}[Equal]
 $$
 
 $$
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ <= \ e_2 : Bool}[LessEqual]
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ <= \ e_2 : Bool}[LessEqual]
 \qquad
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ >= \ e_2 : Bool}[GreaterEqual]
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ >= \ e_2 : Bool}[GreaterEqual]
+$$
+
+$$
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ < \ e_2 : Bool}[Less]
+\qquad
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ > \ e_2 : Bool}[Greater]
 $$
 
 $$
