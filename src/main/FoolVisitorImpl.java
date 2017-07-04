@@ -76,8 +76,6 @@ public class FoolVisitorImpl extends FOOLBaseVisitor<INode> {
                     letDeclarations.add(visit(dc));
                 }
 
-                System.out.println("[DEBUG] FoolVisitorImpl.visitClassExp() found " + classDeclarations.size() + " classes, and " + letDeclarations.size() + " let declarations");
-
                 INode exp = visit(ctx.exp());
 
                 res = new ProgClassDecNode(ctx, classDeclarations, new LetNode(ctx.let(), letDeclarations), new InNode(ctx.let(), exp, true));

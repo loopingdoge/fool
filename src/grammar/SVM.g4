@@ -2,11 +2,12 @@ grammar SVM;
 
 @header {
     import java.util.HashMap;
+    import java.util.ArrayList;
     import vm.ExecuteVM;
 }
 
 @lexer::members {
-    public int lexicalErrors=0;
+    public ArrayList<String> errors = new ArrayList<>();
 }
 
 @parser::members {
@@ -113,5 +114,5 @@ NUMBER	        : '0' | ('-')?(('1'..'9')('0'..'9')*) ;
 
 WHITESP         : ( '\t' | ' ' | '\r' | '\n' )+   -> channel(HIDDEN);
 
-ERR   	        : . { System.err.println("Invalid char: " + getText()); lexicalErrors++;  } -> channel(HIDDEN);
+ERR   	        : . { errors.add("Invalid char: " + getText()); } -> channel(HIDDEN);
 
