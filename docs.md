@@ -561,23 +561,44 @@ La regola `classSubtype` verifica sia l'eredetarietà diretta che quella indiret
 
 ## 5. Code generation
 
-Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
+In questo capitolo affronteremo le parti più importanti della fase di generazione di codice riguardanti della nostra implementazione dell'estensione di FOOL ad oggetti.
+
+### 5.1 Dispatch table
+
+Le dispatch tables di tutti gli oggetti sono memorizzate in `CodegenUtils.java` nella seguente struttura dati che viene popolata durante la valutazione semantica:
+
+```java
+HashMap<String, ArrayList<DispatchTableEntry>> dispatchTables;
+```
+
+Attraverso il metodo `addDispatchTable`, ogni classe può aggiugere, usando come chiave il proprio nome, la sua dispatch table che altro non è che la lista **ordinata** dei suoi metodi. Infatti una `DispatchTableEntry` è costituta da:
+
+| Nome           | Tipo     | Descrizione                              |
+| -------------- | -------- | ---------------------------------------- |
+| `method_id`    | `String` | Nome del metodo                          |
+| `method_label` | `String` | Etichetta che segnala l'inizio del codice della funzione |
+
+Infine, prima di concludere la fase di code generation, si concatena al codice `SVM` generato il risultato della chiamata al metodo `generateDispatchTablesCode()` che genera il codice relativo a tutte le dispatch tables aggiunte.  
+
+### 5.2 Dichiarazione di classe
+
+La code generation relativa ad una dichiarazione di classe (in `ClassNode.java`) altro non è che la costruzione corretta, rispetto anche alla superclasse, della dispatch table con questa modalità:
+
+- Si crea una variabile `ArrayList<DispatchTableEntry> dispatchTable` che contenga la dispatch table della classe.
+- Si assegna a `dispatchTable` la copia della dispatch table della superclasse, se esiste.
+- Ciclando sui metodi di `dispatchTable` si controlla se esista un metodo con lo stesso nome in `metDecList`, ovvero nella classe in dichiarazione:
+  - in caso positivo si sostituisce la `method_label` della classe padre con quella del metodo ridefinito.
+- Infine, ciclando sui metodi di `metDecList` non ancora presenti nella dispatch table (ovvero quelli definiti solo nella classe corrente) si aggiunge una nuova `DispatchTableEntry` a `dispatchTable` 
+
+### 5.3 Istanziazione di classe
+
+La generazione di codice della creazione di un oggetto avviene in modo abbastanza semplice. Per prima cosa vengono pushati sullo stack tutti gli argomenti dati al costruttore. Successivamente viene pushato il numero di questi argomenti, il nome della classe ed infine il comando `new`.
+
+### 5.4 Riferimento ad un campo
 
 
 
-### 5.1 Class definition
-
-- Creare una lista `new_methods` che contiene `methods` meno `supertype.methods`
-- Se `C` estende un'altra classe `Super`:
-  - creare una nuova entry `c_entry` nella dispatch table copiando quella di `Super`
-- Altrimenti:
-  - creare una nuova entry `c_entry` vuota nella dispatch table
-- Per ogni metodo `new_m` in `new_methods`:
-  - creare una nuova label `new_m_label` per `new_m`
-  - inserire `new_m_label` + `codegen(new_m)` nel codice delle funzioni
-  - aggiungere in `c_entry` un nuovo metodo `new_m.id` con label `new_m_label`
-
-### 5.2 Method call
+### 5.5 Chiamata di un metodo
 
 - Carica il valore di `$fp` sullo stack
 - Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
@@ -586,39 +607,6 @@ Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a 
 - Carica sullo stack l'`object_address` e `method_offset` decrementato di `1` perché //TODO
 - Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
 - Setta `$ra` e salta all'esecuzione del codice del metodo
-
-### 5.3 Istanziazione di classe
-
-TODO
-
-### 5.4 Utilizzo di un attributo
-
-TODO
-
-### 5.5 Dispatch table
-
-La dispatch table e' implementata in `CodegenUtils` come struttura dati popolata durante la valutazione semantica, dalle quale successivamente si genera il codice `SVM` che viene aggiunto in fondo al risultato della code generation.
-
-Viene usata un'hashmap di liste `String => ArrayList<DispatchTableEntry>` che associa ad ogni chiave `class_id` una lista ordinata di `DispatchTableEntry`, delle coppie costituite da:
-
-| Nome           | Tipo     | Descrizione                              |
-| -------------- | -------- | ---------------------------------------- |
-| `method_id`    | `String` | L'id del metodo chiamato                 |
-| `method_label` | `String` | label corrispondente all'indirizzo del codice della funzione |
-
-Per gestire le strutture dati sono disponibili i metodi: 
-
-- `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
-  Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
-
-- `ArrayList<DispatchTableEntry> getDispatchTable(String classID)`
-  Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
-
-- `String generateDispatchTablesCode()`
-  Genera e restituisce il codice `SVM` delle dispatch tables
-
-
-
 
 ## 6. Stack Virtual Machine
 
