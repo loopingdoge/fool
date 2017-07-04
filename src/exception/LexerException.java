@@ -1,11 +1,13 @@
 package exception;
 
-public class LexerException extends Exception {
+import java.util.ArrayList;
 
-    // TODO: modificare la grammatica in modo che sia possibile ottenere l'errore specifico
+public class LexerException extends Throwable {
 
-    public LexerException(String message) {
-        super(message);
+    ArrayList<String> errors;
+
+    public LexerException(ArrayList<String> errors) {
+        super(errors.stream().reduce("", (prev, curr) -> prev + "\n" + curr));
     }
 
 }

@@ -1,10 +1,11 @@
 grammar FOOL;
 
+@header {
+    import java.util.ArrayList;
+}
+
 @lexer::members {
-   //there is a much better way to do this, check the ANTLR guide
-   //I will leave it like this for now just becasue it is quick
-   //but it doesn't work well
-   public int lexicalErrors=0;
+   public ArrayList<String> errors = new ArrayList<>();
 }
 
 /*------------------------------------------------------------------
@@ -136,6 +137,4 @@ WS              : (' '|'\t'|'\n'|'\r')-> skip ;
 LINECOMENTS     : '//' (~('\n'|'\r'))* -> skip ;
 BLOCKCOMENTS    : '/*'( ~('/'|'*')|'/'~'*'|'*'~'/'|BLOCKCOMENTS)* '*/' -> skip ;
 
-//VERY SIMPLISTIC ERROR CHECK FOR THE LEXING PROCESS, THE OUTPUT GOES DIRECTLY TO THE TERMINAL
-//THIS IS WRONG!!!!
-ERR     : . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN) ;
+ERR     : . { errors.add("Invalid char: " + getText());} -> channel(HIDDEN) ;
