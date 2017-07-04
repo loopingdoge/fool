@@ -747,3 +747,19 @@ test56 - Subtyping hell in returntype:
     in
         print(777);
 -   "777"
+
+test57 - Calling method inside a function:
+-   class A (int x) {
+        int x() x;
+        int z()
+            let
+                int f() this.x();
+            in
+                f()
+        ;
+    };
+    let
+        A a = new A(1);
+    in
+        print(a.z());
+-   "1"

@@ -1,5 +1,6 @@
 package vm;
 
+import exception.SegmentationFaultException;
 import exception.VMOutOfMemoryException;
 import grammar.SVMParser;
 
@@ -9,7 +10,7 @@ import java.util.HashSet;
 
 public class ExecuteVM {
 
-    public static final int MEMORY_START_ADDRESS = 1000;
+    public static final int MEMORY_START_ADDRESS = 777;
     private static final int MEMSIZE = 1000;
     private static final int GARBAGE_THRESHOLD = Math.max((MEMSIZE / 100) * 5, 10);
 
@@ -34,16 +35,24 @@ public class ExecuteVM {
         this.debug = debug;
     }
 
-    private int accessMemory(int address) {
-        return memory[address - MEMORY_START_ADDRESS];
+    private int getMemory(int address) throws SegmentationFaultException {
+        int location = address - MEMORY_START_ADDRESS;
+        if (location < 0 || location >= MEMSIZE) {
+            throw new SegmentationFaultException();
+        }
+        return memory[location];
     }
 
-    private void setMemory(int address, int value) {
-        memory[address - MEMORY_START_ADDRESS] = value;
+    private void setMemory(int address, int value) throws SegmentationFaultException {
+        int location = address - MEMORY_START_ADDRESS;
+        if (location < 0 || location >= MEMSIZE) {
+            throw new SegmentationFaultException();
+        }
+        memory[location] = value;
     }
 
     // Mark and sweep
-    private void garbageCollection() {
+    private void garbageCollection() throws SegmentationFaultException {
         // address => isUsed
         HashMap<Integer, Boolean> table = new HashMap<>();
         // Inizializzo a false tutti gli oggetti
@@ -52,25 +61,25 @@ public class ExecuteVM {
         }
         // Se viene trovato sullo stack l'indirizzo di un oggetto, setto la table a true
         for (int i = MEMSIZE + MEMORY_START_ADDRESS - 1; i >= sp; i--) {
-            if (table.containsKey(accessMemory(i))) {
-                table.put(accessMemory(i), true);
+            if (table.containsKey(getMemory(i))) {
+                table.put(getMemory(i), true);
             }
         }
         if (table.containsKey(rv)) {
             table.put(rv, true);
         }
-        heapMemoryInUse.forEach(m -> {
-            if (!table.get(m.getIndex())) {
-                HeapMemoryCell curr = m;
+        for (HeapMemoryCell heapMemoryCell : heapMemoryInUse) {
+            if (!table.get(heapMemoryCell.getIndex())) {
+                HeapMemoryCell curr = heapMemoryCell;
                 if (debug) {
                     while (curr != null) {
                         setMemory(curr.getIndex(), 0);
                         curr = curr.next;
                     }
                 }
-                heap.deallocate(m);
+                heap.deallocate(heapMemoryCell);
             }
-        });
+        }
         heapMemoryInUse.removeIf(m -> !table.get(m.getIndex()));
     }
 
@@ -124,7 +133,7 @@ public class ExecuteVM {
                         setMemory(address, pop());
                         break;
                     case SVMParser.LOADW: // Prende l'indirizzo in cima allo stack e pusha il valore puntato sullo stack
-                        push(accessMemory(pop()));
+                        push(getMemory(pop()));
                         break;
                     case SVMParser.BRANCH:
                         address = code[ip];
@@ -169,7 +178,7 @@ public class ExecuteVM {
                         fp = sp;
                         break;
                     case SVMParser.PRINT:
-                        outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
+                        outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(getMemory(sp)) : "Empty stack!");
                         break;
                     case SVMParser.NEW:
                         // Il numero di argomenti per il new e' sulla testa dello stack
@@ -213,7 +222,7 @@ public class ExecuteVM {
                         push(code[codeAddress]);
                         break;
                     case SVMParser.COPY:
-                        push(accessMemory(sp));
+                        push(getMemory(sp));
                         break;
                     case SVMParser.HOFF:
                         int objAddress = pop(); // indirizzo di this
@@ -238,20 +247,20 @@ public class ExecuteVM {
                     printMemory();
                 }
             }
-        } catch (VMOutOfMemoryException e) {
-            outputBuffer.add(e.getMessage());
+        } catch (VMOutOfMemoryException | SegmentationFaultException e) {
+            outputBuffer.add("Error: " + e.getMessage());
             return outputBuffer;
         }
     }
 
 
-    private int pop() {
-        int res = accessMemory(sp);
+    private int pop() throws SegmentationFaultException {
+        int res = getMemory(sp);
         setMemory(sp++, 0);
         return res;
     }
 
-    private void push(int v) throws VMOutOfMemoryException {
+    private void push(int v) throws VMOutOfMemoryException, SegmentationFaultException {
         if (sp - 1 < hp) {
             throw new VMOutOfMemoryException(VMOutOfMemoryException.OverflowType.STACK);
         }

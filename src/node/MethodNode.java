@@ -36,10 +36,6 @@ public class MethodNode extends FunNode {
 
         //env.offset = -2;
 
-        //TODO: Deve per forza avere un parametro di ritorno definito insieme alla funzione? Nel dubbio ho fatto il controllo, controllare che il parametro di ritorno, se dichiarato ID(classe) esista.
-        if (this.id.equals("<missing ID>")) {
-            res.add(new SemanticError("Missing ID or Type in a function."));
-        }
         try {
             // Se restituisco un oggetto, aggiorno le informazione sul ClassType
             if ( this.declaredReturnType instanceof InstanceType ) {

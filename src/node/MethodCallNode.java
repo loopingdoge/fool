@@ -41,13 +41,12 @@ public class MethodCallNode extends FunCallNode {
             // Calcolo gli offset per recuperare l'oggetto
             if (objectID.equals("this")) {
                 Type objectType = env.getLatestClassEntry().getType();
-                // TODO: cosi' funziona sempre credo, pero' sarebbe meglio farlo meno hardcoded
                 // Se il metodo e' chiamato su this, l'offset rispetto a $fp e' sempre 0
                 this.objectOffset = 0;
-                // L'oggetto e' sempre al livello dei parametri di metodo, ovvero 3
-                this.objectNestingLevel = 3;
                 if (objectType instanceof ClassType) {
                     classType = (ClassType) objectType;
+                    // L'oggetto e' sempre al livello dei parametri di metodo, ovvero 3
+                    this.objectNestingLevel = 3;
                 } else {
                     res.add(new SemanticError("Can't call this outside a class"));
                 }
