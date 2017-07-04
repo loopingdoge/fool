@@ -7,6 +7,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class TestDebug {
 
+    private static final boolean NO_COLORS = false;
+
     static int count_var(ParseTree t) {
         int n = 0;
         if (t.getClass().getName().equals("parser.FOOLParser$LetContext")) {
@@ -46,6 +48,7 @@ public class TestDebug {
     public static void main(String[] args) throws Exception {
         String filename = "input.fool";
         CharStream input = CharStreams.fromFileName(filename);
-        String output = FoolRunner.test("", input, "", true, true);
+        String output = FoolRunner.run(input, "input.svm", "", false, true, true, NO_COLORS);
+        System.out.println(output);
     }
 }

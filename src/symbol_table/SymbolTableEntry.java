@@ -23,10 +23,6 @@ public class SymbolTableEntry {
         this.isAttribute = isAttribute;
     }
 
-    public void addType(Type t) {
-        type = t;
-    }
-
     public Type getType() {
         return type;
     }

@@ -64,7 +64,26 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 ### 1.1 Installazione ed esecuzione
 
-Spiegare le modalità per importare e eseguire il progetto ... TODO
+#### Installazione
+
+Le modalità per importare il progetto in Eclipse sono semplici e prevedono tre passaggi:
+
+1. Scompattare l'archivio .zip contenente il progetto;
+2. Su Eclipse, andare su 'File' -> 'Open Projects from File System...'
+   1. Nella schermata successiva cliccare sul pulsante 'Directory' e selezionare la cartella 'fool' appena scompattata e cliccare Finish.
+3. Fare click destro sul progetto quindi andare alla voce 'Build Path -> Configure Build Path'. Nella schermata che appare andare nel tab 'Libraries' e cliccare sul bottone 'Add External JARs', quindi selezionare tutti e 3 i file .Jar presenti nella cartella 'fool/libs'. Cliccare quindi 'Apply and Close'.
+
+#### Esecuzione
+
+Nel nostro progetto abbiamo due possibili file da poter eseguire, entrambi si trovano in 'fool/src/main', per eseguirli basta cliccare col tasto destro su di essi ed andare alla voce 'Run As' -> 'Java Application' e sono:
+
+1. TestDebug.java:
+
+   Prende in input il codice presente nel file 'fool/input.fool' e stampa nella console l'albero AST del codice, il byteCode ed il risultato;
+
+2. TestComplete.java:
+
+   Prende in input tutti gli esempi di codice che si trovano all'interno del file 'fool/test.yml' e nella console vengono stampati tutti gli esiti per ogni test, confrontando l'esito ottenuto con quello previsto(corretto). Al termine dell'esecuzione di ogni test viene stampato quanti test hanno avuto esito positivo sul totale.
 
 ## 2. Analisi lessicale e sintattica
 
@@ -135,21 +154,15 @@ Per semplificare il riutilizzo dei valori sullo stack è stata aggiunta l'istruz
 | COPY                        {   code.add(COPY);     }
 ```
 
-```java
-case SVMParser.COPY:
-	push(memory[sp - MEMORY_START_ADDRESS]);
-	break;
-```
-
 #### 2.2.1 l = LABEL
 
-Per la generazione del codice delle dispatch tables delle varie classi è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`).
+Per la generazione del codice delle dispatch tables delle varie classi è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`):
 
 ```antlr
 | l=LABEL  {   labelRef.put(code.size(), $l.text);   code.add(0);    }
 ```
 
-L'effetto di questa istruzione è di inserire nell'array `code` nella posizione corrente l'etichetta che sarà il nome di un metodo dell'oggetto di cui stiamo assemblando la dispatch table.
+Questa istruzione inserisce in fondo all'array `code` l'etichetta che corrisponde al metodo dell'oggetto del quale stiamo generando la dispatch table
 
 #### 2.2.2 LC
 
@@ -161,56 +174,23 @@ Per implementare le chiamate di funzioni è stata aggiunta l'istruzione `LC` che
 
 L'istruzione `LC` si aspetta in cima allo stack la label di una funzione, rimuove il valore dalla pila e lo usa come indice nell'array `code`, pushando il valore ottenuto in cima allo stack:
 
-```java
-case SVMParser.LC:
-	int codeAddress = pop();
-    push(code[codeAddress]);
-	break;
-```
-
 #### 2.2.4 NEW
 
-Questa istruzione, la cui implementazione è fornita in `ExecuteVM.java`, serve a riservare un area di memoria e riempirla con i campi di un oggetto che si intende istanziare.
+Serve ad allocare un'area di memoria nello heap e riempirla con i valori dei campi dell'oggetto che si vuole istanziare:
 
 ```antlr
 | NEW                         {   code.add(NEW);      }
 ```
 
-Il numero di questi campi ed i loro valori sono stati già predisposti in fondo allo stack. Dopo aver recuperato questi valori, viene allocata la memoria necessaria all'oggetto nello heap (eventualmente facendo garbage collection) ed infine con un ciclo si scorre tale area di memoria assegnando il valore dei campi. Si noti però che la prima locazione di memoria nello heap di ogni oggetto è l'indirizzo della sua dispatch table.
+Questa istruzione si aspetta di avere in cima allo stack il numero di campi ed i rispettivi valori. Dopo averli recuperati alloca la memoria e la popola facendo garbage collection se necessario. La prima locazione di memoria occupata contiene l'indirizzo della dispatch table.
 
 #### 2.2.5 HOFF
 
-L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
-
-L'istruzione `HOFF` è implementata come segue:
+L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria:
 
 ```ANTLR
 | HOFF                        {   code.add(HOFF);     }
 ```
-
-```java
-case SVMParser.HOFF:
-	int objAddress = pop(); // indirizzo di this
-    int objOffset = pop(); // offset logico rispetto all'oggetto
-    HeapMemoryCell list = heapMemoryInUse
-    						.stream()
-                            .filter(cell -> cell.getIndex() == 
-                                            objAddress)
-                            .reduce(new HeapMemoryCell(0, null)
-                                    , (prev, curr) -> curr);
-    for (int i = 0; i < objOffset; i++) {
-    	list = list.next;
-    }
-    int fieldAddress = list.getIndex();
-    int realOffset = fieldAddress - objAddress;
-    push(realOffset);
-    push(objAddress);
-    break;
-```
-
-La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse nel paragrafo 6.1. In questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
-
-
 
 ### 2.3 Nodi
 
@@ -219,7 +199,7 @@ Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'inte
 - Il metodo `toPrint()` è stato sostituito dal metodo `toString()` nativo di Java
 - Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale
 
-#### 2.3.2 Nodi operatore
+#### 2.3.1 Nodi operatore
 
 La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
 
@@ -231,53 +211,14 @@ La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata q
 
 Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
 
-- `INode left`,  l'operando sinistro
-- `INode right`,  l'operando destro
+| Campo   | Tipo    | Descrizione         |
+| ------- | ------- | ------------------- |
+| `left`  | `INode` | l'operando sinistro |
+| `right` | `INode` | l'operando destro   |
 
 mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato.
 
-
-
-## 3. Analisi semantica
-
-### 3.1 Symbol Table
-
-La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
-
-```java
-private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
-```
-
-All'ambiente sono stati aggiunti anche diversi metodi per gestire la symbol table.
-
-Sono stati aggiunti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry). Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
-
-- `public Environment addEntry(String id, Type type, int offset)`
-
-  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una `RedeclaredVarException`
-
-- `public SymbolTableEntry getLatestEntryOf(String id)`
-
-  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una `UndeclaredVarException` 
-
-- `public Environment setEntryType(String id, Type newtype, int offset)`
-
-  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
-
-  ​
-
-
-### 3.2 Dichiarazione di classi
-
-Passiamo ora a discutere il funzionamento del controllo semantico nel caso di programmi FOOL contenenti dichiarazioni di classi. Innanzitutto il metodo `visitClassExp` della classe FoolVisitorImpl.java avendo a disposizione tutto il codice parsato instanzia oggetti delle varie classi nodo (`ParameterNode` per i campi e `MethodNode` per i metodi che insieme concorrono a creare `ClassNode`, `LetNode` per le dichiarazioni di variabili e funzioni e `InNode` per l'espressione conclusiva). Tutti questi oggetti vengono passati al costruttore dell'oggetto `ProgClassDecNode` che costituisce il nodo radice dell'AST. È proprio dalla radice, andando verso le foglie che parte il controllo semantico, lanciato dal metodo `semanticAnalysis` della classe FoolRunner.java.
-
-
-
-Il controllo semantico in `ProgClassDecNode`, per prima cosa, si occupa di eseguire un inserzione preliminare delle classi nella symbol table (come detto in precedenza). Per ogni elemento della lista `classDeclarations`,  istanza di `ClassNode`, viene poi chiamato il controllo semantico su di essa. 
-
-
-
-#### 3.2.1 Class Node
+#### 2.3.2 Nodi classe
 
 La classe `ClassNode` dispone di:
 
@@ -291,31 +232,66 @@ La classe `ClassNode` dispone di:
 | `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei campi                |
 | `type`         | `ClassType`                | Tipo della classe                        |
 
+## 3. Analisi semantica
 
+### 3.1 Symbol Table
 
-#### 3.2.2 Field
+La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
 
-La classe `Field` dispone di:
+```java
+private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
+```
 
-| Campo  | Tipo     | Descrizione    |
-| ------ | -------- | -------------- |
-| `id`   | `String` | Id della campo |
-| `type` | `Type`   | Tipo del campo |
+Dove `SymbolTableEntry` è una classe che ha come attributi:
 
+| Campo          | Tipo      | Descrizione                              |
+| -------------- | --------- | ---------------------------------------- |
+| `nestingLevel` | `int`     | livello di nesting al quale si trova la entry |
+| `type`         | `Type`    | tipo della entry                         |
+| `offset`       | `int`     | offset della entry rispetto all'area di memoria in cui è definita |
+| `isAttribute`  | `boolean` | indica se la entry è stata definita come attributo di una classe |
 
+All'ambiente sono stati aggiunti anche diversi metodi per gestire le symbol table:
 
-#### 3.2.2 Method
+- `public Environment pushHashMap()`
 
-La classe `Method` dispone di:
+  aggiunge alla lista una nuova HashMap, viene usato quando si visita un nuovo scope
 
-| Campo  | Tipo      | Descrizione             |
-| ------ | --------- | ----------------------- |
-| `id`   | `String`  | Id della campo          |
-| `type` | `FunType` | Tipo (firma) del metodo |
+- `public Environment popHashMap()`
 
+  rimuove l'ultima HashMap aggiunta, viene usato all'uscita da uno scope
 
+- `public Environment addEntry(String id, Type type, int offset)`
 
-#### 3.2.3 Validazione dichiarazione di classe
+  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una `RedeclaredVarException`
+
+- `public Environment setEntryType(String id, Type newtype, int offset)`
+
+  serve per aggiornare l'attributo `type` della `SimbolTableEntry` con chiave `id`. Se non trova la chiave `id` lancia `UndeclaredClassException`. Poiché è possibile stabilire la struttura gerarchica fra classi solo in seguito alla visita di tutte le `classdec`, vengono inserite nella symbol table informazioni incomplete, questo metodo viene usato per aggiornare le informazioni sul supertipo di una classe.
+
+- `public int getNestingLevel()`
+
+  restituisce il valore di nesting level corrente
+
+- `public SymbolTableEntry getLatestEntryOf(String id)`
+
+  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una `UndeclaredVarException` 
+
+- `public SymbolTableEntry getLatestEntryOfNotFun(String id)`
+
+  come il metodo precedente ma ignora le entry di tipo `FunType`
+
+- `public Type getTypeOf(String id)`
+
+  come i metodi precedenti ma restituisce solo il `type` della entry
+
+- `public SymbolTableEntry getLatestClassEntry()`
+
+  restituisce la entry dell'ultima classe visitata, viene usato durante il controllo semantico nel caso di chiamata di un metodo usando `this`
+
+### 3.2 Dichiarazioni di classi
+
+Nel caso vi siano delle dichiarazioni di classi, la radice dell'AST sarà un `ProgClassDecNode` e l'analisi semantica visiterà per prima cosa tutti i `ClassNode` . Durante questo passaggio per ogni classe viene inserita una entry nella symbol table.
 
 La **validazione semantica di una classe** ha i seguenti passi:
 
@@ -363,8 +339,6 @@ La **validazione semantica di una classe** ha i seguenti passi:
 
 In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo sui tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
 
-
-
 Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo della espressione `exp` finale del programma FOOL.
 
 ### 4.1 Type system
@@ -384,8 +358,10 @@ Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID` in 
 
 $$
 \frac{}{\vdash true : Bool}[BoolTrue]
-\qquad \qquad 
+\qquad
 \frac{}{\vdash false : Bool}[BoolFalse]
+\qquad
+\frac{\vdash e : Bool}{\vdash ! e}[Not]
 $$
 
 $$
@@ -395,15 +371,19 @@ $$
 $$
 
 $$
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ < \ e_2 : Bool}[Less]
-\qquad
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ > \ e_2 : Bool}[Greater]
+\frac{ e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2<:T}{\Gamma \vdash e_1 \ == \ e_2 : Bool}[Equal]
 $$
 
 $$
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ <= \ e_2 : Bool}[LessEqual]
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ <= \ e_2 : Bool}[LessEqual]
 \qquad
-\frac{\Gamma \vdash e_1 : Bool \qquad \Gamma \vdash e_2 : Bool}{\Gamma \vdash e_1 \ >= \ e_2 : Bool}[GreaterEqual]
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ >= \ e_2 : Bool}[GreaterEqual]
+$$
+
+$$
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ < \ e_2 : Bool}[Less]
+\qquad
+\frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ > \ e_2 : Bool}[Greater]
 $$
 
 $$

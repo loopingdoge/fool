@@ -13,8 +13,6 @@ public class ExecuteVM {
     private static final int MEMSIZE = 1000;
     private static final int GARBAGE_THRESHOLD = Math.max((MEMSIZE / 100) * 5, 10);
 
-    private static boolean DEBUG = false;
-
     private ArrayList<String> outputBuffer = new ArrayList<>();
 
     private int[] memory = new int[MEMSIZE];
@@ -27,11 +25,13 @@ public class ExecuteVM {
     private int ra;
     private int rv;
 
+    private boolean debug;
     private HeapMemory heap = new HeapMemory(MEMSIZE);
     private HashSet<HeapMemoryCell> heapMemoryInUse = new HashSet<>();
 
-    public ExecuteVM(int[] code) {
+    public ExecuteVM(int[] code, boolean debug) {
         this.code = code;
+        this.debug = debug;
     }
 
     private int accessMemory(int address) {
@@ -62,7 +62,7 @@ public class ExecuteVM {
         heapMemoryInUse.forEach(m -> {
             if (!table.get(m.getIndex())) {
                 HeapMemoryCell curr = m;
-                if (DEBUG) {
+                if (debug) {
                     while (curr != null) {
                         setMemory(curr.getIndex(), 0);
                         curr = curr.next;
@@ -84,7 +84,7 @@ public class ExecuteVM {
 
     public ArrayList<String> cpu() {
         try {
-            if (DEBUG) {
+            if (debug) {
                 System.out.println("start :");
                 printMemory();
             }
@@ -169,7 +169,6 @@ public class ExecuteVM {
                         fp = sp;
                         break;
                     case SVMParser.PRINT:
-                        System.out.println((sp < MEMORY_START_ADDRESS + MEMSIZE) ? accessMemory(sp) : "Empty stack!");
                         outputBuffer.add((sp < MEMORY_START_ADDRESS + MEMSIZE) ? Integer.toString(accessMemory(sp)) : "Empty stack!");
                         break;
                     case SVMParser.NEW:
@@ -234,7 +233,7 @@ public class ExecuteVM {
                     case SVMParser.HALT:
                         return outputBuffer;
                 }
-                if (DEBUG) {
+                if (debug) {
                     System.out.println(bytecode + ": ");
                     printMemory();
                 }

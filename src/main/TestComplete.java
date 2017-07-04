@@ -13,7 +13,9 @@ import java.util.Map;
 
 public class TestComplete {
 
-    public static void runTestSuite(String filename) {
+    private static final boolean NO_COLORS = false;
+
+    public static void runTestSuite(String filename, boolean noColors) {
         Yaml yaml = new Yaml();
 
         try {
@@ -28,22 +30,33 @@ public class TestComplete {
                 String code = String.valueOf(test.get(0));
                 String result = String.valueOf(test.get(1));
 
-                System.out.println(FoolRunner.ANSI_BLUE + "Executing: " + testID + FoolRunner.ANSI_RESET);
+                System.out.println((noColors ? "" : FoolRunner.ANSI_BLUE)
+                        + "Executing: " + testID
+                        + (noColors ? "" : FoolRunner.ANSI_RESET)
+                );
                 CharStream input = CharStreams.fromString(code);
-                String output = FoolRunner.test(testID, input, result, false, false);
+                String output = FoolRunner.test(testID, input, result, false, false, noColors);
 
                 if(output.endsWith( "Test PASSED!" )) passed++;
 
-                System.out.println(output + FoolRunner.ANSI_RESET + "\n");
+                System.out.println(output + (noColors ? "" : FoolRunner.ANSI_RESET) + "\n");
             }
             String color = (passed == tests.keySet().size()) ? FoolRunner.ANSI_GREEN : FoolRunner.ANSI_RED;
-            System.out.println(FoolRunner.ANSI_GREEN + "TESTING COMPLETED. TESTS PASSED " + color + passed + FoolRunner.ANSI_GREEN + "/" + tests.keySet().size() + FoolRunner.ANSI_RESET);
+            System.out.println((noColors ? "" : FoolRunner.ANSI_GREEN)
+                    + "TESTING COMPLETED. TESTS PASSED "
+                    + (noColors ? "" : color)
+                    + passed
+                    + (noColors ? "" : FoolRunner.ANSI_GREEN)
+                    + "/"
+                    + tests.keySet().size()
+                    + (noColors ? "" : FoolRunner.ANSI_RESET)
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        runTestSuite("test.yml");
+        runTestSuite("test.yml", NO_COLORS);
     }
 }

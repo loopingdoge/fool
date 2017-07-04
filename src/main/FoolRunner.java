@@ -1,6 +1,7 @@
 package main;
 
 import exception.LexerException;
+import exception.ParserException;
 import exception.ScopeException;
 import exception.TypeException;
 import grammar.FOOLLexer;
@@ -31,12 +32,11 @@ public class FoolRunner {
 
     private static int maxMemsizeWithoutRecursion;
 
-
     private static INode lexicalAndSyntacticAnalysis(CharStream input) throws LexerException {
         FOOLLexer lexer = new FOOLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        if (lexer.lexicalErrors > 0) {
-            throw new LexerException("TODO: Qua ci dovrebbe essere un buon messaggio di errore specifico del lexer");
+        if (lexer.errors.size() > 0) {
+            throw new LexerException(lexer.errors);
         }
         FOOLParser parser = new FOOLParser(tokens);
         FoolVisitorImpl visitor = new FoolVisitorImpl();
@@ -52,19 +52,19 @@ public class FoolRunner {
         }
 
         if (visualizeAST) {
-            System.out.println("\nVisualizing AST...");
-            printAST(ast);
+            System.out.println("Abstract Syntax Tree:");
+            System.out.println(myPrintAST(ast, ""));
         }
 
         return ast.type(); //type-checking bottom-up
     }
 
-    private static int[] codeGeneration(INode ast, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging) throws IOException {
+    private static int[] codeGeneration(INode ast, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging) throws IOException, LexerException, ParserException {
         String code = ast.codeGeneration();
         code += CodegenUtils.generateDispatchTablesCode();
         computeMemoryCapacity(code);
 
-        File svmFile = new File(svmFilename + ".svm");
+        File svmFile = new File(svmFilename);
         BufferedWriter svmWriter = new BufferedWriter(new FileWriter(svmFile.getAbsoluteFile()));
         svmWriter.write(code);
         svmWriter.close();
@@ -73,26 +73,24 @@ public class FoolRunner {
             System.out.println("SVM code generated (" + code.split("\n").length + " lines). Assembling and running generated code: \n" + code);
         }
 
-        CharStream inputASM = CharStreams.fromFileName(svmFile.getName());
+        CharStream inputASM = CharStreams.fromFileName(svmFile.getAbsolutePath());
         SVMLexer lexerASM = new SVMLexer(inputASM);
         CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
         SVMParser parserASM = new SVMParser(tokensASM);
 
         parserASM.assembly();
 
-        if (lexerASM.lexicalErrors > 0) {
-            System.err.println("Error: SVM lexer error");
-            // TODO: throw new lexer exception
+        if (lexerASM.errors.size() > 0) {
+            throw new LexerException(lexerASM.errors);
         }
         if (parserASM.getNumberOfSyntaxErrors() > 0) {
-            System.err.println("Error: SVM parser error");
-            // TODO: throw new parser exception
+            throw new ParserException("SVM parser error");
         }
 
         if (enableLogging) {
             System.out.println("Code generated! Assembling and running generated code:");
             int[] codeToView = parserASM.getBytecode();
-            for (int i = 0; i < codeToView.length; i++) System.out.println(codeToView[i]);
+            for (int aCodeToView : codeToView) System.out.println(aCodeToView);
         }
 
         if (!keepSvmFile) {
@@ -100,7 +98,7 @@ public class FoolRunner {
         }
 
         if (!bytecodeFilename.equals("")) {
-            File bytecodeFile = new File(bytecodeFilename + ".bytecode");
+            File bytecodeFile = new File(bytecodeFilename);
             BufferedWriter bytecodeWriter = new BufferedWriter(new FileWriter(bytecodeFile.getAbsoluteFile()));
             bytecodeWriter.write(code);
             bytecodeWriter.close();
@@ -153,8 +151,8 @@ public class FoolRunner {
         }
     }
 
-    private static String executeVM(int[] code) {
-        ExecuteVM vm = new ExecuteVM(code);
+    private static String executeVM(int[] code, boolean debug) {
+        ExecuteVM vm = new ExecuteVM(code, debug);
         String message = "No output";
         ArrayList<String> output = vm.cpu();
         if (output.size() > 0)
@@ -162,7 +160,7 @@ public class FoolRunner {
         return message;
     }
 
-    public static String run(CharStream input, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging, boolean showAST) {
+    public static String run(CharStream input, String svmFilename, String bytecodeFilename, boolean keepSvmFile, boolean enableLogging, boolean showAST, boolean noColors) {
         CodegenUtils.reset();
         String result = "";
         try {
@@ -179,9 +177,7 @@ public class FoolRunner {
 
             Type type = semanticAnalysis(ast, showAST);
 
-            if (enableLogging) {
-                System.out.println("Type: " + type);
-            }
+            System.out.println("Type: " + type);
 
             int[] code = codeGeneration(ast, svmFilename, bytecodeFilename, keepSvmFile, enableLogging);
 
@@ -189,13 +185,9 @@ public class FoolRunner {
                 System.out.println("Starting VM (allocated dimensions: bytecode " + code.length + ", memory " + maxMemsizeWithoutRecursion + ")");
             }
 
-            result = executeVM(code);
+            result = executeVM(code, enableLogging);
 
-            if (enableLogging) {
-                System.out.println(result);
-            }
-
-        } catch (LexerException | ScopeException | IOException | TypeException e) {
+        } catch (LexerException | ScopeException | IOException | TypeException | ParserException e) {
             if (enableLogging) {
                 System.out.println(e.getMessage());
             }
@@ -204,11 +196,11 @@ public class FoolRunner {
         return result;
     }
 
-    public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging, boolean showAST) {
+    public static String test(String testID, CharStream input, String expectedResult, boolean enableLogging, boolean showAST, boolean noColors) {
         String actualResult = "";
 
         try {
-            actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST);
+            actualResult = run(input, testID + ".svm", "", false, enableLogging, showAST, noColors);
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -216,31 +208,22 @@ public class FoolRunner {
         output.append("-Expected: ").append(expectedResult).append("\n")
                 .append("-Got: ").append(actualResult).append("\n");
         if (actualResult.trim().equals(expectedResult.trim())) {
-            output.append(ANSI_GREEN + "Test PASSED!");
+            output.append(noColors ? "" : ANSI_GREEN)
+                    .append("Test PASSED!");
         } else {
-            output.append(ANSI_RED + "Test FAILED!");
+            output.append(noColors ? "" : ANSI_RED)
+                    .append("Test FAILED!");
         }
 
         return output.toString();
     }
 
-    private static void printAST(INode ast) {
-        System.out.println("\nAbstract Syntax Tree: ");
-        if (ast.getChilds() != null) {
-            recursiveStamp(ast, "");
-        } else {
-            System.out.println("\nEmpty AST");
+    private static String myPrintAST(INode ast, String indent) {
+        StringBuilder res = new StringBuilder(indent + ast + "\n");
+        for (INode child : ast.getChilds()) {
+            res.append(myPrintAST(child, indent + "    "));
         }
+        return res.toString();
     }
 
-    private static void recursiveStamp(INode father, String indent) {
-        System.out.println(indent + father);
-        try {
-            for (INode child : father.getChilds()) {
-                recursiveStamp(child, indent + "   ");
-            }
-        } catch (Exception e) {
-            System.out.println("Error in -> " + father.getClass());
-        }
-    }
 }
