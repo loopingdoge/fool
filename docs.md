@@ -19,9 +19,9 @@
 
 ## 1. Struttura del progetto
 
-Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` e le esegua su un calcolatore emulato. 
+Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` le quali vengano eseguite su un calcolatore emulato. 
 
-Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection ed estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`)
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e le estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
 
 Il progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di `ANTLR v4.7`.  
 
@@ -56,7 +56,7 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 - `util`
 
-  contiene metodi di utilitá, principalmente utility usate in fase di code generation per la creazione di label e la generazione delle dispatch tables
+  contiene metodi di utilitá principalmente usati in fase di code generation per la creazione di label e la generazione delle dispatch tables
 
 - `vm`
 
@@ -98,7 +98,7 @@ Per permettere di utilizzare il valore di ritorno delle chiamate di funzioni e d
 - `#funExp` che rappresenta la chiamata di una funzione
 - `#methodExp` che rappresenta la chiamata di un metodo
 
-Queste due etichette permettono di gestire i nodi separatamente durante l'analisi lessicale implementando logiche diverse per i metodi `visitFunExp` e `visitMethodExp`:
+Queste due etichette permettono di gestire i nodi separatamente durante l'analisi lessicale implementando logiche diverse nei metodi `visitFunExp` e `visitMethodExp`:
 
 ```ANTLR
 value
@@ -129,7 +129,7 @@ left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? 
 
 #### 2.2.1 COPY
 
-Per semplificare  il riutilizzo dei valori sullo stack è stata aggiunta l'istruzione `COPY` che duplica il valore in cima alla pila. L'istruzione è implementata come segue:
+Per semplificare il riutilizzo dei valori sullo stack è stata aggiunta l'istruzione `COPY` che duplica il valore in cima alla pila. L'istruzione è implementata come segue:
 
 ```ANTLR
 | COPY                        {   code.add(COPY);     }
@@ -143,7 +143,7 @@ case SVMParser.COPY:
 
 #### 2.2.1 l = LABEL
 
-// TODO
+TODO
 
 #### 2.2.2 LC
 
@@ -164,11 +164,11 @@ case SVMParser.LC:
 
 #### 2.2.4 NEW
 
-//TODO
+TODO
 
 #### 2.2.5 HOFF
 
-L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap ed l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
+L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria.
 
 L'istruzione `HOFF` è implementata come segue:
 
@@ -182,8 +182,10 @@ case SVMParser.HOFF:
     int objOffset = pop(); // offset logico rispetto all'oggetto
     HeapMemoryCell list = heapMemoryInUse
     						.stream()
-                            .filter(cell -> cell.getIndex() == objAddress)
-                            .reduce(new HeapMemoryCell(0, null), (prev, curr) -> curr);
+                            .filter(cell -> cell.getIndex() == 
+                                            objAddress)
+                            .reduce(new HeapMemoryCell(0, null)
+                                    , (prev, curr) -> curr);
     for (int i = 0; i < objOffset; i++) {
     	list = list.next;
     }
@@ -194,13 +196,7 @@ case SVMParser.HOFF:
     break;
 ```
 
-La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse successivamente,  in questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
-
-
-
-// TODO sistemare questo sotto, non fa parte della grammatica
-
-Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. Ciò è stato fatto cambiando l'array `int[] code` nella sezione annotata come *@parser:members* in un private `ArrayList<Integer> code` di dimensioni inizialmente nulle.  Nelle regole per l'*assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad ArrayList. 
+La struttura ed il funzionamento dello heap dove vengono memorizzate le istanze di oggetti verranno discusse nel paragrafo 6.1. In questo esempio viene utilizzato il metodo `stream()` di Java 8 per lavorare su collezioni senza usare cicli.
 
 
 
@@ -226,7 +222,7 @@ Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
 - `INode left`,  l'operando sinistro
 - `INode right`,  l'operando destro
 
-mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato
+mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato.
 
 
 
@@ -240,17 +236,17 @@ La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environm
 private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
 ```
 
-All'ambiente sono stati aggiunti anche i seguenti metodi per gestire la symbol table:
+All'ambiente sono stati aggiunti anche diversi metodi per gestire la symbol table.
 
-Sono stati aggiunti infatti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry).  Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
+Sono stati aggiunti i metodi necessari per accedere alla tabella con le varie modalità (aggiungere una hashtable, aggiungere, cercare o modificare una entry). Se si incontra un `prog` che dichiara definizioni di classi e variabili (seconda e terza produzioni) allora viene aggiunta una hashmap alla `symbolTable` su cui si opererà con i metodi:
 
 - `public Environment addEntry(String id, Type type, int offset)`
 
-  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una`RedeclaredVarException`
+  inserisce nell'hashmap piú recente la chiave `id` con associata una `SymbolTableEntry` con tipo `type` ed offset `offset`. Se é giá presente lancia una `RedeclaredVarException`
 
 - `public SymbolTableEntry getLatestEntryOf(String id)`
 
-  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una`UndeclaredVarException` 
+  scorre la lista di `HashTables` e ritorna la entry con chiave `id` se trovata, altrimenti lancia una `UndeclaredVarException` 
 
 - `public Environment setEntryType(String id, Type newtype, int offset)`
 
@@ -353,7 +349,7 @@ La **validazione semantica di una classe** ha i seguenti passi:
 
 ## 4. Type checking
 
-In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo dei tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
+In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo sui tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
 
 
 
@@ -365,7 +361,7 @@ Durante il controllo dei tipi si va a controllare che, per un determinato nodo, 
 
 - `String getID()` - restituisce un valore dell'enumerazione `TypeID` 
 
-- `boolean isSubtypeOf(Type t)` - restituisce `true` se la classe tipo da cui viene chiamato è sottotipo di `t`, `false` altrimenti
+- `boolean isSubtypeOf(Type t)` - restituisce `true` se la classe tipo da cui viene chiamato è sottotipo del tipo passato come parametro `t`, `false` altrimenti
 
   ​
 
@@ -375,9 +371,9 @@ Nel nostro compilatore abbiamo i seguenti tipi, definiti dalla `enum TypeID` in 
 
 
 $$
-\frac{}{\Gamma \vdash true : Bool}[BoolTrue]
+\frac{}{\vdash true : Bool}[BoolTrue]
 \qquad \qquad 
-\frac{}{\Gamma \vdash false : Bool}[BoolFalse]
+\frac{}{\vdash false : Bool}[BoolFalse]
 $$
 
 $$
@@ -399,14 +395,16 @@ $$
 $$
 
 $$
-\frac{\Gamma \vdash c : Bool \qquad e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ c \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
+\frac{\Gamma \vdash c : Bool \qquad e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ (c) \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
 $$
+
+
 
 - `INT` - un valore intero:
 
 
 $$
-\frac{\text{x is an} \ \ Int \ \ \text{token}}{\Gamma \vdash x : Int}[Int]
+\frac{\text{x is an} \ \ Int \ \ \text{token}}{\vdash x : Int}[Int]
 $$
 
 $$
@@ -415,23 +413,30 @@ $$
 \frac{\Gamma \vdash e_1 : Int \qquad \Gamma \vdash e_2 : Int}{\Gamma \vdash e_1 \ - \ e_2 : Int}[Sub]
 $$
 
+
+
 - `FUN` - una funzione o un metodo (seguono le stesse regole di typing):
 
 
 $$
-\frac{\Gamma [p_1 \rightarrow T_1] \ ... \ [p_n \rightarrow T_n] \vdash e : T}{\Gamma \vdash T \ foo(T_1 \ p_1, ..., T_n \ p_n) \ e; \  : (T_1, ..., T_n) \rightarrow T}[FunDef]
+\frac{\Gamma [p_1 \rightarrow T_1] \ ... \ [p_n \rightarrow T_n] \vdash e : T}{\Gamma \vdash T \ foo(T_1 \ p_1, ..., T_n \ p_n) \ e;\
+: \ (T_1, ..., T_n) \rightarrow T}[FunDef]
 $$
 
 $$
-\frac{\Gamma \vdash foo : (T_1, ..., T_n) \rightarrow T \qquad a_1 : ST_1 <: T_1 ,\ldots, a_n : ST_n <: T_n}{\Gamma \vdash foo(ST_1 \ a_1,...,ST_n \ a_n) : T}[FunApp]
+\frac{\Gamma \vdash foo : (T_1, ..., T_n) \rightarrow T \qquad a_1 : ST_1 <: T_1 \ \ldots \ a_n : ST_n <: T_n}{\Gamma \vdash foo(ST_1 \ a_1,...,ST_n \ a_n) : T}[FunApp]
 $$
+
+
 
 - `CLASSDEC` - una classe:
 
 
 $$
-\frac{\Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_1p_1 \rightarrow F_1T_1] \ ... \ [f_1p_n \rightarrow F_1T_n] \vdash e_1 : F_1 \ ... \ \Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_np_1 \rightarrow F_nT_1] \ ... \ [f_np_n \rightarrow F_nT_n] \vdash e_n : F_n}{\Gamma \vdash class \ A \ (T_1 \ a_1, ..., T_n \ a_n) \ \{F_1 \ f_1(F_1T_1 \ f_1p_1, ..., F_1T_n \ f_1p_n) \ e_1;,...,F_n \ f_n(F_nT_1 \ f_np_1, ..., F_nT_n \ f_np_n) \ e_n;\} : Class}[ClassDef]
+\frac{\Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_1p_1 \rightarrow F_1T_1]...[f_1p_n \rightarrow F_1T_n] \vdash e_1 : F_1 \ ... \ \Gamma [a_1 \rightarrow T_1]...[a_n \rightarrow T_n][f_np_1 \rightarrow F_nT_1] \ ... \ [f_np_n \rightarrow F_nT_n] \vdash e_n : F_n}{\Gamma \vdash class \ A \ (T_1 \ a_1, ..., T_n \ a_n) \ \{F_1 \ f_1(F_1T_1 \ f_1p_1, ..., F_1T_n \ f_1p_n) \ e_1; \ ... \ F_n \ f_n(F_nT_1 \ f_np_1, ..., F_nT_n \ f_np_n) \ e_n;\} : Class}[ClassDef]
 $$
+
+
 
 - `INSTANCE` - un'istanza di classe:
 
@@ -439,7 +444,7 @@ $$
 
 $$
 \frac{
-	\Gamma \vdash A : Class \qquad \Gamma \vdash A.a_1 : T_1, \ldots, A.a_n : T_n \qquad  a_1 : ST_1 <: T_1 ,\ldots, a_n : ST_n <: T_n
+	\Gamma \vdash A : Class \qquad \Gamma \vdash A.a_1 : T_1 \ \ldots \ \Gamma \vdash A.a_n : T_n \qquad  a_1 : ST_1 <: T_1 \ \ldots \ a_n : ST_n <: T_n
 }{
 	\Gamma \vdash \text{new } A(ST_1 \ a_1, \ldots ,ST_n \ a_n) : Instance
 }
@@ -447,12 +452,23 @@ $$
 $$
 
 $$
-\frac{\Gamma \vdash o : Instance \quad \exists \ foo : (T_1,...,T_n) \rightarrow T \in methods(class(o)) \ | \ a_1 : T'_1,...,a_n : T'_n \quad T'_1 <: T_1 \ ... \ T'_n <: T_n}{\Gamma \vdash o.foo(a_1,...,a_n) : T}[MethodCall]
+\cfrac
+{\raise{0.5ex}{\Gamma \vdash : Instance} \quad
+	\raise{2.5ex}{\cfrac{}
+	{\exists \ foo : (T_1,...,T_n) \rightarrow T \in
+    methods(class(o))}[funApp]}}
+{\Gamma \vdash o.foo(a_1,...,a_n) : T}[MethodCall]
 $$
 
-In aggiunta a queste regole, e' stato anche definito l'operatore **let-in** per permettere l'introduzione di variabili all'interno di un'espressione:
+
+
+In aggiunta a queste regole, è stato anche definito l'operatore **let-in** per permettere l'introduzione di variabili all'interno di un'espressione:
 $$
-\frac{\Gamma[x \rightarrow T''] \vdash e' : T' \quad e:T <: T''}{\Gamma \vdash let \ T'' \ x \ = \ e \ in \ e' \ : T'}[LetIn]
+\frac{
+\Gamma \vdash  e : T \quad
+T <: T'' \quad
+\Gamma[x \rightarrow T''] \vdash e' : T' \quad}
+{\Gamma \vdash let \ T'' \ x \ = \ e \ in \ e' \ : T'}[LetIn]
 $$
 
 ### 4.2 Subtyping
@@ -462,18 +478,18 @@ Si considerano in seguito le regole di subtyping per i tipi definiti precedentem
 #### 4.2.1 Interi
 
 $$
-\frac{\Gamma \vdash n_1 : Int \quad n_2 : Int}{\Gamma \vdash n_1 <: n_2}[IntSubtype]
+\frac{\Gamma \vdash n_1 : Int \quad \Gamma \vdash n_2 : Int}{\Gamma \vdash n_1 <: n_2}[IntSubtype]
 $$
 
 #### 4.2.2 Booleani
 
 $$
-\frac{\Gamma \vdash b_1 : Bool \quad b_2 : Bool}{\Gamma \vdash b_1 <: b_2}[BoolSubtype]
+\frac{\Gamma \vdash b_1 : Bool \quad \Gamma \vdash b_2 : Bool}{\Gamma \vdash b_1 <: b_2}[BoolSubtype]
 $$
 
 #### 4.2.1 Funzioni
 
-La regola di subtyping per le funzioni e':
+La regola di subtyping per le funzioni è:
 
 
 $$
@@ -497,32 +513,39 @@ Questa regola viene implementata all'interno del file `FunType.java`.
 Le regole di subtyping tra classi sono:
 
 $$
-\frac
+\cfrac
 {
-\Gamma \vdash A : Class \quad B:Class
+\raise{0.5ex}{\Gamma \vdash A : Class \quad \Gamma \vdash B:Class
 \quad B \ \ implements \ \ A
 \quad \forall \ a_i \in fields(A) ,\ \exists \ b_i \in fields(B) \ | \ b_i <: a_i
-\quad \forall fb_i \in redefined\_methods(B), \ \exists \ fa_i \in methods(A) \ | fb_i <: fa_i
+\quad \forall fb_i \in redefined\_methods(B) \ \exists \ fa_i \in methods(A) \ |}
+\raise{2.5ex}{\cfrac{}{fb_i <: fa_i}[funSubtype]}
 }
 {
-B <: A
+\Gamma \vdash B <: A
 } [ClassDirectSubtype]
 $$
 $$
-\frac
-{\Gamma \vdash A : Class \quad C : Class \qquad \exists \ B :Class \ | \ C <: B \quad B <: A}
+\cfrac
+{
+\raise{0.5ex}{\Gamma \vdash A : Class \quad \Gamma \vdash C : Class \qquad \exists \ B :Class \ \quad | \qquad}
+\raise{2.5ex}{\cfrac{}{C <: B}[ClassDirectSubtype] \quad \cfrac{}{B <: A}[ClassDirectSubtype]}}
 {\Gamma \vdash C <: A}[ClassIndirectSubtype]
 $$
 
-Queste regole di subtyping vengono implementate all'interno del file `ClassType.java`.
+Quest'ultima regola di subtyping è implementata all'interno del file `ClassType.java`.
 
 #### 4.2.3 Istanze
 
-La regola di subtyping tra istanze di classi e':
+La regola di subtyping tra istanze di classi è:
 $$
-\frac{\Gamma \vdash a : Instance \quad b : Instance \quad class(a) <: class(b)}{\Gamma \vdash a <: b}[InstanceSubtype]
+\cfrac{
+\raise{0.5ex}{\Gamma \vdash a : Instance \quad \Gamma \vdash b : Instance \quad}
+\raise{2.5ex}{\cfrac{}{class(a) <: class(b)}[classSubtype]}}{\Gamma \vdash a <: b}[InstanceSubtype]
 $$
-Questa regola di subtyping e' implementata nel file `InstanceType.java`.
+La regola `classSubtype` verifica sia l'eredetarietà diretta che quella indiretta seguendo le regole definite al paragrafo (4.2.2) precedente. Questa regola di subtyping è implementata nel file `InstanceType.java`.
+
+
 
 ## 5. Code generation
 
@@ -571,12 +594,22 @@ Per gestire le strutture dati sono disponibili i metodi:
 
 - `void addDispatchTable(String classID, ArrayList<DispatchTableEntry> dt)`
   Inserisce nella struttura dati la dispatch table `dt` per la classe `classID` 
+
 - `ArrayList<DispatchTableEntry> getDispatchTable(String classID)`
   Restituisce una copia della dispatch table della classe `classID`, viene usato per il subtyping
+
 - `String generateDispatchTablesCode()`
   Genera e restituisce il codice `SVM` delle dispatch tables
 
-TODO dire qualcosa di piu'
+  ​
+
+#### 5.6 Memorizzazione codice
+
+Si è resa la dimensione dell'array `code`, contenente il bytecode, variabile a seconda del codice SVM prodotto dal compilatore FOOL. È stato necessario cambiare l'array `int[] code`, all'interno di `SMV.g4` nel blocco annotato come `@parser:members`, in un  `ArrayList<Integer> code` privato di dimensioni inizialmente nulle.  Nelle regole di *assembly* per aggiungere un istruzione si chiama `code.add(instruction_int_code)`. In tal modo il codice sarà lungo esattamente quanto necessario senza sprechi di memoria. Si è modificato leggermente di conseguenza anche il *backpatching* per accedere ad un ArrayList. 
+
+
+
+
 
 ## 6. Stack Virtual Machine
 
