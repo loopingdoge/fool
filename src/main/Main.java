@@ -6,9 +6,16 @@ import org.apache.commons.cli.*;
 
 public class Main {
 
+    private static void help(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("fool", options);
+        System.exit(0);
+    }
+
     public static void main(String[] args) throws Exception {
         Options options = new Options();
-        options.addRequiredOption("i", "input", true, "input .fool file");
+        options.addOption("h", "help", false, "print this message");
+        options.addRequiredOption("i", "input", true, "REQUIRED input .fool file");
         options.addOption("d", "debug", false, "show debug logs");
         options.addOption("a", "ast", false, "show the AST");
         options.addOption("s", "svm", true, "outputs the generated SVM code to the given file");
@@ -19,6 +26,10 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine line = parser.parse(options, args);
+
+            if (line.hasOption("help")) {
+                help(options);
+            }
 
             String inputFilename = line.getOptionValue("input");
             String svmFilename = inputFilename.substring(0, inputFilename.lastIndexOf(".")) + ".svm";
@@ -52,9 +63,8 @@ public class Main {
                 }
             }
         } catch (ParseException e) {
-            System.err.println("Parsing failed: " + e.getMessage());
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("fool", options);
+            System.err.println("Error: " + e.getMessage());
+            help(options);
         }
     }
 
