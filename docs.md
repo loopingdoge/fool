@@ -223,7 +223,7 @@ Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'inte
 
 #### 2.3.1 Nodi operatore
 
-La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
+La grammatica inziale definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
 
 - gli operatori sottrazione e divisione `-` e `/`
 
@@ -231,7 +231,7 @@ La grammatica inziale permetteva definiva solamente l'operatore `==`, è stata q
 - gli operatori per il confronto fra interi  `<=`, `>=`, `<` e `>` 
 - gli operatori booleani  `&&`, `||` e `!` 
 
-Ogni nodo operatore (escluso il NOT) presenta ha due attributi:
+Ogni nodo operatore (escluso il NOT) presenta due attributi:
 
 | Campo   | Tipo    | Descrizione         |
 | ------- | ------- | ------------------- |
@@ -251,7 +251,7 @@ La classe `ClassNode` dispone degli attributi:
 | `attrDecList`  | `ArrayList<ParameterNode>` | Lista dei nodi campi (passata dal costruttore) |
 | `metDecList`   | `ArrayList<MethodNode>`    | Lista dei nodi metodi (passata dal costruttore) |
 | `fields`       | `HashMap<String, Type>`    | Mappa nome-tipo dei campi                |
-| `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei campi                |
+| `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei metodi               |
 | `type`         | `ClassType`                | Tipo della classe                        |
 
 
@@ -260,7 +260,7 @@ La classe `ClassNode` dispone degli attributi:
 
 ### 3.1 Symbol Table
 
-La tabella dei simboli fa parte dell'ambiente, un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
+La tabella dei simboli fa parte dell'ambiente, ed è un'istanza della classe `Environment` che viene passata ad ogni nodo dell'AST per eseguire l'analisi semantica. La tabella dei simboli è implementata con una lista di hashtable:
 
 ```java
 private ArrayList<HashMap<String, SymbolTableEntry>> symbolTable
@@ -324,7 +324,7 @@ La **validazione semantica di una classe** ha i seguenti passi:
 3. Per ogni metodo `m` di  `metDecList`:
    - ciclare sui parametri `p` del metodo `m` 
    - aggiungere il tipo `t` di `p` all'`ArrayList<Type> paramsType`
-     - se `t` è un  ID di una classe `c`, cercare `c` nella symbol table ed inserire il relativo `ClassType` in `paramsType`. Se non si è trovata `c` allora si sollevare un **eccezione** di classe non dichiarata.
+     - se `t` è un  ID di una classe `c`, cercare `c` nella symbol table ed inserire il relativo `ClassType` in `paramsType`. Se non si è trovata `c` allora si solleva un **eccezione** di classe non dichiarata.
    - infine creare un oggetto `fun` di tipo `FunType` passando il tipo di ritorno di `m` e i `paramsType`
 4. Aggiungere l'oggetto `fun` ad un `ArrayList<Method> methodList` e alla mappa `methods`  
 5. Cercare nella symbol table il tipo `superType` della super classe: `getLatestEntryOf(superClassID)`
@@ -340,8 +340,8 @@ La **validazione semantica di una classe** ha i seguenti passi:
    - altrimenti, creare ed inserire una entry all'interno della symbol table per `var` con il suo tipo
 10. Fare un altro push di una nuova symbol hashtable (incrementando il nesting level)
 11. Per ogni metodo `fun` in `metDecList`:
-    - controllare che abbia un id ed un tipo di ritorno (?)  // TODO
-    - se il tipo di ritorno è un `InstanceType`  aggiornare il suo campo `classType` con il tipo di classe recuperato dalla symbol table una classe. Se tale classe non è contenuta nella symbol table sollevare un eccezione.
+    - controllare che abbia un id ed un tipo di ritorno
+    - se il tipo di ritorno è un `InstanceType`  aggiornare il suo campo `classType` con il tipo di classe recuperato dalla symbol table. Se tale classe non è contenuta nella symbol table sollevare un eccezione.
     - altrimenti, creare ed inserire una entry all'interno della symbol table per `fun`
     - fare push di una nuova symbol hashtable (incrementando il nesting level)
     - aggiungere una entry con chiave `this` avente `InstanceType` della classe che contiene `fun`
@@ -387,7 +387,7 @@ $$
 \qquad
 \frac{}{\vdash false : Bool}[BoolFalse]
 \qquad
-\frac{\vdash e : Bool}{\vdash ! e}[Not]
+\frac{\Gamma\vdash e : Bool}{\vdash ! e : Bool}[Not]
 $$
 
 $$
@@ -602,7 +602,7 @@ La generazione di codice della creazione di un oggetto avviene in modo abbastanz
 
 ### 5.4 Riferimento ad un campo
 
-La generazione del codice per accedere ad una variabile era implementata all'interno di `IdNode.java` ed è stata estera per poter accedere anche ad un campo di una classe, un uso concesso solo all'interno di un metodo della stessa. Per distinguere i due casi precedenti si usa il metodo `boolean isAttribute()` della classe `SymbolTableEntry`.
+La generazione del codice per accedere ad una variabile era implementata all'interno di `IdNode.java` ed è stata estesa per poter accedere anche ad un campo di una classe, un uso concesso solo all'interno di un metodo della stessa. Per distinguere i due casi precedenti si usa il metodo `boolean isAttribute()` della classe `SymbolTableEntry`.
 
 La code generation di un riferimento ad un campo è implementata come segue:
 
@@ -662,7 +662,7 @@ E' stato scelto di implementare lo heap con una lista libera in modo da facilita
 
 E' stato realizzato un garbage collector usando la tecnica **mark and sweep**: se l'indirizzo di un oggetto non viene trovato nello stack o nel registro *RV*, allora tale oggetto può essere deallocato. Usando semplici numeri interi per rappresentare l'indirizzo di un oggetto, la ricerca di un indirizzo attivo sullo stack può produrre *falsi positivi*, poichè l'intero trovato potrebbe non fare riferimento all'oggetto ma ad un semplice valore numerico. Per ridurre questa probabilità è stato introdotto un offset (`MEMORY_START_ADDRESS`) con un valore elevato per indicare l'inizio della memoria, in quanto ad esempio il numero 0 (che è sempre presente come primo valore sullo stack), o più in generale numeri bassi, sono più facilmente trovabili in programmi comuni (p.e si pensi ad un iteratore).
 
-L'operazione di garbage collection viene eseguita se prima di allocare un oggetto, la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
+L'operazione di garbage collection viene eseguita prima di allocare un oggetto, se la differenza tra `sp` e `hp` e' minore o uguale al massimo tra:
 
 - 5% della memoria totale
 - 10 (in caso di memoria particolarmente piccola)
@@ -681,4 +681,4 @@ testId - descrizione del test:
 
 Parsando il file viene estratto il codice fool di ogni test, una volta eseguito si confrontano il risultato ottenuto con quello atteso e se i due risultati sono diversi il test risulta fallito. Dopo aver eseguito tutti i test viene mostrato il numero di test che hanno avuto successo.
 
-Il codice originale non era pensato per eseguire test, infatti il risultato di un'esecuzione era stampano direttamente in output e in caso di errore di type checking il programma terminava con un `System.exit()`. Il codice è stato  modificato per lanciare una `TypeException` in caso di errore di type checking e per permettere al metodo `cpu()` di `ExecuteVM` di raccogliere l'output nell'`outputBuffer` e restituirlo al termine dell'elaborazione.
+Il codice originale non era pensato per eseguire test, infatti il risultato di un'esecuzione era stampato direttamente in output e in caso di errore di type checking il programma terminava con un `System.exit()`. Il codice è stato  modificato per lanciare una `TypeException` in caso di errore di type checking e per permettere al metodo `cpu()` di `ExecuteVM` di raccogliere l'output nell'`outputBuffer` e restituirlo al termine dell'elaborazione.
