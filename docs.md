@@ -23,8 +23,6 @@ Il progetto del corso prevede l'implementazione di un compilatore per codice sor
 
 Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e le estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
 
-Il progetto è sviluppato in Java utilizzando l'IDE IntelliJ IDEA e le librerie di `ANTLR v4.7`.  
-
 La cartella `src` contiene il codice sorgente che è suddiviso in diversi package:
 
 - `exception`
@@ -64,23 +62,23 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 ### 1.1 Installazione ed esecuzione da IDE
 
-Il nostro gruppo ha lavorato al progetto tramite l'IDE **IntelliJ IDEA**, ma ci siamo assicurati che fosse facilmente importabile anche su **Eclipse**, seguono le istruzione per entrambi gli IDE.
+Il nostro gruppo ha realizzato il progetto usando l'IDE **IntelliJ IDEA**, assicurandosi che fosse facilmente importabile anche su **Eclipse**. Seguono le istruzione per entrambi gli IDE
 
 #### 1.1.1 Eclipse
 
-1. Decomprimere l'archivio .zip contenente il progetto;
-2. Su Eclipse, selezionare *File -> Open Projects from File System...*, nella schermata successiva cliccare sul bottone *Directory* e selezionare la cartella *fool* appena decompresso e cliccare *Finish;*
-3. Fare click destro sul progetto, quindi andare alla voce *Build Path -> Configure Build Path*. Nella schermata che appare andare nel tab *Libraries* e cliccare sul bottone *Add External JARs*, quindi selezionare tutti e 3 i file .jar presenti nella cartella `fool/libs`. Cliccare quindi *Apply and Close*.
+1. Decomprimere l'archivio `.zip` contenente il progetto
+2. Su Eclipse, selezionare `File -> Open Projects from File System…`, nella schermata successiva cliccare il bottone `Directory` e selezionare la cartella `fool` appena decompressa e cliccare `Finish`
+3. Fare click destro sul progetto, quindi andare alla voce`Build Path -> Configure Build Path`. Nella schermata che appare andare nel tab `Libraries` e cliccare sul bottone `Add External JARs`, quindi selezionare i 3 file `.jar` presenti nella cartella `fool/libs`. Cliccare quindi `Apply and Close`
 
 #### 1.1.2 IntelliJ IDEA
 
-1. Scompattare l'archivio .zip contenente il progetto;
-2. Su IntelliJ IDEA, selezionare *Open* e selezionare la cartella *fool* appena decompresso e cliccare *OK*;
-3. Nella tab *Project* sulla sinistra, fare click destro sulla cartella *libs*, e selezionare *Add as Library...*, clickare *OK*.
+1. Scompattare l'archivio `.zip` contenente il progetto
+2. Su IntelliJ IDEA, selezionare `Open`, selezionare la cartella `fool` appena decompressa e cliccare `OK`
+3. Nella tab `Project` sulla sinistra, fare click destro sulla cartella `libs`, e selezionare `Add as Library…`, cliccare `OK`
 
 #### 1.1.3 Esecuzione
 
-Nel nostro progetto abbiamo due possibili file da poter eseguire, entrambi si trovano in `fool/src/main`, per eseguirli cliccare col tasto destro su di essi ed andare alla voce *Run As -> Java Application*, i file sono i seguenti:
+Nel nostro progetto abbiamo due possibili file da poter eseguire, entrambi si trovano in `fool/src/main`, per eseguirli cliccare col tasto destro su di essi ed andare alla voce `Run As -> Java Application`, i file sono i seguenti:
 
 1. `TestDebug.java`:
 
@@ -167,6 +165,7 @@ factor :
 left=value (operator=(AND | OR | GEQ | EQ | LEQ | GREATER | LESS) right=value)? ;
 ```
 
+
 ### 2.2 Grammatica SVM
 
 #### 2.2.1 COPY
@@ -243,7 +242,7 @@ mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode`
 
 #### 2.3.2 Nodi classe
 
-La classe `ClassNode` dispone di:
+La classe `ClassNode` dispone degli attributi: 
 
 | Campo          | Tipo                       | Descrizione                              |
 | -------------- | -------------------------- | ---------------------------------------- |
@@ -254,6 +253,8 @@ La classe `ClassNode` dispone di:
 | `fields`       | `HashMap<String, Type>`    | Mappa nome-tipo dei campi                |
 | `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei campi                |
 | `type`         | `ClassType`                | Tipo della classe                        |
+
+
 
 ## 3. Analisi semantica
 
@@ -358,9 +359,11 @@ La **validazione semantica di una classe** ha i seguenti passi:
       - se esiste un omonimo (i.e. `Super.m()`) nella superclasse controllare che `C.m()` lo sottotipi correttamente (si rimanda alla sezione 4 per i dettagli)
       - altrimenti vengono sollevati i corrispondenti `SemanticError`
 
+
+
 ## 4. Type checking
 
-In seguito all'analisi semantica, viene eseguito il type checking del programma FOOL in input. Il controllo sui tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
+In seguito all'analisi semantica, viene eseguito il type checking del programma `FOOL` in input. Il controllo sui tipi viene però svolto in ordine bottom-up rispetto ai nodi dell'AST. Ogni `INode` presenta un metodo `type()` che applica le regole di inferenza definite in seguito ed in caso esse vengano verificate, restituisce il tipo di quel nodo, altrimenti viene lanciata un'eccezione indicando il tipo di errore.
 
 Il tipo dell'intero AST, ritornato dal metodo `type()` della radice, è il tipo della espressione `exp` finale del programma FOOL.
 
@@ -564,7 +567,7 @@ La regola `classSubtype` verifica sia l'eredetarietà diretta che quella indiret
 
 ## 5. Code generation
 
-In questo capitolo affronteremo le parti più importanti della fase di generazione di codice riguardanti della nostra implementazione dell'estensione di FOOL ad oggetti.
+In questo capitolo affronteremo le parti più importanti della fase di generazione di codice riguardanti la nostra implementazione dell'estensione di FOOL ad oggetti.
 
 ### 5.1 Dispatch table
 
@@ -599,17 +602,39 @@ La generazione di codice della creazione di un oggetto avviene in modo abbastanz
 
 ### 5.4 Riferimento ad un campo
 
+La generazione del codice per accedere ad una variabile era implementata all'interno di `IdNode.java` ed è stata estera per poter accedere anche ad un campo di una classe, un uso concesso solo all'interno di un metodo della stessa. Per distinguere i due casi precedenti si usa il metodo `boolean isAttribute()` della classe `SymbolTableEntry`.
 
+La code generation di un riferimento ad un campo è implementata come segue:
+
+- Si pushano l'offset di un campo rispetto all'indirizzo in memoria dell'oggetto in cui è definito
+- Si pusha l'offset del riferimento all'oggetto rispetto all'activation record nel quale si trova. Ogni chiamata di metodo infatti mette sullo stack un riferimento a `this`, cioè l'istanza dell'oggeto sul quale è stata chiamata
+- Si risale la catena statica partendo dal valore attuale del *Frame Pointer* per un totale di livelli uguale alla differenza di nesting level tra il riferimento al campo e la referenza a `this` . Si pusha l'indirizzo dell'activation record ottenuto
+- Si sommano gli ultimi due valori inseriti per ottenere in cima allo stack l'indirizzo in memoria dell'istanza
+- Si esegue l'istruzione `hoff` per convertire l'offset logico in quello effettivo, che differiscono nel caso l'oggetto sia memorizzato il celle non contigue
+- Si sommano l'offset effettivo e l'indirizzo dell'oggetto, che si trovano in cima allo stack, ottenendo l'indirizzo in memoria del campo
+- Con una `lw` si carica il valore del campo desiderato in cima alla stack
 
 ### 5.5 Chiamata di un metodo
 
-- Carica il valore di `$fp` sullo stack
-- Per ogni `a` in `args` inserisce sullo stack `codegen(a)`
-- Carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
-- Somma i due valori precedenti ottenendo e caricando sullo stack l'`object_address`, l'indirizzo dell'oggetto nello heap
-- Carica sullo stack l'`object_address` e `method_offset` decrementato di `1` perché //TODO
-- Somma i due valori precedenti ottenendo e caricando sullo stack l'indirizzo del codice del metodo
-- Setta `$ra` e salta all'esecuzione del codice del metodo
+La generazione del codice per l'invocazione di un metodo è implementata all'interno del file `MethodCallNode.java` con queste modalità: 
+
+- Si carica il valore di `$fp` sullo stack
+
+- Per ogni `a` in `args` si inserisce sullo stack `codegen(a)`
+
+- Si carica sullo stack l'`object_offset` e risale la catena statica fino a caricare l'indirizzo dell'activation record dove è definito l'oggetto
+
+- Si sommano i due valori precedenti ottenendo e si carica sullo stack l'`object_address` ovvero l'indirizzo dell'oggetto nello heap
+
+- Si carica sullo stack una copia dell'`object_address` e sommandola al `method_offset` si trova l'indirizzo di memoria nell'array `code` del metodo
+
+- Tramite la nuova operazione di `lc` (descritta nel paragrafo 2.2.2) si pusha sullo stack l'indirizzo dell'array `code` a cui saltare 
+
+- Infine si setta `$ra` = `$ip` e si salta alla prima istruzione del metodo impostando 
+
+  `$ip` = `pop()`
+
+
 
 ## 6. Stack Virtual Machine
 
@@ -654,6 +679,6 @@ testId - descrizione del test:
 -	"risultato atteso"
 ```
 
-Il file viene parsato e da ogni test viene estratto il codice fool, il quale viene eseguito e viene confrontato il risultato ottenuto con quello atteso. Se i due risultati sono diversi, il test viene segnato come fallito. Al termine dell'esecuzione di tutti i test viene indicato quanti di essi sono stati superati con successo.
+Parsando il file viene estratto il codice fool di ogni test, una volta eseguito si confrontano il risultato ottenuto con quello atteso e se i due risultati sono diversi il test risulta fallito. Dopo aver eseguito tutti i test viene mostrato il numero di test che hanno avuto successo.
 
-Il codice originario non si prestava bene a questo tipo di procedimento, infatti non c'era modo né  di ottenere il risultato finale di un'esecuzione, né di ottenere un errore di type checking, in quanto erano inseriti dei `System.exit()` in caso di errori. È stato quindi fatto un refactoring del codice che ha inserito il sollevamento di una `TypeException` nel metodo `type`, ed è stato fatto in modo che il metodo `cpu` della SVM accumuli in `outputBuffer` i valori calcolati durante la computazione e restituisca alla fine di essa.
+Il codice originale non era pensato per eseguire test, infatti il risultato di un'esecuzione era stampano direttamente in output e in caso di errore di type checking il programma terminava con un `System.exit()`. Il codice è stato  modificato per lanciare una `TypeException` in caso di errore di type checking e per permettere al metodo `cpu()` di `ExecuteVM` di raccogliere l'output nell'`outputBuffer` e restituirlo al termine dell'elaborazione.

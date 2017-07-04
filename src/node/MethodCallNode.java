@@ -115,7 +115,7 @@ public class MethodCallNode extends FunCallNode {
         for (int i = 0; i < nestinglevel - objectNestingLevel; i++)
             getAR.append("lw\n");
 
-        return "lfp\n"                                  // carico il frame pointer (perche'?)
+        return "lfp\n"                                  // carico il frame pointer
                 + parCode                               // carico i parametri
                 + "push " + objectOffset + "\n"         // carico l'offset dell'oggetto nello scope di definizione
                 + "lfp\n"                               // carico il frame pointer
