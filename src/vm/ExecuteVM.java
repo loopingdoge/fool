@@ -226,7 +226,7 @@ public class ExecuteVM {
                         break;
                     case SVMParser.HOFF:
                         int objAddress = pop(); // indirizzo di this
-                        int objOffset = pop(); // offset dell'oggetto rispetto al coso
+                        int objOffset = pop();  // offset dell'oggetto rispetto all'inizio del suo spazio nello heap
                         HeapMemoryCell list = heapMemoryInUse
                                 .stream()
                                 .filter(cell -> cell.getIndex() == objAddress)

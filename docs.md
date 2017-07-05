@@ -19,7 +19,7 @@
 
 ## 1. Struttura del progetto
 
-Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` le quali vengano eseguite su un calcolatore emulato. 
+Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` le quali vengano eseguite su un calcolatore virtuale. 
 
 Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e le estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
 
@@ -42,15 +42,15 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 - `node`
 
-  contiene una classe per ogni nodo dell'AST creato dal lexer. Ciascuno dei nodi implementa i metodi necessari per il controllo semantico, il type checking (visita bottom-up) e la code generation (visita top-down)
+  contiene una classe per ogni nodo dell'AST creato dal lexer. Ciascuno dei nodi implementa i metodi necessari per il controllo semantico, il type checking e la code generation
 
 - `symbol_table`
 
-  contiene la tabella dei simboli, implementata con una lista di hashtable, utilizzata durante il controllo semantico in caso di dichiarazione o di riferimento ad una variabile
+  contiene la tabella dei simboli, implementata con una lista di hashtable, utilizzata durante il controllo semantico
 
 - `type`
 
-  contiene le classi che implementano i tipi primitivi del linguaggio `FOOL`. Ad ogni nodo dell'albero corrispone un tipo che viene utilizzato per il controllo semantico, il type checking e come entry della tabella dei simboli per le variabili e le funzioni. 
+  contiene le classi che implementano i tipi primitivi del linguaggio `FOOL`. Ad ogni nodo dell'albero corrisponde un tipo che viene utilizzato per il controllo semantico, il type checking e come entry della tabella dei simboli per le variabili e le funzioni. 
 
 - `util`
 
@@ -58,11 +58,11 @@ La cartella `src` contiene il codice sorgente che è suddiviso in diversi packag
 
 - `vm`
 
-  contiene le classi che emulano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap
+  contiene le classi che virtualizzano l'archittetura e l'instruction set di un calcolatore dotato di una memoria gestita in parte come stack e in parte come heap
 
 ### 1.1 Installazione ed esecuzione da IDE
 
-Il nostro gruppo ha realizzato il progetto usando l'IDE **IntelliJ IDEA**, assicurandosi che fosse facilmente importabile anche su **Eclipse**. Seguono le istruzione per entrambi gli IDE
+Il nostro gruppo ha realizzato il progetto usando l'IDE **IntelliJ IDEA**, assicurandosi che fosse facilmente importabile anche su **Eclipse**. Seguono le istruzione per entrambi gli IDE:
 
 #### 1.1.1 Eclipse
 
@@ -138,26 +138,7 @@ met : fun;
 fun : type ID LPAR ( vardec ( COMMA vardec)* )? RPAR (let)? exp;
 ```
 
-#### 2.1.2 funExp e methodExp
-
-Per permettere di utilizzare il valore di ritorno delle chiamate di funzioni e di metodi come fossero `exp`, sono state create due produzioni sotto `value`:
-
-- `#funExp` che rappresenta la chiamata di una funzione
-- `#methodExp` che rappresenta la chiamata di un metodo
-
-Queste due etichette permettono di gestire i nodi separatamente durante l'analisi lessicale implementando logiche diverse nei metodi `visitFunExp` e `visitMethodExp`:
-
-```ANTLR
-value
-    :  ...
-    | funcall       							#funExp
-    | (ID | THIS) DOT funcall                   #methodExp 
-    |  ... ;
-
-funcall : ID ( LPAR (exp (COMMA exp)* )? RPAR ) ;
-```
-
-### 2.1.3 Operatori aggiuntivi
+#### 2.1.2 Operatori aggiuntivi
 
 Gli operatori aggiuntivi sono stati realizzati semplicemente aggiungendo delle opzioni per la riduzione del non terminale `operator`:
 
@@ -183,23 +164,21 @@ Per semplificare il riutilizzo dei valori sullo stack è stata aggiunta l'istruz
 
 #### 2.2.1 l = LABEL
 
-Per la generazione del codice delle dispatch tables delle varie classi è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`):
+Per la generazione del codice delle dispatch tables è stata aggiunta l'istruzione `LABEL` (non seguita dal terminale `COL`):
 
 ```antlr
 | l=LABEL  {   labelRef.put(code.size(), $l.text);   code.add(0);    }
 ```
 
-Questa istruzione inserisce come ultimo elemento dell'array `code` l'etichetta che corrisponde al metodo dell'oggetto del quale stiamo generando la dispatch table
+Questa istruzione inserisce uno `0` provvisorio nell'array `code`, che verra' sostituito dall'indice di `LABEL` dentro all'array `code` durante la fase di *backpatching*.
 
 #### 2.2.2 LC
 
-Per implementare le chiamate di funzioni è stata aggiunta l'istruzione `LC` che permette di ottenere l'indirizzo del codice di una funzione partendo dalla sua label:
+Per implementare il dynamic dispatch, si e' resa necessaria una istruzione `LC` (`LOAD CODE`) che, dato un indice `index` dell'array `code` (inizio della dispatch table di una classe, memorizzato come primo elemento dell'oggetto nello heap), mettesse sullo stack il contenuto di `code[index]` (indirizzo del metodo all'interno di `code`).
 
 ```ANTLR
 | LC                          {   code.add(LC);       }
 ```
-
-L'istruzione `LC` si aspetta in cima allo stack la label di una funzione, rimuove il valore dalla pila e lo usa come indice nell'array `code`, pushando il valore ottenuto in cima allo stack:
 
 #### 2.2.4 NEW
 
@@ -209,26 +188,41 @@ Serve ad allocare un'area di memoria nello heap e riempirla con i valori dei cam
 | NEW                         {   code.add(NEW);      }
 ```
 
-Questa istruzione si aspetta di avere in cima allo stack il numero di campi ed i rispettivi valori. Dopo averli recuperati alloca la memoria e la popola, facendo garbage collection se necessario. La prima locazione di memoria occupata contiene l'indirizzo della dispatch table dell'oggetto.
+Questa istruzione si aspetta di avere in cima allo stack:
+
+1. L'indirizzo della dispatch table della classe istanziata;
+
+2. il numero di campi;
+
+3. I valori da assegnare ai campi.
+
+Dopo aver recuperato questi valori, la VM alloca la memoria e la popola, inserendo nello heap in prima locazione l'indirizzo della dispatch table e successivamente i valori dei campi.
 
 #### 2.2.5 HOFF
 
-L'istruzione `HOFF` (heap offset) converte l'offset del campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. Viene utilizzato accedendo ad un campo per gestire il caso in cui gli oggetti siano memorizzati in celle non contigue di memoria:
+L'istruzione `HOFF` (`HEAP OFFSET`) si e' resa necessaria per gestire il caso in cui gli oggetti siano memorizzati nello heap in celle non contigue di memoria (situazione data dalla presenza del garbage collector). Questa istruzione converte l'offset di un campo di un oggetto nell'offset reale tra l'indirizzo dell'oggetto nello heap e l'indirizzo del campo. 
 
 ```ANTLR
 | HOFF                        {   code.add(HOFF);     }
 ```
 
+Questa istruzione si aspetta di avere in cima allo stack:
+
+1. L'indirizzo dell'oggetto del quale si richiede il valore del campo;
+2. L'offset logico del campo rispetto all'inizio del suo spazio nello heap.
+
+Infine viene inserito in cima allo stack l'offset reale trovato.
+
 ### 2.3 Nodi
 
-Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'interfaccia `INode` che rispetto alla versione originale è stata modificata come segue:
+Ad ogni nodo dell'albero sintattico corrisponde una classe che implementa l'interfaccia `INode`, che rispetto alla versione originale è stata modificata come segue:
 
 - Il metodo `toPrint()` è stato sostituito dal metodo `toString()` nativo di Java
-- Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale
+- Per poter stampare l'AST è stato aggiunto il metodo `ArrayList<INode> getChilds()` che restituisce i figli del nodo attuale, in modo da poter eseguire una stampa ricorsiva partendo dalla radice dell'albero
 
 #### 2.3.1 Nodi operatore
 
-La grammatica inziale definiva solamente l'operatore `==`, è stata quindi estesa per supportare anche:
+La grammatica inziale definiva solamente l'operatore `==`, è stata estesa per supportare anche:
 
 - gli operatori sottrazione e divisione `-` e `/`
 
@@ -236,14 +230,14 @@ La grammatica inziale definiva solamente l'operatore `==`, è stata quindi estes
 - gli operatori per il confronto fra interi  `<=`, `>=`, `<` e `>` 
 - gli operatori booleani  `&&`, `||` e `!` 
 
-Ogni nodo operatore (escluso il NOT) presenta due attributi:
+Ogni nodo operatore binario presenta due attributi:
 
 | Campo   | Tipo    | Descrizione       |
 | ------- | ------- | ----------------- |
 | `left`  | `INode` | Operando sinistro |
 | `right` | `INode` | Operando destro   |
 
-mentre il nodo operatore NOT ha solamente un `INode` figlio che è il `BoolNode` su cui viene applicato.
+mentre il nodo operatore unario NOT ha solamente un `INode` figlio, ovvero il `BoolNode` su cui viene applicato.
 
 #### 2.3.2 Nodi classe
 
@@ -258,8 +252,6 @@ La classe `ClassNode` dispone degli attributi:
 | `fields`       | `HashMap<String, Type>`    | Mappa nome-tipo dei campi                |
 | `methods`      | `HashMap<String, FunType>` | Mappa nome-tipo dei metodi               |
 | `type`         | `ClassType`                | Tipo della classe                        |
-
-
 
 ## 3. Analisi semantica
 
@@ -402,7 +394,7 @@ $$
 $$
 
 $$
-\frac{ e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2<:T}{\Gamma \vdash e_1 \ == \ e_2 : Bool}[Equal]
+\frac{\Gamma \vdash  e_1 : T_1 \qquad \Gamma \vdash e_2 : T_2 \qquad T_1 <: T \qquad T_2<:T}{\Gamma \vdash e_1 \ == \ e_2 : Bool}[Equal]
 $$
 
 $$
@@ -418,7 +410,7 @@ $$
 $$
 
 $$
-\frac{\Gamma \vdash c : Bool \qquad e_1 : T_1 \qquad e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ (c) \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
+\frac{\Gamma \vdash c : Bool \qquad \Gamma \vdash e_1 : T_1 \qquad \Gamma \vdash e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ (c) \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
 $$
 
 
