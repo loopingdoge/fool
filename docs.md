@@ -21,6 +21,8 @@
 
 Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` le quali vengano eseguite su un calcolatore virtuale. 
 
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e le estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
+
 La cartella `src` contiene il codice sorgente che è suddiviso in diversi package:
 
 - `exception`
@@ -408,8 +410,6 @@ $$
 \frac{\Gamma \vdash c : Bool \qquad \Gamma \vdash e_1 : T_1 \qquad \Gamma \vdash e_2 : T_2 \qquad T_1 <: T \qquad T_2 <: T}{\Gamma \vdash if \ \ (c) \ \ then \ \ \{e_1\} \ \ else \ \ \{e_2\} : T}[IfThenElse]
 $$
 
-
-
 - `INT` - un valore intero:
 
 
@@ -682,14 +682,12 @@ Il codice originale non era pensato per eseguire test, infatti il risultato di u
 Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto: 
 
 - estensione del linguaggio con gli operatori `<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`
-
 - deallocazione degli oggetti nello heap (garbage collection)
 
 Sono stati inoltre forniti i test per verificare il funzionamento di:
 
 - *garbage collection*, test 33
-
-* *dynamic dispatch*, test 20
-* *ricorsione e mutua ricorsione*, test 42 e test 41
-* *inheritance*, test 49
-* un programma reale che implementa un *list sorting*, test 55
+- *dynamic dispatch*, test 20
+- *ricorsione e mutua ricorsione*, test 42 e test 41
+- *inheritance*, test 49
+- un programma reale che implementa un *list sorting*, test 55
