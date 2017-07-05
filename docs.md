@@ -68,7 +68,9 @@ Il nostro gruppo ha realizzato il progetto usando l'IDE **IntelliJ IDEA**, assic
 
 1. Decomprimere l'archivio `.zip` contenente il progetto
 2. Su Eclipse, selezionare `File -> Open Projects from File System…`, nella schermata successiva cliccare il bottone `Directory` e selezionare la cartella `fool` appena decompressa e cliccare su `Finish`
-3. Fare click destro sul progetto, quindi andare alla voce`Build Path -> Configure Build Path`. Nella schermata che appare andare nel tab `Libraries` e cliccare sul bottone `Add External JARs`, quindi selezionare i 3 file `.jar` presenti nella cartella `fool/libs`. Cliccare quindi `Apply and Close`
+3. Fare click destro sul progetto, quindi andare alla voce`Build Path -> Configure Build Path`. 
+4. Nella schermata che appare andare nel tab `Libraries` e cliccare sul bottone `Add External JARs`, quindi selezionare i 3 file `.jar` presenti nella cartella `fool/libs`. Cliccare quindi `Apply`
+5. rimuovere old libs
 
 #### 1.1.2 IntelliJ IDEA
 
@@ -187,7 +189,7 @@ Per la generazione del codice delle dispatch tables delle varie classi è stata 
 | l=LABEL  {   labelRef.put(code.size(), $l.text);   code.add(0);    }
 ```
 
-Questa istruzione inserisce nella posizione attuale dell'array `code` l'etichetta che corrisponde al metodo dell'oggetto del quale stiamo generando la dispatch table
+Questa istruzione inserisce come ultimo elemento dell'array `code` l'etichetta che corrisponde al metodo dell'oggetto del quale stiamo generando la dispatch table
 
 #### 2.2.2 LC
 
@@ -610,7 +612,7 @@ La generazione del codice per accedere ad una variabile era implementata all'int
 La code generation di un riferimento ad un campo è implementata come segue:
 
 - Si pushano l'offset di un campo rispetto all'indirizzo in memoria dell'oggetto in cui è definito
-- Si pusha l'offset del riferimento all'oggetto rispetto all'activation record nel quale si trova. Ogni metodo mette sullo stack un riferimento a `this`, cioè l'istanza dell'oggetto nel quale è stato definito.
+- Si pusha l'offset del riferimento all'oggetto rispetto all'activation record nel quale si trova. Ogni chiamata di metodo, infatti, mette sullo stack un riferimento a `this`, cioè l'istanza dell'oggetto nel quale è stato definito.
 - Si risale la catena statica partendo dal valore attuale del *Frame Pointer* per un totale di livelli uguale alla differenza di nesting level tra il riferimento al campo e la referenza a `this`. Si pusha l'indirizzo dell'activation record ottenuto
 - Si sommano gli ultimi due valori inseriti per ottenere in cima allo stack l'indirizzo in memoria dell'istanza
 - Si esegue l'istruzione `hoff` per convertire l'offset logico in quello effettivo, che differiscono nel caso l'oggetto sia memorizzato il celle non contigue
