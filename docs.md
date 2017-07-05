@@ -69,8 +69,8 @@ Il nostro gruppo ha realizzato il progetto usando l'IDE **IntelliJ IDEA**, assic
 1. Decomprimere l'archivio `.zip` contenente il progetto
 2. Su Eclipse, selezionare `File -> Open Projects from File System…`, nella schermata successiva cliccare il bottone `Directory` e selezionare la cartella `fool` appena decompressa e cliccare su `Finish`
 3. Fare click destro sul progetto, quindi andare alla voce`Build Path -> Configure Build Path`. 
-4. Nella schermata che appare andare nel tab `Libraries` e cliccare sul bottone `Add External JARs`, quindi selezionare i 3 file `.jar` presenti nella cartella `fool/libs`. Cliccare quindi `Apply`
-5. rimuovere old libs
+4. Se all'interno tab `Libraries` dovessero gia' essere presenti le librerie presenti in `fool/libs` selezionarle e cliccare su `Remove`
+5. Sempre nella tab `Libraries` e cliccare sul bottone `Add External JARs`, quindi selezionare i 3 file `.jar` presenti nella cartella `fool/libs`. Cliccare quindi `Apply`
 
 #### 1.1.2 IntelliJ IDEA
 
