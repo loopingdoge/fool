@@ -21,8 +21,6 @@
 
 Il progetto del corso prevede l'implementazione di un compilatore per codice sorgente `FOOL` che generi delle istruzioni `SVM` le quali vengano eseguite su un calcolatore virtuale. 
 
-Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto, ovvero garbage collection e le estensioni con gli operatori (`<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`).
-
 La cartella `src` contiene il codice sorgente che è suddiviso in diversi package:
 
 - `exception`
@@ -678,3 +676,20 @@ testId - descrizione del test:
 Parsando il file viene estratto il codice fool di ogni test, una volta eseguito si confrontano il risultato ottenuto con quello atteso e se i due risultati sono diversi il test risulta fallito. Dopo aver eseguito tutti i test viene mostrato il numero di test che hanno avuto successo.
 
 Il codice originale non era pensato per eseguire test, infatti il risultato di un'esecuzione era stampato direttamente in output e in caso di errore di type checking il programma terminava con un `System.exit()`. Il codice è stato  modificato per lanciare una `TypeException` in caso di errore di type checking e per permettere al metodo `cpu()` di `ExecuteVM` di raccogliere l'output nell'`outputBuffer` e restituirlo al termine dell'elaborazione.
+
+## 8. Conclusioni
+
+Sono state realizzate **entrambe** le richieste opzionali nella consegna del progetto: 
+
+- estensione del linguaggio con gli operatori `<`, `>`, `<=`, `>=`, `||`, `&&`, `/`, `-`,  `!`
+
+- deallocazione degli oggetti nello heap (garbage collection)
+
+Sono stati inoltre forniti i test per verificare il funzionamento di:
+
+- *garbage collection*, test 33
+
+* *dynamic dispatch*, test 20
+* *ricorsione e mutua ricorsione*, test 42 e test 41
+* *inheritance*, test 49
+* un programma reale che implementa un *list sorting*, test 55
