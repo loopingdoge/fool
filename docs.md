@@ -90,7 +90,7 @@ Nel nostro progetto abbiamo due possibili file da poter eseguire, entrambi si tr
 
 ## 1.2 Installazione ed esecuzione da eseguibile JAR
 
-Nell'archivio del progetto e' contenuto anche un eseguibile `fool.jar`, eseguibile da riga di comando con le seguenti opzioni:
+Nell'archivio del progetto è contenuto anche un eseguibile `fool.jar`, eseguibile da riga di comando con le seguenti opzioni:
 
 ```
 $ java -jar fool.jar -h
@@ -109,7 +109,7 @@ usage: fool
  							suite file
 ```
 
-L'opzione `-i <filepath>` e' obbligatoria e richiede il file `.fool` da eseguire.
+L'opzione `-i <filepath>` è obbligatoria e richiede il file `.fool` da eseguire.
 
 ## 2. Analisi lessicale e sintattica
 
