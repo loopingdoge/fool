@@ -763,3 +763,22 @@ test57 - Calling method inside a function:
     in
         print(a.z());
 -   "1"
+
+test58:
+-   class A {
+        int get() 44;
+    }
+
+    class B implements A {
+        int get() 555;
+    }
+
+    class C (A ogg) {
+        int ooo() ogg.get();
+    }
+    ;
+    let
+        C c = new C(new A());
+    in
+        print(c.ooo());
+-   "44"

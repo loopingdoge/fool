@@ -55,11 +55,19 @@ public class MethodCallNode extends FunCallNode {
                 Type objectType = objectSEntry.getType();
                 this.objectOffset = objectSEntry.getOffset();
                 this.objectNestingLevel = objectSEntry.getNestinglevel();
+                try {
+                    SymbolTableEntry thisEntry = env.getLatestEntryOf("this");
+                    if (thisEntry.getNestinglevel() == this.nestinglevel) {
+                        this.nestinglevel--;
+                    }
+                } catch (UndeclaredVarException e) {
+                }
                 // Controllo che il metodo sia stato chiamato su un oggetto
                 if (objectType instanceof InstanceType) {
                     classType = ((InstanceType) objectType).getClassType();
                 } else {
                     res.add(new SemanticError("Method " + methodID + " called on a non-object type"));
+                    return res;
                 }
             }
 
