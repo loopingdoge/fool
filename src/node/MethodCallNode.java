@@ -56,10 +56,9 @@ public class MethodCallNode extends FunCallNode {
                 this.objectOffset = objectSEntry.getOffset();
                 this.objectNestingLevel = objectSEntry.getNestinglevel();
                 try {
-                    SymbolTableEntry thisEntry = env.getLatestEntryOf("this");
-                    if (thisEntry.getNestinglevel() == this.nestinglevel) {
-                        this.nestinglevel--;
-                    }
+                    env.getLatestEntryOf("this");
+                    // Se ha trovato il this (aka sono dentro un metodo), decremento il nesting level
+                    this.nestinglevel--;
                 } catch (UndeclaredVarException e) {
                 }
                 // Controllo che il metodo sia stato chiamato su un oggetto

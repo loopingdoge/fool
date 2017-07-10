@@ -769,10 +769,6 @@ test58:
         int get() 44;
     }
 
-    class B implements A {
-        int get() 555;
-    }
-
     class C (A ogg) {
         int ooo() ogg.get();
     }
@@ -782,3 +778,18 @@ test58:
     in
         print(c.ooo());
 -   "44"
+
+test59:
+-   class A
+
+    class C (A ogg) {
+        A a() ogg;
+    }
+    ;
+    let
+        A a = new A();
+        C c1 = new C(a);
+        C c2 = new C(a);
+    in
+        print(c1.a() == c2.a());
+-   "1"
