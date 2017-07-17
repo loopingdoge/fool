@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/loopingdoge/fool.svg?branch=master)](https://travis-ci.org/loopingdoge/fool)
 
 # FOOL - Functional Object Oriented Language
 
